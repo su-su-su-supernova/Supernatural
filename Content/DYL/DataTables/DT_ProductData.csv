@@ -1,0 +1,2 @@
+,"ProductName	",ImagePath,CostPrice,SellingPrice,ShelfStock,StorageStock,BoxStock,bIsDisplayed,MaxShelfStock
+1,Cereal,/Script/Engine.Texture2D'/Game/DYL/Images/BG.BG',5000,7500,13,30,45,TRUE,15
