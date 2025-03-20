@@ -20,13 +20,16 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* StorageStock;
 
-		UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ShelfStock;
+
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* BoxStock;
 
 		UPROPERTY(meta = (BindWidget))
 	class UTextBlock* CostPrice;
 
-		UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* CostPriceSum;
 
 };

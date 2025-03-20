@@ -37,7 +37,6 @@ void UMainBoardWidget::NativeConstruct()
     }
     ProductInfoWidget->ProductName->SetText(FText::FromString(FString::Printf(TEXT("TEXT:  %d"), i)));
     WrapBox->AddChildToWrapBox(ProductInfoWidget);
-    UE_LOG(LogTemp, Log, TEXT("fasdasd"));
     }
 }
 
