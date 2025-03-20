@@ -5,6 +5,8 @@
 #include "ProductInfoWidget.h"
 #include "Components/WrapBox.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
+#include "ProductBoxSpawner.h"
 
 
 UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
@@ -17,6 +19,7 @@ UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
 void UMainBoardWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+    purchaseButton->OnClicked.AddDynamic(this, &UMainBoardWidget::OnButtonClicked);
     if (!ProductInfoWidgetTool)
     {
         UE_LOG(LogTemp, Error, TEXT("ProductInfoWidgetTool is null!"));
@@ -37,7 +40,15 @@ void UMainBoardWidget::NativeConstruct()
     }
     ProductInfoWidget->ProductName->SetText(FText::FromString(FString::Printf(TEXT("TEXT:  %d"), i)));
     WrapBox->AddChildToWrapBox(ProductInfoWidget);
-    UE_LOG(LogTemp, Log, TEXT("fasdasd"));
     }
+    FVector SpawnLocation(20.0f, 400.0f, 60.0f);
+    FTransform SpawnTransform(SpawnLocation);
+    GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform)->
+    SpawnBoxHandler(TEXT("abcde"), TEXT("abcdeasdasd"), 200, 200);
+}
+
+void UMainBoardWidget::OnButtonClicked()
+{
+	UE_LOG(LogTemp, Log, TEXT("asdasdasd"));
 }
 
