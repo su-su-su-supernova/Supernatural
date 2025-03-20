@@ -10,5 +10,6 @@ enum class EProductType : uint8
 	CEREAL = 0,
 	COKE,
 	TEA,
+	Cake,
 	MAX
 };

@@ -11,7 +11,7 @@ struct FProductData : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, Category = "ProductData")
-	EProductType ProductName;
+	FString ProductName;
 
 	UPROPERTY(EditAnywhere, Category = "ProductData")
 	FString ImagePath;

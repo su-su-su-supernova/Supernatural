@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "CProductDataTable.h"
 #include "SuperGameMode.generated.h"
 
 class CProductDataTable;
@@ -14,17 +15,22 @@ class SUPERNATURAL_API ASuperGameMode : public AGameModeBase
 protected:
 	virtual void BeginPlay() override;
 
-	/* Product Data Table & Data Asset */
+	/* Product Data Table */
 public:
 	UPROPERTY(EditAnywhere, Category = "DataTable")
 	class UDataTable* DTProduct;
 
-	UPROPERTY(EditAnywhere, Category = "DataAsset")
-	class UCProductDataAsset* DAProduct;
+	UPROPERTY(EditAnywhere)
+	EProductType Type;
 
-	void LoadCSVData(UScriptStruct* InStruct);
+	TMap<FString, FProductData*> Product;
+
+	//UPROPERTY(EditAnywhere, Category = "DataAsset")
+	//class UCProductDataAsset* DAProduct;
+
+	void LoadProductDT(UScriptStruct* InStruct);
 
 	// void CreateProductDataAsset(UDataTable* InDT);
 
-	void 
+	void LoadProductData();
 };
