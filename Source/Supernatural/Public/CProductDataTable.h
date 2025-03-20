@@ -2,23 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "EProductType.h"
 #include "CProductDataTable.generated.h"
 
-UENUM(BlueprintType)
-enum class EProductType : uint8
-{
-	CEREAL = 0,
-	MAX
-};
-
-USTRUCT()
+USTRUCT(Atomic, BlueprintType)
 struct FProductData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
-
 	UPROPERTY(EditAnywhere, Category = "ProductData")
-	EProductType ProductName;
+	FString ProductName;
 
 	UPROPERTY(EditAnywhere, Category = "ProductData")
 	FString ImagePath;
@@ -36,6 +29,9 @@ struct FProductData : public FTableRowBase
 	int32 StorageStock;
 
 	UPROPERTY(EditAnywhere, Category = "ProductData")
+	int32 OrderStock;
+
+	UPROPERTY(EditAnywhere, Category = "ProductData")
 	int32 BoxStock;
 
 	UPROPERTY(EditAnywhere, Category = "ProductData")
@@ -44,3 +40,4 @@ struct FProductData : public FTableRowBase
 	UPROPERTY(EditAnywhere, Category = "ProductData")
 	int32 MaxShelfStock;
 };
+
