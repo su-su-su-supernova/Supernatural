@@ -4,6 +4,9 @@
 #include "GameFramework/Actor.h"
 #include "CComputer.generated.h"
 
+// 전방 선언
+class UCProductDataAsset;
+
 UCLASS()
 class SUPERNATURAL_API ACComputer : public AActor
 {
@@ -18,7 +21,5 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	/* Product Data Table */
-public:
-	class UDataTable* DTProduct;
+
 };
