@@ -15,7 +15,7 @@ AProductBoxActor::AProductBoxActor()
 void AProductBoxActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -25,3 +25,30 @@ void AProductBoxActor::Tick(float DeltaTime)
 
 }
 
+void AProductBoxActor::SetBoxInfo(FName PdName, FName ImgPath, int32 CtPrice, int32 OdStock)
+{
+	this->ProductName = PdName;
+	this->ImagePath = ImgPath;
+	this->CostPrice = CtPrice;
+	this->OrderStock = OdStock;
+
+}
+FName AProductBoxActor::ProductNameGetter()
+{
+	return ProductName;
+}
+
+FName AProductBoxActor::ImagePathGetter()
+{
+	return ImagePath;
+}
+
+int32 AProductBoxActor::CostPriceGetter()
+{
+	return CostPrice;
+}
+
+int32 AProductBoxActor::OrderStockGetter()
+{
+	return OrderStock;
+}

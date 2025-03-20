@@ -6,6 +6,7 @@
 #include "Components/WrapBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "ProductBoxSpawner.h"
 
 
 UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
@@ -40,6 +41,10 @@ void UMainBoardWidget::NativeConstruct()
     ProductInfoWidget->ProductName->SetText(FText::FromString(FString::Printf(TEXT("TEXT:  %d"), i)));
     WrapBox->AddChildToWrapBox(ProductInfoWidget);
     }
+    FVector SpawnLocation(20.0f, 400.0f, 60.0f);
+    FTransform SpawnTransform(SpawnLocation);
+    GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform)->
+    SpawnBoxHandler(TEXT("abcde"), TEXT("abcdeasdasd"), 200, 200);
 }
 
 void UMainBoardWidget::OnButtonClicked()

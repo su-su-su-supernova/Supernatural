@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "ProductInfoWidget.h"
+#include "ProductBoxSpawner.h"
 #include "MainBoardWidget.generated.h"
 
 /**
@@ -20,10 +21,6 @@ class SUPERNATURAL_API UMainBoardWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
-
-
-
-
 public:
 	class UProductInfoWidget* ProductInfoWidget;
 
@@ -33,10 +30,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widget")
 	TSubclassOf<class UProductInfoWidget> ProductInfoWidgetTool;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spawner")
+	TSubclassOf<class AProductBoxSpawner> ProductBoxSpawner;
+
+
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* purchaseButton;
-	   UFUNCTION()
+	UFUNCTION()
     void OnButtonClicked();
 
 

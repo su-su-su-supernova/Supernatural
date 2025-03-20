@@ -23,8 +23,7 @@ AProductBoxSpawner::AProductBoxSpawner()
 void AProductBoxSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	GetWorld()->SpawnActor<AProductBoxActor>(BoxClass, ArrowComp->GetComponentTransform());
-
+	//GetWorld()->SpawnActor<AProductBoxActor>(BoxClass, ArrowComp->GetComponentTransform());
 }
 
 // Called every frame
@@ -34,10 +33,13 @@ void AProductBoxSpawner::Tick(float DeltaTime)
 
 }
 
-void AProductBoxSpawner::SpawnBoxHandler(FName a, FName ImagePath, int32 CostPrice, int32 OrderStock)
+void AProductBoxSpawner::SpawnBoxHandler(FName ProductName, FName ImagePath, int32 CostPrice, int32 OrderStock)
 {
 	//AProductBoxActor* ProductBoxActor = Cast<AProductBoxActor>(BoxClass);
-	if(ProductBoxActor)
-	GetWorld()->SpawnActor<AProductBoxActor>(BoxClass, ArrowComp->GetComponentTransform());
+	ProductBoxActor = GetWorld()->SpawnActor<AProductBoxActor>(BoxClass, ArrowComp->GetComponentTransform());
+	if (ProductBoxActor) {
+		ProductBoxActor->SetBoxInfo(ProductName, ImagePath, 200, OrderStock);
+	}
+
 }
 
