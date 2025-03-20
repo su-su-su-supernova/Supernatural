@@ -5,6 +5,7 @@
 #include "ProductInfoWidget.h"
 #include "Components/WrapBox.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 
 
 UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
@@ -17,6 +18,7 @@ UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
 void UMainBoardWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+    purchaseButton->OnClicked.AddDynamic(this, &UMainBoardWidget::OnButtonClicked);
     if (!ProductInfoWidgetTool)
     {
         UE_LOG(LogTemp, Error, TEXT("ProductInfoWidgetTool is null!"));
@@ -38,5 +40,10 @@ void UMainBoardWidget::NativeConstruct()
     ProductInfoWidget->ProductName->SetText(FText::FromString(FString::Printf(TEXT("TEXT:  %d"), i)));
     WrapBox->AddChildToWrapBox(ProductInfoWidget);
     }
+}
+
+void UMainBoardWidget::OnButtonClicked()
+{
+	UE_LOG(LogTemp, Log, TEXT("asdasdasd"));
 }
 

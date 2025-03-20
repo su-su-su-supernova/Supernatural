@@ -33,4 +33,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Widget")
 	TSubclassOf<class UProductInfoWidget> ProductInfoWidgetTool;
 
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* purchaseButton;
+	   UFUNCTION()
+    void OnButtonClicked();
+
+
 };
