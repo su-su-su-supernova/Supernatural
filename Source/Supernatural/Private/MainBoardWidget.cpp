@@ -7,6 +7,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "ProductBoxSpawner.h"
+#include "SuperGameMode.h"
 
 
 UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
@@ -19,6 +20,9 @@ UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
 void UMainBoardWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+    GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+    if (!GameMode)return;
     purchaseButton->OnClicked.AddDynamic(this, &UMainBoardWidget::OnButtonClicked);
     if (!ProductInfoWidgetTool)
     {
@@ -36,6 +40,7 @@ void UMainBoardWidget::NativeConstruct()
     if (!WrapBox)
     {
         UE_LOG(LogTemp, Error, TEXT("WrapBox is nullptr!"));
+
         return;
     }
     ProductInfoWidget->ProductName->SetText(FText::FromString(FString::Printf(TEXT("TEXT:  %d"), i)));
@@ -43,10 +48,11 @@ void UMainBoardWidget::NativeConstruct()
     }
     FVector SpawnLocation(20.0f, 400.0f, 60.0f);
     FTransform SpawnTransform(SpawnLocation);
-    GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform)->
-    SpawnBoxHandler(TEXT("abcde"), TEXT("abcdeasdasd"), 200, 200);
-}
+    FName name = FName(GameMode->Product["Coke"]->ProductName);
 
+    GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform)->
+    SpawnBoxHandler(name, TEXT("abcdeasdasd"), 200, 200);
+}
 void UMainBoardWidget::OnButtonClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("asdasdasd"));

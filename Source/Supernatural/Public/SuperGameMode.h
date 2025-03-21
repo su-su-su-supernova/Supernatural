@@ -11,6 +11,7 @@ UCLASS()
 class SUPERNATURAL_API ASuperGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+	ASuperGameMode();
 
 protected:
 	virtual void BeginPlay() override;

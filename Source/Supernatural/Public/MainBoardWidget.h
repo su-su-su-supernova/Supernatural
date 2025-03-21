@@ -39,6 +39,8 @@ public:
 	class UButton* purchaseButton;
 	UFUNCTION()
     void OnButtonClicked();
+private:
+	class ASuperGameMode* GameMode;
 
 
 };
