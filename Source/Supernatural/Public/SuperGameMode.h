@@ -38,4 +38,6 @@ public:
     FProductData* GetProductDataByIndex(int32 Index) const;
 
 	void LoadProductData();
+
+
 };
