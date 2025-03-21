@@ -31,6 +31,8 @@ void AProductBoxActor::SetBoxInfo(FName PdName, FName ImgPath, int32 CtPrice, in
 	this->ImagePath = ImgPath;
 	this->CostPrice = CtPrice;
 	this->OrderStock = OdStock;
+
+	UE_LOG(LogTemp, Warning, TEXT("%d"), CostPrice);
 }
 FName AProductBoxActor::ProductNameGetter()
 {

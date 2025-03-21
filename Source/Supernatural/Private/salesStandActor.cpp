@@ -7,10 +7,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "EProductDivide.h"
 
-// Sets default values
 AsalesStandActor::AsalesStandActor()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	BoxComp->SetBoxExtent(FVector(95, 25, 25));
@@ -22,8 +20,6 @@ AsalesStandActor::AsalesStandActor()
 		CachedProducts = ProductSalesStandDataAsset->ProdctSalesStandDataTable;
 
 	}
-
-
 	for (int i = 0; i < 10; i++) {
 		FString ComponentName = FString::Printf(TEXT("Product%d"), i);
 		UStaticMeshComponent* NewMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName(*ComponentName));
@@ -35,12 +31,9 @@ AsalesStandActor::AsalesStandActor()
 		NewMesh->SetupAttachment(BoxComp);
 		NewMesh->SetRelativeLocation(FVector(i * 10.0f, 0, 0));
 		ProductMeshes.Add(NewMesh);
-
 	}
-
 }
 
-// Called when the game starts or when spawned
 void AsalesStandActor::BeginPlay()
 {
 	Super::BeginPlay();

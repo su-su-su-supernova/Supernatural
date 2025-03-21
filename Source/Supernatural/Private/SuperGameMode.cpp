@@ -51,7 +51,6 @@ void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
     else
         UE_LOG(LogTemp, Error, TEXT(">> Failed to load CSV file from path: %s"), *csvFilePath);
 }
-
 void ASuperGameMode::LoadProductData()
 {
     if (!DTProduct)
@@ -80,4 +79,44 @@ void ASuperGameMode::LoadProductData()
     {
         UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>> Product : %s / Price : %d"), *p.Key, p.Value->SellingPrice);
     }
+}
+FProductData* ASuperGameMode::GetProductData(const FString& ProductName) const
+{
+    FProductData* const* FoundData = Product.Find(ProductName);
+    if (FoundData)
+    {
+        return *FoundData; // 포인터 직접 반환
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT(">> Product '%s' not found in Product map"), *ProductName);
+        return nullptr;
+    }
+}
+
+FProductData* ASuperGameMode::GetProductDataByIndex(int32 Index) const
+{
+    if (Product.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT(">> Product map is empty"));
+        return nullptr;
+    }
+
+    if (Index < 0 || Index >= Product.Num())
+    {
+        UE_LOG(LogTemp, Warning, TEXT(">> Index %d is out of range. Product map size: %d"), Index, Product.Num());
+        return nullptr;
+    }
+
+    int32 CurrentIndex = 0;
+    for (const auto& Pair : Product)
+    {
+        if (CurrentIndex == Index)
+        {
+            return Pair.Value; // 포인터 직접 반환
+        }
+        CurrentIndex++;
+    }
+
+    return nullptr;
 }

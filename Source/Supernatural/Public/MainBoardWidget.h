@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ProductInfoWidget.h"
 #include "ProductBoxSpawner.h"
+#include "CProductDataTable.h"
 #include "MainBoardWidget.generated.h"
 
 /**
@@ -41,6 +42,11 @@ public:
     void OnButtonClicked();
 private:
 	class ASuperGameMode* GameMode;
+private:
+	void SetInfoWidget(TMap<FString, FProductData*> Product);
+	void SpawnProductBox();
+
+
 
 
 };
