@@ -14,29 +14,66 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-public:	
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	
 public:
-	/* Camera */
+#pragma region Camera
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* PlayerCamera;
+#pragma endregion
 
-	/* Inputs */
+
+#pragma region IMC
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputMappingContext* IMC_PlayerInput;
+#pragma endregion
 
-	// Move
+
+#pragma region Motion Controller
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UMotionControllerComponent* LeftHand;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UMotionControllerComponent* RightHand;
+#pragma endregion
+
+
+#pragma region Move
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_PlayerMove;
-	void Move(const struct FInputActionValue& InValues);
 
-	// Turn
+	void Move(const struct FInputActionValue& InValues);
+#pragma endregion
+
+	
+#pragma region Turn
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_PlayerTurn;
+
 	void Turn(const struct FInputActionValue& InValues);
+#pragma endregion
+
+
+#pragma region  Click UI
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_ClickUI;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ClickUI")
+	bool bIsClickingUI = false;
+	
+	void ClickUI();
+#pragma endregion
+
+
+#pragma region Widget Interaction Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VR", meta = (AllowPrivateAccess = "true"))
+	class UWidgetInteractionComponent* WidgetInteraction;
+
+	UPROPERTY(EditAnywhere, Category = "VR")
+	float WidgetInteractionDistance = 1000.f;
+
+	void PerformLineTrace();
+#pragma endregion
+
 };
