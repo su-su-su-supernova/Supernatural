@@ -24,7 +24,7 @@ public:
 public:
 	/* Camera */
 	UPROPERTY(VisibleAnywhere)
-	class UCameraComponent* PlayerCamer;
+	class UCameraComponent* PlayerCamera;
 
 	/* Inputs */
 	UPROPERTY(EditDefaultsOnly, Category = "Input")

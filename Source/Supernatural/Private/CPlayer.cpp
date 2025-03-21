@@ -11,8 +11,9 @@ ACPlayer::ACPlayer()
 	PrimaryActorTick.bCanEverTick = true;
 
 	/* Camera */
-	PlayerCamer = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamer"));
-	PlayerCamer->SetupAttachment(RootComponent);
+	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamer"));
+	PlayerCamera->SetupAttachment(RootComponent);
+	PlayerCamera->SetRelativeLocation(FVector(0,0,95));
 
 	/* IMC */
 	ConstructorHelpers::FObjectFinder<UInputMappingContext> tmpIMC(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/DYL/Inputs/IMC_PlayerInput.IMC_PlayerInput'"));
@@ -67,7 +68,7 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ACPlayer::Move(const FInputActionValue& InValues)
 {
 	FVector2D Scale = InValues.Get<FVector2D>();
-	FVector dir = PlayerCamer->GetForwardVector() * Scale.X + PlayerCamer->GetRightVector() * Scale.Y;
+	FVector dir = PlayerCamera->GetForwardVector() * Scale.X + PlayerCamera->GetRightVector() * Scale.Y;
 	AddMovementInput(dir);
 }
 
