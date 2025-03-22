@@ -9,10 +9,14 @@
 /**
  *
  */
+class UMainBoardWidget;
 UCLASS()
 class SUPERNATURAL_API UProductInfoWidget : public UUserWidget
 {
 	GENERATED_BODY()
+public:
+	virtual void NativeConstruct() override;
+
 public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ProductName;
@@ -35,5 +39,14 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ProductCount;
 
+	UPROPERTY(meta = (BindWidget))
+	class UButton* AddBTN;
+
+	class UMainBoardWidget* MainBoardRef;
+
+	UFUNCTION()
+    void OnButtonClicked();
+
+	void SetMainBoardReference(UMainBoardWidget* InMainBoard);
 
 };
