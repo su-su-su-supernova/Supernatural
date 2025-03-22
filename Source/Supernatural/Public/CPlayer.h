@@ -66,6 +66,7 @@ private:
 	void Turn(const struct FInputActionValue& InValues);
 #pragma endregion
 
+void CustomRayTrace(float InInteractionDistance);
 
 #pragma region  Click UI
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -78,15 +79,43 @@ private:
 
 
 #pragma region Widget Interaction Component
-	UPROPERTY(EditDefaultsOnly, Category = "Widget Interaction")
+	UPROPERTY(EditDefaultsOnly, Category = "WidgetInteraction")
 	class UWidgetInteractionComponent* WidgetInteraction;
 
-	UPROPERTY(EditAnywhere, Category = "VR")
+	UPROPERTY(EditAnywhere, Category = "WidgetInteraction")
 	float WidgetInteractionDistance = 200.f;
-
-	void PerformLineTrace();
 #pragma endregion
 
 
+#pragma endregion
+
+
+#pragma region Grab Box
+	// 박스를 잡고 있는 상태인지 체크
+    UPROPERTY(EditDefaultsOnly, Category = "GrabBox")
+    bool bIsGrabbingBox = false;
+
+	// GrabBox input이 들어왔는지 체크
+    UPROPERTY(EditDefaultsOnly, Category = "GrabBox")
+    bool bIsIAGrabBoxEntered = false;
+
+    UPROPERTY(EditAnywhere, Category = "GrabBox")
+    float BoxInteractionDistance = 1.f;
+
+	// 현재 들고 있는 박스의 정보
+	UPROPERTY(EditAnywhere, Category = "GrabBox")
+	class AProductBoxActor* Box;
+
+    // GrabBox input이 들어왔을 때 실행
+    void GrabBoxEnterStart();
+
+    // 박스를 실제로 집을 때 할 행동
+    void LiftBox();
+
+    // GrabBox input이 끝났을 때 실행
+    void GrabBoxEnterEnd();
+
+    // 박스를 떨어뜨릴 때 할 행동
+    void DropBox();
 #pragma endregion
 };

@@ -61,6 +61,10 @@ ACPlayer::ACPlayer()
 	WidgetInteraction->InteractionDistance = WidgetInteractionDistance;
 	WidgetInteraction->InteractionSource = EWidgetInteractionSource::World;
 	WidgetInteraction->TraceChannel = ECollisionChannel::ECC_Visibility;
+
+
+	/* Grab Box */
+
 }
 
 void ACPlayer::BeginPlay()
@@ -73,12 +77,13 @@ void ACPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FString rslt = bIsHitWithMainBoard == 1 ? TEXT("true") : TEXT("false");
-	UE_LOG(LogTemp, Warning, TEXT(">>>>> bIsHitWithMainBoard : %s"), *rslt);
+	//FString rslt = bIsHitWithMainBoard == 1 ? TEXT("true") : TEXT("false");
+	//UE_LOG(LogTemp, Warning, TEXT(">>>>> bIsHitWithMainBoard : %s"), *rslt);
 
 	// Main Board의 일정 거리 앞에 있으면 Custom Ray Trace 실행
 	if(bIsHitWithMainBoard)
-		PerformLineTrace();
+		CustomRayTrace(WidgetInteractionDistance);
+	// Left Trigger Slide를 누르고 있으면 
 }
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -150,12 +155,12 @@ void ACPlayer::Turn(const FInputActionValue& InValues)
 #pragma region Click UI
 // Widget Interaction Component 내에서 자동으로 Ray Tracing을 해주지만
 // LineTraceByChannel을 이용하여 Custom Ray Trace를 진행해봄
-void ACPlayer::PerformLineTrace()
+void ACPlayer::CustomRayTrace(float InInteractionDistance)
 {
 	//if(!WidgetInteraction) return;
 
 	FVector startPos = RightHand->GetComponentLocation();
-	FVector endPos = startPos + RightHand->GetForwardVector() * WidgetInteractionDistance;
+	FVector endPos = startPos + RightHand->GetForwardVector() * InInteractionDistance;
 	
 	UE_LOG(LogTemp, Warning, TEXT(">>>>> startPos : %f / endPos : %f"), startPos.Size(), endPos.Size());
 
@@ -194,5 +199,21 @@ void ACPlayer::ClickUI()
 			}
 		}
 	}
+}
+void ACPlayer::GrabBoxEnterStart()
+{
+	
+}
+void ACPlayer::LiftBox()
+{
+	
+}
+void ACPlayer::GrabBoxEnterEnd()
+{
+	
+}
+void ACPlayer::DropBox()
+{
+	
 }
 #pragma endregion
