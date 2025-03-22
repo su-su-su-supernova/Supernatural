@@ -17,10 +17,22 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-public:
+private:
 #pragma region Camera
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* PlayerCamera;
+#pragma endregion
+
+
+#pragma region Collision
+	UPROPERTY(EditDefaultsOnly, Category = "ClickUI")
+	bool bIsHitWithMainBoard = false;
+
+	UFUNCTION()
+	void OnMainBoardBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnMainBoardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 #pragma endregion
 
 
@@ -63,17 +75,18 @@ public:
 	bool bIsClickingUI = false;
 	
 	void ClickUI();
-#pragma endregion
 
 
 #pragma region Widget Interaction Component
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VR", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Widget Interaction")
 	class UWidgetInteractionComponent* WidgetInteraction;
 
 	UPROPERTY(EditAnywhere, Category = "VR")
-	float WidgetInteractionDistance = 1000.f;
+	float WidgetInteractionDistance = 200.f;
 
 	void PerformLineTrace();
 #pragma endregion
 
+
+#pragma endregion
 };
