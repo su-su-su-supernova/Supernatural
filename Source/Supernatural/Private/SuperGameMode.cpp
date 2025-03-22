@@ -13,7 +13,7 @@ ASuperGameMode::ASuperGameMode()
 void ASuperGameMode::BeginPlay()
 {
     Super::BeginPlay();
-    UE_LOG(LogTemp, Log, TEXT(">> SuperBeginPlay"));
+    //UE_LOG(LogTemp, Log, TEXT(">> SuperBeginPlay"));
 }
 
 void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
@@ -28,7 +28,7 @@ void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
     {
         // Data Table의 Row Struct를 정의한다
         DTProduct->RowStruct = InStruct;
-
+        
         // 파일 데이터를 바탕으로 Data Table을 생성한다
         TArray<FString> errorMessages = DTProduct->CreateTableFromCSVString(csvFileData);
 
@@ -50,6 +50,7 @@ void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
     // CSV 파일 데이터를 불러오는 데 실패했다면
     else
         UE_LOG(LogTemp, Error, TEXT(">> Failed to load CSV file from path: %s"), *csvFilePath);
+    
 }
 void ASuperGameMode::LoadProductData()
 {

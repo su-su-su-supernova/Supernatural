@@ -33,7 +33,8 @@ void UMainBoardWidget::NativeConstruct()
 }
 void UMainBoardWidget::OnButtonClicked()
 {
-    SpawnProductBox();
+    //SpawnProductBox();
+    UE_LOG(LogTemp,Warning,TEXT("TQ"));
 }
 
 void UMainBoardWidget::SetInfoWidget(TMap<FString, FProductData*> Product)
