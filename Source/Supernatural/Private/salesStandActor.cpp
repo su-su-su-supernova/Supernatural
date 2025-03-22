@@ -23,10 +23,6 @@ AsalesStandActor::AsalesStandActor()
 	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	BoxComp->SetBoxExtent(FVector(95, 25, 25));
 	BoxComp->SetupAttachment(RootComponent);
-	SelifBaseComp = CreateDefaultSubobject<USelif_BaseComponent>(TEXT("SelifBaseComp"));
-	Comp5 = CreateDefaultSubobject<USelif_5Component>(TEXT("Comp5"));
-	Comp10 = CreateDefaultSubobject<USelif_10Component>(TEXT("Comp10"));
-	Comp15 = CreateDefaultSubobject<USelif_15Component>(TEXT("Comp15"));
 
 	SceneComp5 = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp5"));
 	SceneComp5->SetupAttachment(BoxComp);
@@ -51,7 +47,32 @@ void AsalesStandActor::BeginPlay()
 	//	if (ProductMeshes[i] == nullptr) return;
 	//ProductMeshes[i]->SetStaticMesh(CachedProducts[EProductDivide::Snack3].Snack1);
 	//}
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+
+	SetMeshesForProductNumber(10, EProductDivide::Snack1);
+
 	SetMeshesForProductNumber(5, EProductDivide::Snack2);
+	SetMeshesForProductNumber(5, EProductDivide::Snack2);
+	SetMeshesForProductNumber(5, EProductDivide::Snack2);
+	SetMeshesForProductNumber(5, EProductDivide::Snack2);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+
+	SetMeshesForProductNumber(5, EProductDivide::Snack2);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+
+
 
 }
 
@@ -67,17 +88,17 @@ void AsalesStandActor::settingProductMesh(int32 v)
 	USceneComponent* TargetSceneComp = nullptr;
 	EProductDivide ProductType = EProductDivide::Snack1;
 	float ProductDistance = 0;
+	if (CurrentProductCount > 0) v = ProductCountMax;
 
 	if (v == 1) { ProductNumber = 5; TargetSceneComp = SceneComp5; ProductType = EProductDivide::Snack2; ProductDistance = 40.5f; }
-	else	if (v == 2) { ProductNumber = 10; TargetSceneComp = SceneComp10; ProductType = EProductDivide::Snack3; ProductDistance = 18.0f;}
-	else if (v == 3) { ProductNumber = 15; TargetSceneComp = SceneComp15; ProductType = EProductDivide::Snack1; ProductDistance = 12.0f;}
+	else if (v == 2) { ProductNumber = 10; TargetSceneComp = SceneComp10; ProductType = EProductDivide::Snack1; ProductDistance = 18.0f;}
+	else if (v == 3) { ProductNumber = 15; TargetSceneComp = SceneComp15; ProductType = EProductDivide::Snack3; ProductDistance = 12.0f;}
 	else return;
-
 	decideProductType(ProductNumber, TargetSceneComp, ProductType, ProductDistance);
 }
+
 void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* TargetSceneComp, EProductDivide ProductType, float ProductDistance)
 {
-
 	// 메쉬 생성
 	static int32 j = 0;
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
@@ -101,9 +122,10 @@ void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* T
 		NewMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		if (ProductType == EProductDivide::Snack2)
 			NewMesh->SetRelativeScale3D(FVector(0.7));
-		TargetArray->Add(NewMesh); // 그룹별 배열에 추가
+		TargetArray->Add(NewMesh);
 	}
 }
+
 void AsalesStandActor::SetMeshesForProductNumber(int32 ProductNumber, EProductDivide ProductType)
 {
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
@@ -117,11 +139,34 @@ void AsalesStandActor::SetMeshesForProductNumber(int32 ProductNumber, EProductDi
 		return;
 	}
 
-	for (int i = 0; i < TargetArray->Num(); i++) {
-		if ((*TargetArray)[i] && CachedProducts.Contains(ProductType) && CachedProducts[ProductType].Snack1)
-		{
-			(*TargetArray)[i]->SetStaticMesh(CachedProducts[ProductType].Snack1);
-		}
-	}
+	if (CurrentProductCount == 0)
+	{
+		CurrentProductNumber = ProductNumber;
+		CurrentProductType = ProductType;
+		ProductCountMax = ProductNumber;
 
+		for (int i = 0; i < TargetArray->Num(); i++) {
+			if ((*TargetArray)[i] && CachedProducts.Contains(ProductType) && CachedProducts[ProductType].Snack1)
+			{
+				(*TargetArray)[i]->SetStaticMesh(CachedProducts[ProductType].Snack1);
+				(*TargetArray)[i]->SetVisibility(false);
+			}
+		}
+		AddProduct(TargetArray);
+	}
+	else if (CurrentProductNumber == ProductNumber && CurrentProductType == ProductType)
+	{
+		AddProduct(TargetArray);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Ignoring SetMeshesForProductNumber: Different ProductNumber or ProductType"));
+	}
+}
+
+void AsalesStandActor::AddProduct(TArray<UStaticMeshComponent*>* TargetArray)
+{
+	if (CurrentProductCount >= ProductCountMax) return;
+	(*TargetArray)[CurrentProductCount]->SetVisibility(true);
+	CurrentProductCount++;
 }
