@@ -31,10 +31,40 @@ public:
 
 	class UStaticMeshComponent* ProductMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    TArray<UStaticMeshComponent*> ProductMeshes;
+	class USelif_5Component* Comp5;
+	class USelif_10Component* Comp10;
+	class USelif_15Component* Comp15;
+	class USelif_BaseComponent* SelifBaseComp;
+	class USceneComponent* SceneComp5;
+	class USceneComponent* SceneComp10;
+	class USceneComponent* SceneComp15;
+
+
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> ProductMeshes5;
+
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> ProductMeshes10;
+
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> ProductMeshes15;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TMap<EProductDivide, FProductSalesStandDataTable> CachedProducts;
+
+private:
+	void settingProductMesh(int32 v);
+	void decideProductType(int32 ProductNumber, USceneComponent* TargetSceneComp, EProductDivide ProductType, float ProductDistance);
+
+	UFUNCTION(BlueprintCallable, Category = "SalesStand")
+	void SetMeshesForProductNumber(int32 ProductNumber, EProductDivide ProductType);
+
+	void AddProduct(TArray<UStaticMeshComponent*>* TargetArray);
+
+private:
+	int32 ProductCountMax = 0;
+	int32 CurrentProductCount = 0;
+	EProductDivide CurrentProductType = EProductDivide::Snack1; // 기본값 설정
+	int32 CurrentProductNumber = 0; // 기본값 설정
 
 };
