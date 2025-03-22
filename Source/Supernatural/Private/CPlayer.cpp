@@ -10,6 +10,7 @@
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/CapsuleComponent.h"
 #include "MainBoardWidget.h"
 #include "CComputer.h"
+#include "ProductBoxActor.h"
 
 ACPlayer::ACPlayer()
 {
@@ -23,7 +24,7 @@ ACPlayer::ACPlayer()
 
 	/* Collision */
 	GetCapsuleComponent()->SetCollisionProfileName(FName("Player"));
-	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACPlayer::OnMainBoardBeginOverlap);
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACPlayer::OnOtherBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ACPlayer::OnMainBoardEndOverlap);
 
 
@@ -104,10 +105,9 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
-void ACPlayer::OnMainBoardBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ACComputer* computer = Cast<ACComputer>(OtherActor);
-	if (computer)
+	if (Cast<ACComputer>(OtherActor))
 	{
 		if (!bIsHitWithMainBoard)
 		{
@@ -115,6 +115,10 @@ void ACPlayer::OnMainBoardBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Computer >>>>>>>>>>>>>>>>>>>"));
 		}
     }
+	else if (Cast<AProductBoxActor>(OtherActor))
+	{
+		
+	}
 }
 
 
@@ -172,7 +176,7 @@ void ACPlayer::ClickUI()
 {
 	if (WidgetInteraction)
 	{
-		// UE_LOG(LogTemp, Error, TEXT(">>> WidgetInteraction Success!!!"));
+		UE_LOG(LogTemp, Error, TEXT(">>> WidgetInteraction Success!!!"));
 		if (WidgetInteraction->IsOverInteractableWidget())
 		{
 			UE_LOG(LogTemp, Error, TEXT(">>> Widget Interactable widget SUCCESS !!!!!!!!!!!"));
