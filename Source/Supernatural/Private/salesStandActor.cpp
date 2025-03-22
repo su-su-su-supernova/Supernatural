@@ -30,8 +30,8 @@ AsalesStandActor::AsalesStandActor()
 
 
 	settingProductMesh(1);
-	//settingProductMesh(2);
-	//settingProductMesh(3);
+	settingProductMesh(2);
+	settingProductMesh(3);
 
 
 
@@ -57,12 +57,18 @@ void AsalesStandActor::settingProductMesh(int32 v)
 {
 	int32 ProductNumber = 0;
 	FName CompName = FName("");
-	if (v == 1) { ProductNumber = 5; CompName = FName("SceneComp5"); }
-	else if (v == 2) { ProductNumber = 10; CompName = FName("SceneComp10"); }
-	else if (v == 3) { ProductNumber = 15; CompName = FName("SceneComp15"); }
+	EProductDivide ProductType;
+	if (v == 1) { ProductNumber = 5; CompName = FName("SceneComp5"); ProductType = EProductDivide::Snack1; }
+	else if (v == 2) { ProductNumber = 10; CompName = FName("SceneComp10"); ProductType = EProductDivide::Snack2;}
+	else if (v == 3) { ProductNumber = 15; CompName = FName("SceneComp15"); ProductType = EProductDivide::Snack3;}
+	decideProductType(ProductNumber, CompName, ProductType);
+}
+
+void AsalesStandActor::decideProductType(int32 ProductNumber, FName CompName, EProductDivide ProductType)
+{
 	SceneComp = CreateDefaultSubobject<USceneComponent>(CompName);
 	SceneComp->SetupAttachment(BoxComp);
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < ProductNumber; i++) {
 		FString ComponentName = FString::Printf(TEXT("Product%d"), i);
 		UStaticMeshComponent* NewMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName(*ComponentName));
 		if (!NewMesh)
@@ -74,9 +80,9 @@ void AsalesStandActor::settingProductMesh(int32 v)
 		NewMesh->SetRelativeLocation(FVector(-85 + i * 12.0f, 0, 0));
 		ProductMeshes.Add(NewMesh);
 	}
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < ProductNumber; i++) {
 		if (ProductMeshes[i] == nullptr) return;
-		ProductMeshes[i]->SetStaticMesh(CachedProducts[EProductDivide::Snack3].Snack1);
+		ProductMeshes[i]->SetStaticMesh(CachedProducts[ProductType].Snack1);
 		//ProductMeshes[i]->SetVisibility(false);
 	}
 }

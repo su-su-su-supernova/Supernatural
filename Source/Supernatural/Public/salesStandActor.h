@@ -46,6 +46,7 @@ public:
 
 private:
 	void settingProductMesh(int32 v);
+	void decideProductType(int32 ProductNumber, FName CompName, EProductDivide ProductType);
 
 
 };
