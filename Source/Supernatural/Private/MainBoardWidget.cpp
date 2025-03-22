@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MainBoardWidget.h"
@@ -7,48 +7,64 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "ProductBoxSpawner.h"
+#include "SuperGameMode.h"
 
 
 UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
-    : Super(ObjectInitializer) // �θ� Ŭ���� �ʱ�ȭ
+    : Super(ObjectInitializer) // 부모 클래스 초기화
 {
-	ProductInfoWidget = CreateWidget<UProductInfoWidget>(this, ProductInfoWidgetTool);
+	//ProductInfoWidget = CreateWidget<UProductInfoWidget>(this, ProductInfoWidgetTool);
 
 }
 
 void UMainBoardWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+    GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+    if (!GameMode)return;
+    SetInfoWidget(GameMode->Product);
     purchaseButton->OnClicked.AddDynamic(this, &UMainBoardWidget::OnButtonClicked);
-    if (!ProductInfoWidgetTool)
-    {
-        UE_LOG(LogTemp, Error, TEXT("ProductInfoWidgetTool is null!"));
-        return;
-    }
-    for(int i=0;i<4;i++){
-    ProductInfoWidget = CreateWidget<UProductInfoWidget>(this, ProductInfoWidgetTool);
-    if (!ProductInfoWidget)
-    {
-        UE_LOG(LogTemp, Error, TEXT("Failed to create ProductInfoWidget!"));
-        return;
-    }
 
-    if (!WrapBox)
-    {
-        UE_LOG(LogTemp, Error, TEXT("WrapBox is nullptr!"));
-        return;
-    }
-    ProductInfoWidget->ProductName->SetText(FText::FromString(FString::Printf(TEXT("TEXT:  %d"), i)));
-    WrapBox->AddChildToWrapBox(ProductInfoWidget);
-    }
-    FVector SpawnLocation(20.0f, 400.0f, 60.0f);
-    FTransform SpawnTransform(SpawnLocation);
-    GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform)->
-    SpawnBoxHandler(TEXT("abcde"), TEXT("abcdeasdasd"), 200, 200);
+
+    SpawnProductBox();
+
+
 }
-
 void UMainBoardWidget::OnButtonClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("asdasdasd"));
+    SpawnProductBox();
+}
+
+void UMainBoardWidget::SetInfoWidget(TMap<FString, FProductData*> Product)
+{
+    for (int i = 0; i < Product.Num(); i++) {
+        ProductInfoWidget = CreateWidget<UProductInfoWidget>(this, ProductInfoWidgetTool);
+        if (GameMode)
+        {
+            FProductData* Data= GameMode->GetProductDataByIndex(i);
+
+            ProductInfoWidget->ProductName->SetText(FText::FromString(Data->ProductName));
+            ProductInfoWidget->StorageStock->SetText(FText::AsNumber(Data->ShelfStock));
+            ProductInfoWidget->BoxStock->SetText(FText::AsNumber(Data->StorageStock));
+            ProductInfoWidget->ShelfStock->SetText(FText::AsNumber(Data->OrderStock));
+            ProductInfoWidget->CostPrice->SetText(FText::Format(NSLOCTEXT("UI", "CostPriceFormat", "개당가격: {0}원"), Data->CostPrice));
+            ProductInfoWidget->CostPriceSum->SetText(FText::Format(NSLOCTEXT("UI", "CostPriceSum", "{0}원"), Data->CostPrice*Data->BoxStock));
+            ProductInfoWidget->ProductCount->SetText(FText::Format(NSLOCTEXT("UI", "CostPriceFormat", "x{0}"), Data->BoxStock));
+            WrapBox->AddChildToWrapBox(ProductInfoWidget);
+        }
+    }
+}
+
+void UMainBoardWidget::SpawnProductBox()
+{
+    FVector SpawnLocation(20.0f, 400.0f, 60.0f);
+    FTransform SpawnTransform(SpawnLocation);
+    FName name = FName(GameMode->Product["Coke"]->ProductName);
+
+    FProductData* Data = GameMode->GetProductData("Coke");
+
+    GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform)->
+        SpawnBoxHandler(FName(Data->ProductName),FName(Data->ImagePath), Data->CostPrice, Data->BoxStock);
 }
 

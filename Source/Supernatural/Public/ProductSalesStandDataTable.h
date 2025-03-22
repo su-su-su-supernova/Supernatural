@@ -10,6 +10,7 @@ struct SUPERNATURAL_API FProductSalesStandDataTable : public FTableRowBase
 {
     GENERATED_BODY()
 
+
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     EProductDivide ProductDivide;

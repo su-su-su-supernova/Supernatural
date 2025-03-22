@@ -11,13 +11,14 @@ UCLASS()
 class SUPERNATURAL_API ASuperGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+	ASuperGameMode();
 
 protected:
 	virtual void BeginPlay() override;
 
 	/* Product Data Table */
 public:
-	UPROPERTY(EditAnywhere, Category = "DataTable")
+	//UPROPERTY(EditAnywhere, Category = "DataTable")
 	class UDataTable* DTProduct;
 
 	UPROPERTY(EditAnywhere)
@@ -32,5 +33,11 @@ public:
 
 	// void CreateProductDataAsset(UDataTable* InDT);
 
+    FProductData* GetProductData(const FString& ProductName) const;
+
+    FProductData* GetProductDataByIndex(int32 Index) const;
+
 	void LoadProductData();
+
+
 };

@@ -38,7 +38,7 @@ void AProductBoxSpawner::SpawnBoxHandler(FName ProductName, FName ImagePath, int
 	//AProductBoxActor* ProductBoxActor = Cast<AProductBoxActor>(BoxClass);
 	ProductBoxActor = GetWorld()->SpawnActor<AProductBoxActor>(BoxClass, ArrowComp->GetComponentTransform());
 	if (ProductBoxActor) {
-		ProductBoxActor->SetBoxInfo(ProductName, ImagePath, 200, OrderStock);
+		ProductBoxActor->SetBoxInfo(ProductName, ImagePath, CostPrice, OrderStock);
 	}
 
 }

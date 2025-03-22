@@ -32,5 +32,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* CostPriceSum;
 
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* ProductCount;
+
 
 };
