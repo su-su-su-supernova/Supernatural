@@ -61,7 +61,7 @@ ACPlayer::ACPlayer()
 	SkeletalMeshLeftHand = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshLeftHand"));
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> tmpLeftHand(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/MannequinsXR/Meshes/SKM_MannyXR_left.SKM_MannyXR_left'"));
-	if (tmpLeftHand.Succeeded()) 
+	if (tmpLeftHand.Succeeded())
 		SkeletalMeshLeftHand->SetSkeletalMesh(tmpLeftHand.Object);
 
 	SkeletalMeshLeftHand->SetupAttachment(LeftHand);
@@ -194,6 +194,10 @@ void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		bIsHitByStand = false;
 		return;
 	}
+	///////////////////
+	isHitStand = true;
+	///////////////////
+
 }
 #pragma endregion
 
@@ -231,7 +235,7 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 	params.AddIgnoredActor(this);
 	params.AddIgnoredActor(LineTraceZone);
 
-	// Line Trace를 실행하는 주체에 따라 색상 다르게 
+	// Line Trace를 실행하는 주체에 따라 색상 다르게
 	FColor drawColor = InInteractionDistance == InteractionDistanceWidget ? FColor::Magenta : FColor::Cyan;
 	drawColor = InInteractionDistance == InteractionDistanceShelf ? FColor::Orange : drawColor;
 
@@ -243,9 +247,9 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		endPos = hitResult.ImpactPoint;
 
 		FString hitActor = hitResult.GetActor()->GetActorNameOrLabel();
-		UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
+		//UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
 
-		/* Click UI */ 
+		/* Click UI */
 		if (InInteractionDistance == InteractionDistanceWidget)
 		{
 			// Widget Interaction에 Custom ray tracing 결과 전달
@@ -275,6 +279,8 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 
 			// hit된 stand를 명시한다
 			Stand = Cast<AsalesStandActor>(hitResult.GetActor());
+
+			isHitStand = true;
 
 			// 상품을 진열한다
 			DisplayProduct();
@@ -322,6 +328,13 @@ void ACPlayer::ClickUIStart()
 			UE_LOG(LogTemp, Warning, TEXT(">>> Activate Click A - bIsClickingUI : %d"), bIsClickingUI);
 		}
 	}
+	/////////////////////////////////////////////////
+	if (isHitStand) {
+		if (!Stand)return;
+		Stand->SetMeshesForProductNumber("Coke");
+	}
+	/////////////////////////////////////////////////
+
 }
 
 void ACPlayer::ClickUICompleted()

@@ -16,7 +16,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
 private:
 #pragma region Camera
 	UPROPERTY(VisibleAnywhere)
@@ -67,7 +67,7 @@ private:
 	void Move(const struct FInputActionValue& InValues);
 #pragma endregion
 
-	
+
 #pragma region Turn
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_PlayerTurn;
@@ -93,7 +93,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "ClickUI")
 	bool bIsClickingUI = false;
-	
+
 	void ClickUIStart();
 	void ClickUICompleted();
 
@@ -195,4 +195,6 @@ private:
     void DPCompleted();
 
 #pragma endregion
+	/////////////////****//////
+	bool isHitStand=false;
 };

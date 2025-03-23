@@ -47,33 +47,6 @@ void AsalesStandActor::BeginPlay()
 	//ProductMeshes[i]->SetStaticMesh(CachedProducts[EProductDivide::Snack3].Snack1);
 	//}
 
-	SetMeshesForProductNumber(10, EProductDivide::Snack1);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-
-
-	SetMeshesForProductNumber(5, EProductDivide::Snack2);
-	SetMeshesForProductNumber(5, EProductDivide::Snack2);
-	SetMeshesForProductNumber(5, EProductDivide::Snack2);
-	SetMeshesForProductNumber(5, EProductDivide::Snack2);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-
-	SetMeshesForProductNumber(5, EProductDivide::Snack2);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
-
-
-
 }
 
 // Called every frame
@@ -126,16 +99,31 @@ void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* T
 	}
 }
 
-void AsalesStandActor::SetMeshesForProductNumber(int32 ProductNumber, EProductDivide ProductType)
+void AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
 {
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *ProductName);
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
+	EProductDivide ProductType;
+	int32 ProductNumber = 0; // 초기화
 
-	if (ProductNumber == 5) TargetArray = &ProductMeshes5;
-	else if (ProductNumber == 10) TargetArray = &ProductMeshes10;
-	else if (ProductNumber == 15) TargetArray = &ProductMeshes15;
+	if (ProductName == "Cereal") {
+		ProductType = EProductDivide::Snack2;
+		TargetArray = &ProductMeshes5;
+		ProductNumber = 5;
+	}
+	else if (ProductName == "Coke") {
+		ProductType = EProductDivide::Snack1;
+		TargetArray = &ProductMeshes10;
+		ProductNumber = 10;
+	}
+	else if (ProductName == "Tea") {
+		ProductType = EProductDivide::Snack3;
+		TargetArray = &ProductMeshes15;
+		ProductNumber = 15;
+	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid ProductNumber: %d"), ProductNumber);
+		UE_LOG(LogTemp, Warning, TEXT("Invalid ProductName: %s"), *ProductName);
 		return;
 	}
 
@@ -154,7 +142,7 @@ void AsalesStandActor::SetMeshesForProductNumber(int32 ProductNumber, EProductDi
 		}
 		AddProduct(TargetArray);
 	}
-	else if (CurrentProductNumber == ProductNumber && CurrentProductType == ProductType)
+	else if (CurrentProductType == ProductType) // ProductNumber 비교 제거
 	{
 		AddProduct(TargetArray);
 	}

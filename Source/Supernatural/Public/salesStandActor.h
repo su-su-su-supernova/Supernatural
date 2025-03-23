@@ -57,8 +57,7 @@ private:
 	void settingProductMesh(int32 v);
 	void decideProductType(int32 ProductNumber, USceneComponent* TargetSceneComp, EProductDivide ProductType, float ProductDistance);
 
-	UFUNCTION(BlueprintCallable, Category = "SalesStand")
-	void SetMeshesForProductNumber(int32 ProductNumber, EProductDivide ProductType);
+	//UFUNCTION(BlueprintCallable, Category = "SalesStand")
 
 	void AddProduct(TArray<UStaticMeshComponent*>* TargetArray);
 
@@ -67,5 +66,9 @@ private:
 	int32 CurrentProductCount = 0;
 	EProductDivide CurrentProductType = EProductDivide::Snack1; // 기본값 설정
 	int32 CurrentProductNumber = 0; // 기본값 설정
+
+public:
+	void SetMeshesForProductNumber(FString ProductType);
+
 
 };
