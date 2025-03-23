@@ -113,6 +113,9 @@ void ACPlayer::Tick(float DeltaTime)
 	// Left Trigger Slide를 누르고 있으면 Box와의 interaction 체크를 위해 Custom Ray Trace 실행
 	if(bIsGrabBoxInputEntered)
 		PerformLineTrace(InteractionDistanceBox);
+
+	if(bIsGrabbingBox)
+        UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>> Box Location : %s"), *(Box->GetActorLocation().ToString()));
 }
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -224,10 +227,13 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		if (InInteractionDistance == InteractionDistanceBox && hitResult.GetActor()->ActorHasTag(BOXTAG))
 		{
 			FString hitActor = hitResult.GetActor()->GetActorNameOrLabel();
-			//UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
+			UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
 
 			// hit된 box를 명시한다
 			Box = Cast<AProductBoxActor>(hitResult.GetActor());
+
+			// Box 의 Symulate Physics를 꺼준다
+			Box->BoxPhysicsOnOff(false);
 
 			// Box를 들어올린다
 			if(!bIsGrabbingBox)
@@ -305,9 +311,6 @@ void ACPlayer::LiftBox()
 {
     UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> Lift Box <<<<<<<<<<"));
 
-	// Box를 잡고 있다고 명시한다
-	bIsGrabbingBox = true;
-
 	// Box를 AttachBox socket에 Attach한다
 	FString rslt = SkeletalMeshLeftHand->DoesSocketExist(SocketAttachBox) ? TEXT("True") : TEXT("False");
 	//FString rslt = LeftHand->GetAttachSocketName().Compare(SocketAttachBox) ? TEXT("True") : TEXT("False");
@@ -318,6 +321,9 @@ void ACPlayer::LiftBox()
 	{
 		if (Box->AttachToComponent(SkeletalMeshLeftHand, FAttachmentTransformRules::KeepWorldTransform, SocketAttachBox))
 		{
+			// Box를 잡고 있다고 명시한다
+			bIsGrabbingBox = true;
+
 			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>> ATTACH BOX SUCCESS <<<<<<<<<<"));
 
 			// Box의 정보를 가져온다
@@ -325,7 +331,8 @@ void ACPlayer::LiftBox()
 			ProductCostPrice = Box->CostPriceGetter();
 			ProductOrderStock = Box->OrderStockGetter();
 
-			UE_LOG(LogTemp, Warning, TEXT("[Product Info] Product Name : %s / Product Cost Price : %d / Product Order Stock : %d"), *ProductName, ProductCostPrice, ProductOrderStock);
+			UE_LOG(LogTemp, Warning, TEXT("[Product Info] Product Location : %s / Product Name : %s / Product Cost Price : %d / Product Order Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCostPrice, ProductOrderStock);
+
 		}
 	}
 }
@@ -349,7 +356,10 @@ void ACPlayer::DropBox()
 	if(bIsGrabbingBox) bIsGrabbingBox = false;
 
 	// Box를 AttachBox socket으로부터 Detach한다
-	Box->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	Box->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>> DETACH BOX SUCCESS <<<<<<<<<<"));
+
+	// Box 의 Symulate Physics를 켜준다
+	Box->BoxPhysicsOnOff(true);
 }
 #pragma endregion

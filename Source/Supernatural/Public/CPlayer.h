@@ -123,7 +123,7 @@ void SetInputMode();
     bool bIsGrabBoxInputEntered = false;
 
     UPROPERTY(EditAnywhere, Category = "GrabBox")
-    float InteractionDistanceBox = 10.f;
+    float InteractionDistanceBox = 30.f;
 
 	// 현재 들고 있는 박스
 	UPROPERTY(EditAnywhere, Category = "GrabBox")
