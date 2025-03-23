@@ -26,13 +26,13 @@ private:
 
 #pragma region Collision
 	UPROPERTY(EditDefaultsOnly, Category = "ClickUI")
-	bool bIsHitWithMainBoard = false;
+	bool bIsHitByMainBoard = false;
 
 	UFUNCTION()
 	void OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void OnMainBoardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 #pragma endregion
 
 
@@ -66,16 +66,27 @@ private:
 	void Turn(const struct FInputActionValue& InValues);
 #pragma endregion
 
-void CustomRayTrace(float InInteractionDistance);
+
+// Custom Line Trace
+UPROPERTY(EditDefaultsOnly, Category = "Line Trace")
+bool bIsPerformingLineTrace = false;
+
+void PerformLineTrace(float InInteractionDistance);
+void SetInputMode();
+
 
 #pragma region  Click UI
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_ClickUI;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ClickUI")
+	bool bIsClickUIInputEntered = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ClickUI")
 	bool bIsClickingUI = false;
 	
-	void ClickUI();
+	void ClickUIStart();
+	void ClickUICompleted();
 
 
 #pragma region Widget Interaction Component
@@ -83,7 +94,7 @@ void CustomRayTrace(float InInteractionDistance);
 	class UWidgetInteractionComponent* WidgetInteraction;
 
 	UPROPERTY(EditAnywhere, Category = "WidgetInteraction")
-	float WidgetInteractionDistance = 200.f;
+	float InteractionDistanceWidget = 200.f;
 #pragma endregion
 
 
@@ -91,29 +102,40 @@ void CustomRayTrace(float InInteractionDistance);
 
 
 #pragma region Grab Box
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_GrabBox;
+
 	// 박스를 잡고 있는 상태인지 체크
     UPROPERTY(EditDefaultsOnly, Category = "GrabBox")
     bool bIsGrabbingBox = false;
 
 	// GrabBox input이 들어왔는지 체크
     UPROPERTY(EditDefaultsOnly, Category = "GrabBox")
-    bool bIsIAGrabBoxEntered = false;
+    bool bIsGrabBoxInputEntered = false;
 
     UPROPERTY(EditAnywhere, Category = "GrabBox")
-    float BoxInteractionDistance = 1.f;
+    float InteractionDistanceBox = 3.f;
 
-	// 현재 들고 있는 박스의 정보
+	// 현재 들고 있는 박스
 	UPROPERTY(EditAnywhere, Category = "GrabBox")
 	class AProductBoxActor* Box;
 
+	// 박스를 부착할 socket의 이름
+	FName SocketNameBox = TEXT("AttachBox");
+
+	// 박스 안 물품의 정보
+	FName ProductName;
+	int32 ProductCostPrice;
+	int32 ProductOrderStock;
+
     // GrabBox input이 들어왔을 때 실행
-    void GrabBoxEnterStart();
+    void GrabBoxInputStart();
 
     // 박스를 실제로 집을 때 할 행동
     void LiftBox();
 
     // GrabBox input이 끝났을 때 실행
-    void GrabBoxEnterEnd();
+    void GrabBoxInputCompleted();
 
     // 박스를 떨어뜨릴 때 할 행동
     void DropBox();

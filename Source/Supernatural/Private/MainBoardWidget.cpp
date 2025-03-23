@@ -29,6 +29,8 @@ void UMainBoardWidget::NativeConstruct()
 }
 void UMainBoardWidget::OnButtonClicked()
 {
+    UE_LOG(LogTemp, Warning, TEXT(">>>>> Button Clicked"));
+
     for (auto product : selectArrayProduct) {
         SpawnProductBox(product);
     }
