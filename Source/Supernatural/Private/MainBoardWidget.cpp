@@ -42,10 +42,7 @@ void UMainBoardWidget::SetInfoWidget(TMap<FString, FProductData*> Product)
 {
     for (int i = 0; i < Product.Num(); i++) {
         ProductInfoWidget = CreateWidget<UProductInfoWidget>(this, ProductInfoWidgetTool);
-        //ProductInfoWidget->SetMainBoardReference(this);
-        // InfoWidget에 MainBoardWidget 참조 전달
         ProductInfoWidget->SetMainBoardReference(this);
-        // 화면에 추가 (예: Canvas Panel에 추가했다고 가정)
         if (GameMode)
         {
             FProductData* Data= GameMode->GetProductDataByIndex(i);
@@ -70,10 +67,10 @@ void UMainBoardWidget::SpawnProductBox(FText product)
     //FName name = FName(GameMode->Product[product.ToString()]->ProductName);
 
     FProductData* Data = GameMode->GetProductData(product.ToString());
-
+    if(Data&& GameMode){
     GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform)->
         SpawnBoxHandler(FName(Data->ProductName),FName(Data->ImagePath), Data->CostPrice, Data->BoxStock);
-
+    }
 }
 
 void UMainBoardWidget::SetVerticalBox(FText ProductName, FText ProductCount, FText CostPriceSum)

@@ -26,8 +26,8 @@ void AAITargetLocationActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AAITargetLocationActor::setBoxTag()
+void AAITargetLocationActor::setBoxTag(FName ProductName)
 {
-	
+	//SetActorLabel(FString(FText::FromString(ProductName)));
 }
 

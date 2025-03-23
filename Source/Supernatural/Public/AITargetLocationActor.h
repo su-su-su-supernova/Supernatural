@@ -26,6 +26,6 @@ public:
 private:
 	class UBoxComponent* BoxComp;
 public:
-	void setBoxTag();
+	void setBoxTag(FName ProductName);
 
 };
