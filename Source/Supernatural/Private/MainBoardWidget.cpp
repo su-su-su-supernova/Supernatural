@@ -30,6 +30,7 @@ void UMainBoardWidget::NativeConstruct()
 void UMainBoardWidget::OnButtonClicked()
 {
     if (selectArrayProduct.Num()<=0)return;
+
     for (auto product : selectArrayProduct) {
         SpawnProductBox(product);
     }

@@ -25,7 +25,7 @@ ACPlayer::ACPlayer()
 	/* Collision */
 	GetCapsuleComponent()->SetCollisionProfileName(FName("Player"));
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACPlayer::OnOtherBeginOverlap);
-	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ACPlayer::OnMainBoardEndOverlap);
+	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ACPlayer::OnOtherEndOverlap);
 
 
 	/* IMC */
@@ -43,6 +43,9 @@ ACPlayer::ACPlayer()
 	ConstructorHelpers::FObjectFinder<UInputAction> tmpIAClickUI(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_ClickUI.IA_ClickUI'"));
 	if (tmpIAMove.Succeeded()) IA_ClickUI = tmpIAClickUI.Object;
 
+	ConstructorHelpers::FObjectFinder<UInputAction> tmpIAGrabBox(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_GrabBox.IA_GrabBox'"));
+	if (tmpIAGrabBox.Succeeded()) IA_GrabBox = tmpIAGrabBox.Object;
+
 
 	/* Motion Controller */
 	LeftHand = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("LeftHand"));
@@ -57,8 +60,7 @@ ACPlayer::ACPlayer()
 	/* Widget Interaction Component */
 	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteraction"));
 	WidgetInteraction->SetupAttachment(RootComponent);
-	//WidgetInteraction->SetWidgetSpace(EWidgetSpace::World);
-	WidgetInteraction->InteractionDistance = WidgetInteractionDistance;
+	WidgetInteraction->InteractionDistance = InteractionDistanceWidget;
 	WidgetInteraction->InteractionSource = EWidgetInteractionSource::World;
 	WidgetInteraction->TraceChannel = ECollisionChannel::ECC_Visibility;
 
@@ -70,20 +72,28 @@ ACPlayer::ACPlayer()
 void ACPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	auto pc = Cast<APlayerController>(GetController());
+	if(pc)
+	{
+        UE_LOG(LogTemp, Error, TEXT(">>>>>> Input Mode : GameAndUI"));
+		pc->SetInputMode(FInputModeGameAndUI());
+	}
+
+	//SetInputMode();
 }
 
 void ACPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//FString rslt = bIsHitWithMainBoard == 1 ? TEXT("true") : TEXT("false");
-	//UE_LOG(LogTemp, Warning, TEXT(">>>>> bIsHitWithMainBoard : %s"), *rslt);
+	// Main Board의 일정 거리 앞에 있으면 Widget과의 interaction 체크를 위해 Custom Ray Trace 실행
+	if(bIsHitByMainBoard)
+		PerformLineTrace(InteractionDistanceWidget);
 
-	// Main Board의 일정 거리 앞에 있으면 Custom Ray Trace 실행
-	if(bIsHitWithMainBoard)
-		CustomRayTrace(WidgetInteractionDistance);
-	// Left Trigger Slide를 누르고 있으면 
+	// Left Trigger Slide를 누르고 있으면 Box와의 interaction 체크를 위해 Custom Ray Trace 실행
+	if(bIsGrabBoxInputEntered)
+		PerformLineTrace(InteractionDistanceBox);
 }
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -106,86 +116,130 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		inputSystem->BindAction(IA_PlayerMove, ETriggerEvent::Triggered, this, &ACPlayer::Move);
 		inputSystem->BindAction(IA_PlayerTurn, ETriggerEvent::Triggered, this, &ACPlayer::Turn);
-		inputSystem->BindAction(IA_ClickUI, ETriggerEvent::Triggered, this,&ACPlayer::ClickUI);
+		inputSystem->BindAction(IA_ClickUI, ETriggerEvent::Started, this,&ACPlayer::ClickUIStart);
+		inputSystem->BindAction(IA_ClickUI, ETriggerEvent::Completed, this, &ACPlayer::ClickUICompleted);
+		inputSystem->BindAction(IA_GrabBox, ETriggerEvent::Started, this, &ACPlayer::GrabBoxInputStart);
+		inputSystem->BindAction(IA_GrabBox, ETriggerEvent::Completed, this, &ACPlayer::GrabBoxInputCompleted);
 	}
 }
 
+
+#pragma region Collision
 void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (Cast<ACComputer>(OtherActor))
 	{
-		if (!bIsHitWithMainBoard)
+		if (!bIsHitByMainBoard)
 		{
-			bIsHitWithMainBoard = true;
+			bIsHitByMainBoard = true;
 			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Computer >>>>>>>>>>>>>>>>>>>"));
 		}
     }
-	else if (Cast<AProductBoxActor>(OtherActor))
-	{
-		
-	}
 }
 
-
-void ACPlayer::OnMainBoardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	ACComputer* computer = Cast<ACComputer>(OtherActor);
 	if (computer)
 	{
 		UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Computer >>>>>>>>>>>>>>>>>>>"));
-		bIsHitWithMainBoard = false;
+		bIsHitByMainBoard = false;
 	}
 }
+#pragma endregion
 
+
+#pragma region Move
 void ACPlayer::Move(const FInputActionValue& InValues)
 {
 	FVector2D Scale = InValues.Get<FVector2D>();
 	FVector dir = PlayerCamera->GetForwardVector() * Scale.X + PlayerCamera->GetRightVector() * Scale.Y;
 	AddMovementInput(dir);
 }
+#pragma endregion
 
+
+#pragma region Turn
 void ACPlayer::Turn(const FInputActionValue& InValues)
 {
 	FVector2d scale = InValues.Get<FVector2d>();
 	AddControllerPitchInput(-scale.Y);
 	AddControllerYawInput(scale.X);
 }
+#pragma endregion
 
 
-#pragma region Click UI
-// Widget Interaction Component 내에서 자동으로 Ray Tracing을 해주지만
-// LineTraceByChannel을 이용하여 Custom Ray Trace를 진행해봄
-void ACPlayer::CustomRayTrace(float InInteractionDistance)
+void ACPlayer::PerformLineTrace(float InInteractionDistance)
 {
-	//if(!WidgetInteraction) return;
-
 	FVector startPos = RightHand->GetComponentLocation();
 	FVector endPos = startPos + RightHand->GetForwardVector() * InInteractionDistance;
-	
-	UE_LOG(LogTemp, Warning, TEXT(">>>>> startPos : %f / endPos : %f"), startPos.Size(), endPos.Size());
+	FString interactionType = InInteractionDistance == InteractionDistanceWidget ? TEXT("Widget") : TEXT("Box");
+
+	//UE_LOG(LogTemp, Warning, TEXT("[Interaction with %s] / startPos : %f / endPos : %f"), *interactionType, startPos.Size(), endPos.Size());
 
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
 
-	DrawDebugLine(GetWorld(), startPos, endPos, FColor::Magenta, false, -1, 0, 1);
+	// Line Trace를 실행하는 주체에 따라 색상 다르게 
+	FColor drawColor = InInteractionDistance == InteractionDistanceWidget ? FColor::Magenta : FColor::Cyan;
+	DrawDebugLine(GetWorld(), startPos, endPos, drawColor, false, -1, 0, 1);
 
 	// Ray Trace
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, startPos, endPos, ECC_Visibility, params))
 	{
-		WidgetInteraction->SetCustomHitResult(hitResult);
+		// endPos = hitResult.ImpactPoint;
+
+		// Click UI
+		if (InInteractionDistance == InteractionDistanceWidget)
+		{
+			//SetInputMode();
+
+			// Widget Interaction에 Custom ray tracing 결과 전달
+			WidgetInteraction->SetCustomHitResult(hitResult);
+			return;
+		}
+
+		// Grab Box
+		if (InInteractionDistance == InteractionDistanceBox && hitResult.GetActor()->GetActorNameOrLabel().Contains("ProductBoxActor"))
+		{
+			FString hitActor = hitResult.GetActor()->GetActorNameOrLabel();
+			UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
+
+			// hit된 box를 명시한다
+			Box = Cast<AProductBoxActor>(hitResult.GetActor());
+
+			// Box를 들어올리는 행동을 실시한다
+			LiftBox();
+			return;
+		}
 	}
 }
 
-void ACPlayer::ClickUI()
+
+void ACPlayer::SetInputMode()
 {
-	if (WidgetInteraction)
+	auto* pc = GetWorld()->GetFirstPlayerController();
+	if (!pc) return;
+
+	// Line Trace를 진행 중이고 Widget과 상호작용 중일 땐 UI 입력으로만 입력을 받게 함
+	if (bIsPerformingLineTrace && WidgetInteraction)pc->SetInputMode(FInputModeUIOnly());
+	else pc->SetInputMode(FInputModeGameOnly());
+}
+
+
+#pragma region Click UI
+void ACPlayer::ClickUIStart()
+{
+	if(!bIsClickUIInputEntered) bIsClickUIInputEntered = true;
+
+	if (bIsClickUIInputEntered && WidgetInteraction)
 	{
 		UE_LOG(LogTemp, Error, TEXT(">>> WidgetInteraction Success!!!"));
 		if (WidgetInteraction->IsOverInteractableWidget())
 		{
 			UE_LOG(LogTemp, Error, TEXT(">>> Widget Interactable widget SUCCESS !!!!!!!!!!!"));
-			if (!bIsClickingUI)
+			/*if (!bIsClickingUI)
 			{
 				WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
 				bIsClickingUI = true;
@@ -196,24 +250,72 @@ void ACPlayer::ClickUI()
 				WidgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
 				bIsClickingUI = false;
 				UE_LOG(LogTemp, Warning, TEXT(">>> Deactivate Click A - bIsClickingUI : %d"), bIsClickingUI);
-			}
+			}*/
+			WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+			// bIsClickingUI = true;
+			UE_LOG(LogTemp, Warning, TEXT(">>> Activate Click A - bIsClickingUI : %d"), bIsClickingUI);
 		}
 	}
 }
-void ACPlayer::GrabBoxEnterStart()
+
+void ACPlayer::ClickUICompleted()
 {
-	
+	bIsClickUIInputEntered = false;
+	//SetInputMode();
+
+	WidgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
+	// bIsClickingUI = false;
+	UE_LOG(LogTemp, Warning, TEXT(">>> Deactivate Click A - bIsClickingUI : %d"), bIsClickingUI);
 }
+
+#pragma endregion
+
+
+#pragma region Grab Box
+void ACPlayer::GrabBoxInputStart()
+{
+	// GrabBox input이 시작되었다고 명시한다
+	bIsGrabBoxInputEntered = true;
+	UE_LOG(LogTemp, Log, TEXT(">>>>> Grab Box Input Start"));
+}
+
 void ACPlayer::LiftBox()
 {
-	
+    UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> Lift Box <<<<<<<<<<"));
+
+	// Box를 잡고 있다고 명시한다
+	if(!bIsGrabbingBox) bIsGrabbingBox = true;
+
+	// Box를 AttachBox socket에 Attach한다
+	if (GetMesh()->DoesSocketExist(SocketNameBox))
+	{
+		// Box의 위치를 socket의 위치로 바꿔준다
+		//Box->AttachTo
+	}
+
+	// Box의 정보를 가져온다
+	ProductName = Box->ProductNameGetter();
+	ProductCostPrice = Box->CostPriceGetter();
+	ProductOrderStock = Box->OrderStockGetter();
 }
-void ACPlayer::GrabBoxEnterEnd()
+
+void ACPlayer::GrabBoxInputCompleted()
 {
-	
+	// GrabBox input이 끝났다고 명시한다
+	bIsGrabBoxInputEntered = false;
+	UE_LOG(LogTemp, Log, TEXT(">>>>> Grab Box Input Completed"));
+
+	// Box를 떨어뜨린다
+	DropBox();
 }
+
 void ACPlayer::DropBox()
 {
-	
+	UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> Drop Box <<<<<<<<<<"));
+
+	// Box를 잡고 있지 않다고 명시한다
+	if(bIsGrabbingBox) bIsGrabbingBox = false;
+
+	// Box를 AttachBox socket으로부터 Detach한다
 }
 #pragma endregion
