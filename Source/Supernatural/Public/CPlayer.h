@@ -25,8 +25,13 @@ private:
 
 
 #pragma region Collision
+	// Main Board로부터 일정 거리 앞에 있는지 체크
 	UPROPERTY(EditDefaultsOnly, Category = "ClickUI")
 	bool bIsHitByMainBoard = false;
+
+	// Stand로부터 일정 거리 앞에 있는지 체크
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    bool bIsHitByStand = false;
 
 	UFUNCTION()
 	void OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -45,9 +50,13 @@ private:
 #pragma region Motion Controller
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UMotionControllerComponent* LeftHand;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class USkeletalMeshComponent* SkeletalMeshLeftHand;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UMotionControllerComponent* RightHand;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class USkeletalMeshComponent* SkeletalMeshRightHand;
 #pragma endregion
 
 
@@ -67,12 +76,12 @@ private:
 #pragma endregion
 
 
-// Custom Line Trace
-UPROPERTY(EditDefaultsOnly, Category = "Line Trace")
-bool bIsPerformingLineTrace = false;
+    // Custom Line Trace
+    UPROPERTY(EditDefaultsOnly, Category = "Line Trace")
+    bool bIsPerformingLineTrace = false;
 
-void PerformLineTrace(float InInteractionDistance);
-void SetInputMode();
+    void PerformLineTrace(float InInteractionDistance);
+    void SetInputMode();
 
 
 #pragma region  Click UI
@@ -105,6 +114,11 @@ void SetInputMode();
     UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_GrabBox;
 
+	// Box 구별용 tag
+	// 이렇게 FString 데이터를 const로 관리하면
+	// 오타로 인한 에러를 방지할 수 있다
+	const FName BOXTAG = FName("Box");
+
 	// 박스를 잡고 있는 상태인지 체크
     UPROPERTY(EditDefaultsOnly, Category = "GrabBox")
     bool bIsGrabbingBox = false;
@@ -114,17 +128,17 @@ void SetInputMode();
     bool bIsGrabBoxInputEntered = false;
 
     UPROPERTY(EditAnywhere, Category = "GrabBox")
-    float InteractionDistanceBox = 3.f;
+    float InteractionDistanceBox = 30.f;
 
 	// 현재 들고 있는 박스
 	UPROPERTY(EditAnywhere, Category = "GrabBox")
 	class AProductBoxActor* Box;
 
 	// 박스를 부착할 socket의 이름
-	FName SocketNameBox = TEXT("AttachBox");
+	FName SocketAttachBox = TEXT("AttachBox");
 
 	// 박스 안 물품의 정보
-	FName ProductName;
+	FString ProductName;
 	int32 ProductCostPrice;
 	int32 ProductOrderStock;
 
@@ -139,5 +153,46 @@ void SetInputMode();
 
     // 박스를 떨어뜨릴 때 할 행동
     void DropBox();
+#pragma endregion
+
+
+#pragma region Display Product
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    class UInputAction* IA_DP;
+
+    // 선반 구별용 tag
+    const FName SHELFTAG = FName("Stand");
+
+    // Line Trace 탐색 거리
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    float InteractionDistanceShelf = 50.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    class ACLineTraceZone* LineTraceZone;
+
+    // DP input이 들어왔는지 체크
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    bool bIsDPInputEntered = false;
+
+    // 현재 물품을 진열하고 있는가
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    bool bIsDisplayingProduct;
+
+	// 물품을 진열할 선반
+	UPROPERTY(EditDefaultsOnly, Category = "DP")
+	class AsalesStandActor* Stand;
+
+    // 현재 몇 개의 물품이 진열되었는가
+    int32 CurDP = 0;
+
+    // DP input이 들어왔을 때 실행
+    void DPStart();
+
+    // 물품을 진열한다
+    void DisplayProduct();
+
+    // DP input이 끝났을 때 실행
+    void DPCompleted();
+
 #pragma endregion
 };

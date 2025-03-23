@@ -17,6 +17,10 @@ private:
 	int32 CostPrice;
 	int32 OrderStock;
 
+	class UBoxComponent* BoxComponent;
+	class UStaticMeshComponent* StaticMeshComponent;
+	class UStaticMesh* Cube;
+
 public:
 	FName ProductNameGetter();
 	FName ImagePathGetter();
@@ -37,5 +41,5 @@ public:
 
 public:
 	void SetBoxInfo(FName ProductName, FName ImagePath, int32 CostPrice, int32 OrderStock);
-
+	void BoxPhysicsOnOff(bool InValue);
 };
