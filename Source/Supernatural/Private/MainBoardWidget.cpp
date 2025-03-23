@@ -29,7 +29,7 @@ void UMainBoardWidget::NativeConstruct()
 }
 void UMainBoardWidget::OnButtonClicked()
 {
-    UE_LOG(LogTemp, Warning, TEXT(">>>>> Button Clicked"));
+    if (selectArrayProduct.Num()<=0)return;
 
     for (auto product : selectArrayProduct) {
         SpawnProductBox(product);
@@ -61,9 +61,11 @@ void UMainBoardWidget::SetInfoWidget(TMap<FString, FProductData*> Product)
 }
 void UMainBoardWidget::SpawnProductBox(FText product)
 {
+    if (!GameMode)return;
+    if (product.IsEmpty())return;
     FVector SpawnLocation(20.0f, 400.0f, 60.0f);
     FTransform SpawnTransform(SpawnLocation);
-    FName name = FName(GameMode->Product[product.ToString()]->ProductName);
+    //FName name = FName(GameMode->Product[product.ToString()]->ProductName);
 
     FProductData* Data = GameMode->GetProductData(product.ToString());
 

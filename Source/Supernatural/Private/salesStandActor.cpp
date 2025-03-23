@@ -18,7 +18,6 @@ AsalesStandActor::AsalesStandActor()
 	if (DataAssetFind.Succeeded()) {
 		ProductSalesStandDataAsset = DataAssetFind.Object;
 		CachedProducts = ProductSalesStandDataAsset->ProdctSalesStandDataTable;
-
 	}
 	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	BoxComp->SetBoxExtent(FVector(95, 25, 25));
@@ -47,9 +46,10 @@ void AsalesStandActor::BeginPlay()
 	//	if (ProductMeshes[i] == nullptr) return;
 	//ProductMeshes[i]->SetStaticMesh(CachedProducts[EProductDivide::Snack3].Snack1);
 	//}
-	SetMeshesForProductNumber(15, EProductDivide::Snack3);
 
 	SetMeshesForProductNumber(10, EProductDivide::Snack1);
+	SetMeshesForProductNumber(15, EProductDivide::Snack3);
+
 
 	SetMeshesForProductNumber(5, EProductDivide::Snack2);
 	SetMeshesForProductNumber(5, EProductDivide::Snack2);
