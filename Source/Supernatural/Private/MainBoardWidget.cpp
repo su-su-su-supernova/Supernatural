@@ -34,6 +34,8 @@ void UMainBoardWidget::OnButtonClicked()
     for (auto product : selectArrayProduct) {
         SpawnProductBox(product);
     }
+    selectArrayProduct.Empty();
+    ProductVerticalBox->ClearChildren();
 }
 
 void UMainBoardWidget::SetInfoWidget(TMap<FString, FProductData*> Product)

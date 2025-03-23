@@ -45,9 +45,13 @@ private:
 #pragma region Motion Controller
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UMotionControllerComponent* LeftHand;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class USkeletalMeshComponent* SkeletalMeshLeftHand;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UMotionControllerComponent* RightHand;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class USkeletalMeshComponent* SkeletalMeshRightHand;
 #pragma endregion
 
 
@@ -105,6 +109,11 @@ void SetInputMode();
     UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_GrabBox;
 
+	// Box 구별용 tag
+	// 이렇게 FString 데이터를 const로 관리하면
+	// 오타로 인한 에러를 방지할 수 있다
+	const FName BOXTAG = FName("Box");
+
 	// 박스를 잡고 있는 상태인지 체크
     UPROPERTY(EditDefaultsOnly, Category = "GrabBox")
     bool bIsGrabbingBox = false;
@@ -114,17 +123,17 @@ void SetInputMode();
     bool bIsGrabBoxInputEntered = false;
 
     UPROPERTY(EditAnywhere, Category = "GrabBox")
-    float InteractionDistanceBox = 3.f;
+    float InteractionDistanceBox = 10.f;
 
 	// 현재 들고 있는 박스
 	UPROPERTY(EditAnywhere, Category = "GrabBox")
 	class AProductBoxActor* Box;
 
 	// 박스를 부착할 socket의 이름
-	FName SocketNameBox = TEXT("AttachBox");
+	FName SocketAttachBox = TEXT("AttachBox");
 
 	// 박스 안 물품의 정보
-	FName ProductName;
+	FString ProductName;
 	int32 ProductCostPrice;
 	int32 ProductOrderStock;
 
