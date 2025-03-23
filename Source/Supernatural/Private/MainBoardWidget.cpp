@@ -34,6 +34,8 @@ void UMainBoardWidget::OnButtonClicked()
     for (auto product : selectArrayProduct) {
         SpawnProductBox(product);
     }
+    selectArrayProduct.Empty();
+    ProductVerticalBox->ClearChildren();
 }
 
 void UMainBoardWidget::SetInfoWidget(TMap<FString, FProductData*> Product)
@@ -71,8 +73,7 @@ void UMainBoardWidget::SpawnProductBox(FText product)
 
     GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform)->
         SpawnBoxHandler(FName(Data->ProductName),FName(Data->ImagePath), Data->CostPrice, Data->BoxStock);
-    selectArrayProduct.Empty();
-    ProductVerticalBox->ClearChildren();
+
 }
 
 void UMainBoardWidget::SetVerticalBox(FText ProductName, FText ProductCount, FText CostPriceSum)

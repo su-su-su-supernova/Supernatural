@@ -11,8 +11,6 @@ void UProductInfoWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	AddBTN->OnClicked.AddDynamic(this, &UProductInfoWidget::OnButtonClicked);
-
-
 }
 
 void UProductInfoWidget::OnButtonClicked()
