@@ -25,8 +25,13 @@ private:
 
 
 #pragma region Collision
+	// Main Board로부터 일정 거리 앞에 있는지 체크
 	UPROPERTY(EditDefaultsOnly, Category = "ClickUI")
 	bool bIsHitByMainBoard = false;
+
+	// Stand로부터 일정 거리 앞에 있는지 체크
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    bool bIsHitByStand = false;
 
 	UFUNCTION()
 	void OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -71,12 +76,12 @@ private:
 #pragma endregion
 
 
-// Custom Line Trace
-UPROPERTY(EditDefaultsOnly, Category = "Line Trace")
-bool bIsPerformingLineTrace = false;
+    // Custom Line Trace
+    UPROPERTY(EditDefaultsOnly, Category = "Line Trace")
+    bool bIsPerformingLineTrace = false;
 
-void PerformLineTrace(float InInteractionDistance);
-void SetInputMode();
+    void PerformLineTrace(float InInteractionDistance);
+    void SetInputMode();
 
 
 #pragma region  Click UI
@@ -148,5 +153,46 @@ void SetInputMode();
 
     // 박스를 떨어뜨릴 때 할 행동
     void DropBox();
+#pragma endregion
+
+
+#pragma region Display Product
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    class UInputAction* IA_DP;
+
+    // 선반 구별용 tag
+    const FName SHELFTAG = FName("Stand");
+
+    // Line Trace 탐색 거리
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    float InteractionDistanceShelf = 50.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    class ACLineTraceZone* LineTraceZone;
+
+    // DP input이 들어왔는지 체크
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    bool bIsDPInputEntered = false;
+
+    // 현재 물품을 진열하고 있는가
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    bool bIsDisplayingProduct;
+
+	// 물품을 진열할 선반
+	UPROPERTY(EditDefaultsOnly, Category = "DP")
+	class AsalesStandActor* Stand;
+
+    // 현재 몇 개의 물품이 진열되었는가
+    int32 CurDP = 0;
+
+    // DP input이 들어왔을 때 실행
+    void DPStart();
+
+    // 물품을 진열한다
+    void DisplayProduct();
+
+    // DP input이 끝났을 때 실행
+    void DPCompleted();
+
 #pragma endregion
 };

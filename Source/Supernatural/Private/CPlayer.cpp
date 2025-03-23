@@ -12,6 +12,8 @@
 #include "CComputer.h"
 #include "ProductBoxActor.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "salesStandActor.h"
+#include "CLineTraceZone.h"
 
 ACPlayer::ACPlayer()
 {
@@ -46,6 +48,9 @@ ACPlayer::ACPlayer()
 
 	ConstructorHelpers::FObjectFinder<UInputAction> tmpIAGrabBox(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_GrabBox.IA_GrabBox'"));
 	if (tmpIAGrabBox.Succeeded()) IA_GrabBox = tmpIAGrabBox.Object;
+
+	ConstructorHelpers::FObjectFinder<UInputAction> tmpIADP(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_DP.IA_DP'"));
+	if (tmpIAGrabBox.Succeeded()) IA_DP = tmpIADP.Object;
 
 
 	/* Motion Controller - Left Hand */
@@ -106,7 +111,7 @@ void ACPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Main Board의 일정 거리 앞에 있으면 Widget과의 interaction 체크를 위해 Custom Ray Trace 실행
+	// Main Board로부터 일정 거리 앞에 있으면 Widget과의 interaction 체크를 위해 Custom Ray Trace 실행
 	if(bIsHitByMainBoard)
 		PerformLineTrace(InteractionDistanceWidget);
 
@@ -114,8 +119,9 @@ void ACPlayer::Tick(float DeltaTime)
 	if(bIsGrabBoxInputEntered)
 		PerformLineTrace(InteractionDistanceBox);
 
-	if(bIsGrabbingBox)
-        UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>> Box Location : %s"), *(Box->GetActorLocation().ToString()));
+	// Shelf로부터 일정 거리 앞에 있으면 Shelf와의 interaction 체크를 위해 Custom Ray Trace 실행
+	if(bIsHitByStand)
+		PerformLineTrace(InteractionDistanceShelf);
 }
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -142,6 +148,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		inputSystem->BindAction(IA_ClickUI, ETriggerEvent::Completed, this, &ACPlayer::ClickUICompleted);
 		inputSystem->BindAction(IA_GrabBox, ETriggerEvent::Started, this, &ACPlayer::GrabBoxInputStart);
 		inputSystem->BindAction(IA_GrabBox, ETriggerEvent::Completed, this, &ACPlayer::GrabBoxInputCompleted);
+		inputSystem->BindAction(IA_DP, ETriggerEvent::Started, this, &ACPlayer::DPStart);
+		inputSystem->BindAction(IA_DP, ETriggerEvent::Completed, this, &ACPlayer::DPCompleted);
 	}
 }
 
@@ -156,16 +164,35 @@ void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 			bIsHitByMainBoard = true;
 			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Computer >>>>>>>>>>>>>>>>>>>"));
 		}
+		return;
     }
+
+	if (Cast<ACLineTraceZone>(OtherActor))
+	{
+		if (!bIsHitByStand)
+		{
+			LineTraceZone = Cast<ACLineTraceZone>(OtherActor);
+			bIsHitByStand = true;
+			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Stand >>>>>>>>>>>>>>>>>>>"));
+		}
+		return;
+	}
 }
 
 void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	ACComputer* computer = Cast<ACComputer>(OtherActor);
-	if (computer)
+	if (Cast<ACComputer>(OtherActor))
 	{
 		UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Computer >>>>>>>>>>>>>>>>>>>"));
 		bIsHitByMainBoard = false;
+		return;
+	}
+
+	if (Cast<ACLineTraceZone>(OtherActor))
+	{
+		UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Stand >>>>>>>>>>>>>>>>>>>"));
+		bIsHitByStand = false;
+		return;
 	}
 }
 #pragma endregion
@@ -202,33 +229,33 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
+	params.AddIgnoredActor(LineTraceZone);
 
 	// Line Trace를 실행하는 주체에 따라 색상 다르게 
 	FColor drawColor = InInteractionDistance == InteractionDistanceWidget ? FColor::Magenta : FColor::Cyan;
+	drawColor = InInteractionDistance == InteractionDistanceShelf ? FColor::Orange : drawColor;
+
 	DrawDebugLine(GetWorld(), startPos, endPos, drawColor, false, -1, 0, 1);
 
 	// Ray Trace
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, startPos, endPos, ECC_Visibility, params))
 	{
-		// endPos = hitResult.ImpactPoint;
+		endPos = hitResult.ImpactPoint;
 
-		// Click UI
+		FString hitActor = hitResult.GetActor()->GetActorNameOrLabel();
+		UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
+
+		/* Click UI */ 
 		if (InInteractionDistance == InteractionDistanceWidget)
 		{
-			//SetInputMode();
-
 			// Widget Interaction에 Custom ray tracing 결과 전달
 			WidgetInteraction->SetCustomHitResult(hitResult);
 			return;
 		}
 
-		// Grab Box
-		//if (InInteractionDistance == InteractionDistanceBox && hitResult.GetActor()->GetActorNameOrLabel().Contains("ProductBox"))
+		/* Grab Box */
 		if (InInteractionDistance == InteractionDistanceBox && hitResult.GetActor()->ActorHasTag(BOXTAG))
 		{
-			FString hitActor = hitResult.GetActor()->GetActorNameOrLabel();
-			UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
-
 			// hit된 box를 명시한다
 			Box = Cast<AProductBoxActor>(hitResult.GetActor());
 
@@ -238,8 +265,19 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 			// Box를 들어올린다
 			if(!bIsGrabbingBox)
 				LiftBox();
-
 			return;
+		}
+
+		/* Display Product */
+		if (InInteractionDistance == InteractionDistanceShelf && hitResult.GetActor()->ActorHasTag(SHELFTAG) && bIsDPInputEntered)
+		{
+			UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
+
+			// hit된 stand를 명시한다
+			Stand = Cast<AsalesStandActor>(hitResult.GetActor());
+
+			// 상품을 진열한다
+			DisplayProduct();
 		}
 	}
 }
@@ -362,4 +400,40 @@ void ACPlayer::DropBox()
 	// Box 의 Symulate Physics를 켜준다
 	Box->BoxPhysicsOnOff(true);
 }
+#pragma endregion
+
+
+#pragma region Display Product
+void ACPlayer::DPStart()
+{
+	// input이 들어왔음을 명시한다
+	bIsDPInputEntered = true;
+	UE_LOG(LogTemp, Error, TEXT(">>>>> DP Input Start"));
+}
+
+void ACPlayer::DisplayProduct()
+{
+	// 박스를 들고 있지 않거나
+	// 선반에 최대로 배치할 수 있을 만큼 배치했다면 끝낸다
+	if( !bIsGrabbingBox || (CurDP == ProductOrderStock) ) return;
+
+	UE_LOG(LogTemp, Error, TEXT(">>>>> Display Product Start <<<<<"));
+	// 선반에 상품을 진열하고
+	// Stand->
+
+	// 현재 진열한 상품의 개수를 1 증가시킨다
+	CurDP++;
+}
+
+void ACPlayer::DPCompleted()
+{
+	// DP한 물품의 개수를 초기화한다
+	CurDP = 0;
+
+	// input이 끝났음을 명시한다
+	bIsDPInputEntered = false;
+
+	UE_LOG(LogTemp, Error, TEXT(">>>>> DP Input Complete"));
+}
+
 #pragma endregion
