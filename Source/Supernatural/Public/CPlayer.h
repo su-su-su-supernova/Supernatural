@@ -161,11 +161,11 @@ private:
     class UInputAction* IA_DP;
 
     // 선반 구별용 tag
-    const FName SHELFTAG = FName("Stand");
+    const FName STANDTAG = FName("Stand");
 
     // Line Trace 탐색 거리
     UPROPERTY(EditDefaultsOnly, Category = "DP")
-    float InteractionDistanceShelf = 50.f;
+    float InteractionDistanceStand = 100.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "DP")
     class ACLineTraceZone* LineTraceZone;
@@ -173,6 +173,10 @@ private:
     // DP input이 들어왔는지 체크
     UPROPERTY(EditDefaultsOnly, Category = "DP")
     bool bIsDPInputEntered = false;
+
+	// 선반에 Line Trace가 되었는지 체크
+    UPROPERTY(EditDefaultsOnly, Category = "DP")
+    bool bIsLineTraceToStand = false;
 
     // 현재 물품을 진열하고 있는가
     UPROPERTY(EditDefaultsOnly, Category = "DP")
