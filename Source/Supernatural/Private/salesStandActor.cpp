@@ -154,7 +154,11 @@ void AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
 
 void AsalesStandActor::AddProduct(TArray<UStaticMeshComponent*>* TargetArray)
 {
-	if (CurrentProductCount >= ProductCountMax) return;
+	if (CurrentProductCount >= ProductCountMax)
+	{
+		bIsFull = true;
+		return;
+	}
 	(*TargetArray)[CurrentProductCount]->SetVisibility(true);
 	CurrentProductCount++;
 }

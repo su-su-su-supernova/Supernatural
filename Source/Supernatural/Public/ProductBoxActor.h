@@ -16,6 +16,7 @@ private:
 	FName ImagePath;
 	int32 CostPrice;
 	int32 OrderStock;
+	int32 CurrentStock;
 
 	class UBoxComponent* BoxComponent;
 	class UStaticMeshComponent* StaticMeshComponent;
@@ -26,6 +27,7 @@ public:
 	FName ImagePathGetter();
 	int32 CostPriceGetter();
 	int32 OrderStockGetter();
+	int32 CurrentStockGetter();
 
 public:
 	// Sets default values for this actor's properties
@@ -41,5 +43,6 @@ public:
 
 public:
 	void SetBoxInfo(FName ProductName, FName ImagePath, int32 CostPrice, int32 OrderStock);
+	void SetCurrentStock(int32 InValue);
 	void BoxPhysicsOnOff(bool InValue);
 };

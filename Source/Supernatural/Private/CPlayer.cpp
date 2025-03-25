@@ -14,6 +14,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "salesStandActor.h"
 #include "CLineTraceZone.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Components/BoxComponent.h"
 
 ACPlayer::ACPlayer()
 {
@@ -86,7 +87,7 @@ ACPlayer::ACPlayer()
 
 	/* Widget Interaction Component */
 	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteraction"));
-	WidgetInteraction->SetupAttachment(RootComponent);
+	WidgetInteraction->SetupAttachment(RightHand);
 	WidgetInteraction->InteractionDistance = InteractionDistanceWidget;
 	WidgetInteraction->InteractionSource = EWidgetInteractionSource::World;
 	WidgetInteraction->TraceChannel = ECollisionChannel::ECC_Visibility;
@@ -111,17 +112,28 @@ void ACPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Click UI
 	// Main Board로부터 일정 거리 앞에 있으면 Widget과의 interaction 체크를 위해 Custom Ray Trace 실행
-	if(bIsHitByMainBoard)
-		PerformLineTrace(InteractionDistanceWidget);
-
+	if (bIsHitByMainBoard && !bIsGrabbingBox)
+	{
+		StartPos = RightHand->GetComponentLocation();
+		EndPos = StartPos + RightHand->GetForwardVector() * InteractionDistanceWidget;
+		PerformLineTrace(InteractionDistanceWidget, StartPos, EndPos);
+	}
 	// Left Trigger Slide를 누르고 있으면 Box와의 interaction 체크를 위해 Custom Ray Trace 실행
-	if(bIsGrabBoxInputEntered)
-		PerformLineTrace(InteractionDistanceBox);
-
+	if (bIsGrabBoxInputEntered)
+	{
+		StartPos = RightHand->GetComponentLocation();
+		EndPos = StartPos + RightHand->GetForwardVector() * InteractionDistanceBox;
+		PerformLineTrace(InteractionDistanceBox, StartPos, EndPos);
+	}
 	// Shelf로부터 일정 거리 앞에 있으면 Shelf와의 interaction 체크를 위해 Custom Ray Trace 실행
-	if(bIsHitByStand)
-		PerformLineTrace(InteractionDistanceStand);
+	if (bIsHitByStand)
+	{
+		StartPos = RightHand->GetComponentLocation();
+		EndPos = StartPos + RightHand->GetForwardVector() * InteractionDistanceStand;
+		PerformLineTrace(InteractionDistanceStand, StartPos, EndPos);
+	}
 }
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -184,6 +196,7 @@ void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
             {
                 bIsHitByMainBoard = true;
                 UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Computer >>>>>>>>>>>>>>>>>>>"));
+				
             }
 		}
 	}
@@ -233,30 +246,14 @@ void ACPlayer::Move(const FInputActionValue& InValues)
 void ACPlayer::Turn(const FInputActionValue& InValues)
 {
 	FVector2d scale = InValues.Get<FVector2d>();
-	AddControllerPitchInput(-scale.Y);
+	AddControllerPitchInput(scale.Y);
 	AddControllerYawInput(scale.X);
 }
 #pragma endregion
 
 
-void ACPlayer::PerformLineTrace(float InInteractionDistance)
+void ACPlayer::PerformLineTrace(float InInteractionDistance, FVector InStartPos, FVector InEndPos)
 {
-	FVector startPos, endPos;
-	startPos = RightHand->GetComponentLocation();
-	endPos = startPos + RightHand->GetForwardVector() * InInteractionDistance;
-
-	/*if (bIsGrabbingBox)
-	{
-		FVector forwardVector = FVector(0, Box->GetActorForwardVector().Y, 0);
-		startPos = Box->GetActorLocation() + forwardVector * FVector(25);
-		endPos = startPos + Box->GetActorForwardVector() * InInteractionDistance;
-	}
-	else
-	{
-		startPos = RightHand->GetComponentLocation();
-		endPos = startPos + RightHand->GetForwardVector() * InInteractionDistance;
-	}*/
-
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(this);
@@ -269,13 +266,11 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 	else if(InInteractionDistance == InteractionDistanceStand) drawColor = FColor::Orange;
 	else drawColor = FColor::Cyan;
 
-	DrawDebugLine(GetWorld(), startPos, endPos, drawColor, false, -1, 0, 1);
+	DrawDebugLine(GetWorld(), StartPos, EndPos, drawColor, false, -1, 0, 1);
 
 	// Ray Trace
-	if (GetWorld()->LineTraceSingleByChannel(hitResult, startPos, endPos, ECC_Visibility, params))
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, InStartPos, InEndPos, ECC_Visibility, params))
 	{
-		// endPos = hitResult.ImpactPoint;
-
 		FString hitActor = hitResult.GetActor()->GetActorNameOrLabel();
 		//UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
 		
@@ -288,24 +283,17 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 			// hit된 stand를 명시한다
 			Stand = Cast<AsalesStandActor>(hitResult.GetActor());
 
-			//isHitStand = true;
-			//bIsHitByStand = true;
-
 			// 선반에 Line Trace가 되어 있다고 명시한다
 			bIsLineTraceToStand = true;
-			
 		}
 		else bIsLineTraceToStand = false;
 
 
 		/* Grab Box */
-		if (hitResult.GetActor()->ActorHasTag(BOXTAG))
+		if (bIsGrabBoxInputEntered && hitResult.GetActor()->ActorHasTag(BOXTAG))
 		{
 			// hit된 box를 명시한다
 			Box = Cast<AProductBoxActor>(hitResult.GetActor());
-
-			// Box 의 Symulate Physics를 꺼준다
-			Box->BoxPhysicsOnOff(false);
 
 			// Box를 들어올린다
 			if (!bIsGrabbingBox)
@@ -314,7 +302,7 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 
 
 		/* Click UI */
-		if (bIsHitByMainBoard)
+		if (bIsClickUIInputEntered && bIsHitByMainBoard && !bIsGrabbingBox)
 		{
             //UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> hitResult : %s"), *(hitResult.ToString()));
 			// Widget Interaction에 Custom ray tracing 결과 전달
@@ -347,6 +335,7 @@ void ACPlayer::ClickUIStart()
 	{
 		UE_LOG(LogTemp, Error, TEXT(">>> WidgetInteraction Success!!!"));
 		UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>>>> IsOverInteractableWidget : %d"), WidgetInteraction->IsOverInteractableWidget());
+
 		if (WidgetInteraction->IsOverInteractableWidget())
 		{
 			UE_LOG(LogTemp, Error, TEXT(">>> Widget Interactable widget SUCCESS !!!!!!!!!!!"));
@@ -401,41 +390,50 @@ void ACPlayer::LiftBox()
 {
     UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> Lift Box <<<<<<<<<<"));
 
-	// Box를 AttachBox socket에 Attach한다
+	// socket이 있는지 확인한다
 	FString rslt = SkeletalMeshLeftHand->DoesSocketExist(SocketAttachBox) ? TEXT("True") : TEXT("False");
-	//FString rslt = LeftHand->GetAttachSocketName().Compare(SocketAttachBox) ? TEXT("True") : TEXT("False");
 
-	//UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>> Does socket exist? %s"), *rslt);
-
+	// socket이 있다면
 	if (SkeletalMeshLeftHand->DoesSocketExist(SocketAttachBox))
 	{
+		// Box를 잡고 있다고 명시한다
+		bIsGrabbingBox = true;
+
+		// Box의 Symulate Physics를 꺼준다
+		Box->BoxPhysicsOnOff(false);
+
+		// Box의 충돌 처리를 꺼준다
+		Box->FindComponentByClass<UBoxComponent>()->SetCollisionProfileName(TEXT("NoCollision"));
+
+		// Box의 위치를 socket 위치로 보정한다
+		FVector socketLocation = RightHand->GetSocketLocation(SocketAttachBox);
+		Box->SetActorLocation(socketLocation);
+
 		if (Box->AttachToComponent(SkeletalMeshLeftHand, FAttachmentTransformRules::KeepWorldTransform, SocketAttachBox))
 		{
-			// Box를 잡고 있다고 명시한다
-			bIsGrabbingBox = true;
-
 			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>> ATTACH BOX SUCCESS <<<<<<<<<<"));
 
 			// Box의 정보를 가져온다
 			ProductName = Box->ProductNameGetter().ToString();
 			ProductCostPrice = Box->CostPriceGetter();
 			ProductOrderStock = Box->OrderStockGetter();
+			ProductCurrentStock = Box->CurrentStockGetter();
 
 			//UE_LOG(LogTemp, Warning, TEXT("[Product Info] Product Location : %s / Product Name : %s / Product Cost Price : %d / Product Order Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCostPrice, ProductOrderStock);
-
 		}
 	}
 }
 
 void ACPlayer::GrabBoxInputCompleted()
 {
+	// 물체를 잡고 있지 않다면 아무 처리하지 않는다
+	if(bIsGrabbingBox == false) return;
+
 	// GrabBox input이 끝났다고 명시한다
 	bIsGrabBoxInputEntered = false;
-	UE_LOG(LogTemp, Error, TEXT(">>>>> Grab Box Input Completed"));
 
 	// Box를 들고 있다면 Box를 떨어뜨린다
-	if(Box)
-		DropBox();
+	DropBox();
 }
 
 void ACPlayer::DropBox()
@@ -443,7 +441,7 @@ void ACPlayer::DropBox()
 	UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> Drop Box <<<<<<<<<<"));
 
 	// Box를 잡고 있지 않다고 명시한다
-	if(bIsGrabbingBox) bIsGrabbingBox = false;
+	bIsGrabbingBox = false;
 
 	// Box를 AttachBox socket으로부터 Detach한다
 	Box->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
@@ -451,6 +449,9 @@ void ACPlayer::DropBox()
 
 	// Box 의 Symulate Physics를 켜준다
 	Box->BoxPhysicsOnOff(true);
+
+	// Box의 충돌 처리를 켜준다
+	Box->FindComponentByClass<UBoxComponent>()->SetCollisionProfileName(TEXT("Box"));
 }
 #pragma endregion
 
@@ -471,9 +472,9 @@ void ACPlayer::DisplayProduct()
 {
 	// 박스를 들고 있지 않거나
 	// 선반에 최대로 배치할 수 있을 만큼 배치했다면 끝낸다
-	if( !bIsGrabbingBox || (CurDP == ProductOrderStock) ) 
+	if( !bIsGrabbingBox || ProductCurrentStock == 0 )
 	{
-        UE_LOG(LogTemp, Error, TEXT("bIsGrabbingBox : %d / CurDP : %d"), bIsGrabbingBox, CurDP);
+        UE_LOG(LogTemp, Error, TEXT("bIsGrabbingBox : %d / ProductCurrentStock : %d"), bIsGrabbingBox, ProductCurrentStock);
 		return;
 	}
 
@@ -494,14 +495,11 @@ void ACPlayer::DisplayProduct()
 	Stand->SetMeshesForProductNumber("Tea");
 
 	// 현재 진열한 상품의 개수를 1 증가시킨다
-	CurDP++;
+	Box->SetCurrentStock(ProductCurrentStock--);
 }
 
 void ACPlayer::DPCompleted()
 {
-	// DP한 물품의 개수를 초기화한다
-	CurDP = 0;
-
 	// input이 끝났음을 명시한다
 	bIsDPInputEntered = false;
 

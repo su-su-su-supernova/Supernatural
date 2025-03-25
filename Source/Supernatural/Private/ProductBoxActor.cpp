@@ -48,9 +48,14 @@ void AProductBoxActor::SetBoxInfo(FName PdName, FName ImgPath, int32 CtPrice, in
 	this->OrderStock = OdStock;
 
 }
+void AProductBoxActor::SetCurrentStock(int32 InValue)
+{
+	this->CurrentStock = InValue;
+}
+
 void AProductBoxActor::BoxPhysicsOnOff(bool InValue)
 {
-	InValue ? BoxComponent->SetSimulatePhysics(true) : BoxComponent->SetSimulatePhysics(false);
+    InValue ? BoxComponent->SetSimulatePhysics(true) : BoxComponent->SetSimulatePhysics(false);
 }
 
 FName AProductBoxActor::ProductNameGetter()
@@ -71,4 +76,9 @@ int32 AProductBoxActor::CostPriceGetter()
 int32 AProductBoxActor::OrderStockGetter()
 {
 	return OrderStock;
+}
+
+int32 AProductBoxActor::CurrentStockGetter()
+{
+	return CurrentStock;
 }

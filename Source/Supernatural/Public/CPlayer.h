@@ -76,11 +76,13 @@ private:
 #pragma endregion
 
 
-    // Custom Line Trace
+    // Line Trace
     UPROPERTY(EditDefaultsOnly, Category = "Line Trace")
     bool bIsPerformingLineTrace = false;
 
-    void PerformLineTrace(float InInteractionDistance);
+	FVector StartPos, EndPos;
+
+    void PerformLineTrace(float InInteractionDistance, FVector InStartPos, FVector InEndPos);
     void SetInputMode();
 
 
@@ -128,7 +130,7 @@ private:
     bool bIsGrabBoxInputEntered = false;
 
     UPROPERTY(EditAnywhere, Category = "GrabBox")
-    float InteractionDistanceBox = 30.f;
+    float InteractionDistanceBox = 200.f;
 
 	// 현재 들고 있는 박스
 	UPROPERTY(EditAnywhere, Category = "GrabBox")
@@ -141,6 +143,7 @@ private:
 	FString ProductName;
 	int32 ProductCostPrice;
 	int32 ProductOrderStock;
+	int32 ProductCurrentStock;
 
     // GrabBox input이 들어왔을 때 실행
     void GrabBoxInputStart();
@@ -165,7 +168,7 @@ private:
 
     // Line Trace 탐색 거리
     UPROPERTY(EditDefaultsOnly, Category = "DP")
-    float InteractionDistanceStand = 100.f;
+    float InteractionDistanceStand = 200;
 
     UPROPERTY(EditDefaultsOnly, Category = "DP")
     class ACLineTraceZone* LineTraceZone;

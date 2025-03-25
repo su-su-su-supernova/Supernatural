@@ -66,6 +66,7 @@ private:
 	int32 CurrentProductCount = 0;
 	EProductDivide CurrentProductType = EProductDivide::Snack1; // 기본값 설정
 	int32 CurrentProductNumber = 0; // 기본값 설정
+	bool bIsFull = false;
 
 public:
 	void SetMeshesForProductNumber(FString ProductType);
