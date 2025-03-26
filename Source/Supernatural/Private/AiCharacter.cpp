@@ -2,6 +2,8 @@
 
 
 #include "AiCharacter.h"
+#include "SuperGameMode.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AAiCharacter::AAiCharacter()
@@ -15,7 +17,9 @@ AAiCharacter::AAiCharacter()
 void AAiCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Log, TEXT("don;t give up!!"));
+	GetCharacterMovement()->MaxWalkSpeed = 200;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 
 }
 
@@ -23,7 +27,6 @@ void AAiCharacter::BeginPlay()
 void AAiCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input

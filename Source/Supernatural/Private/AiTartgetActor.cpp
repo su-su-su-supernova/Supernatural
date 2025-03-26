@@ -20,6 +20,7 @@ void AAiTartgetActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Tags.Add(FName(TEXT("Coke")));
 }
 
 // Called every frame

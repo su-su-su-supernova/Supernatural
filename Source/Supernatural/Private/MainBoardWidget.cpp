@@ -74,6 +74,7 @@ void UMainBoardWidget::SpawnProductBox(FText product)
     if(Data&& GameMode){
         if (productBox) {
             productBox->SpawnBoxHandler(FName(Data->ProductName), FName(Data->ImagePath), Data->CostPrice, Data->BoxStock);
+
         }
     }
 }

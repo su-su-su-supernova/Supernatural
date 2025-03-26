@@ -4,17 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "AIMoveToTaskNode.generated.h"
+#include "CProductDataTable.h"
+#include "AIChooseFirstItemTaskNode.generated.h"
 
 /**
  *
  */
 UCLASS()
-class SUPERNATURAL_API UAIMoveToTaskNode : public UBTTaskNode
+class SUPERNATURAL_API UAIChooseFirstItemTaskNode : public UBTTaskNode
 {
 	GENERATED_BODY()
 
-    UAIMoveToTaskNode();
+    UAIChooseFirstItemTaskNode();
 
 public:
     // 태스크가 시작될 때 호출되며, 주요 로직을 실행하고 결과를 반환합니다.
@@ -26,13 +27,8 @@ public:
     // 태스크가 중단(abort)될 때 호출되어 정리 작업을 수행합니다.
     virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-public:
-    UBlackboardComponent* BlackboardComp;
-private:
-    void FindActor();
 
-    class APawn* PlayerPawn;
-    class AActor* ProductActor;
-    class ASuperAIController* AiController;
+
+
 
 };

@@ -7,6 +7,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "SuperGameMode.h"
+#include "CPlayer.h"
 
 ASuperAIController::ASuperAIController()
 {
@@ -22,32 +24,57 @@ void ASuperAIController::BeginPlay()
 	Super::BeginPlay();
 
 	RunBehaviorTree(AIBehaviorTree);
-	GetCharacter()->GetCharacterMovement()->MaxWalkSpeed = 200;
-	GetCharacter()->GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+	if (!GameMode)return;
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	ACPlayer* player = Cast<ACPlayer>(PlayerPawn);
+	GetBlackboardComponent()->SetValueAsObject(TEXT("PlayerClass"), player);
+	for (int i = 0; i < 4; i++) {1
+		randomVaule = FMath::RandRange(0, GameMode->Product.Num() - 1);
+		ProductName[i]=(GameMode->GetProductDataByIndex(randomVaule)->ProductName);
+	}
+	TArray<AActor*> FoundActors;
+
+	FName TargetTag = FName(*ProductName[index]);
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
+	if (FoundActors[0] == nullptr)return;
+	GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
+	//SelectNextProduct();
+
+
+
+	//GetBlackboardComponent()->SetValueAsBool(TEXT("isBuyProduct"), isBuyProduct[index]);
+
+
 
 }
 
 void ASuperAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	if (!ProductName) return;
+	//SelectNextProduct();
 
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	GetBlackboardComponent()->SetValueAsVector(TEXT("PlayerLocation"), PlayerPawn->GetActorLocation());
-	GetBlackboardComponent()->SetValueAsVector(TEXT("DefaultLocation"), GetPawn()->GetActorLocation());
-	GetPawn()->bUseControllerRotationYaw = false;
-	FindActor(PlayerPawn);
 }
 
-void ASuperAIController::FindActor(APawn* PlayerPawn)
+void ASuperAIController::SelectNextProduct()
 {
-	if (LineOfSightTo(PlayerPawn)) {
-		SetFocus(PlayerPawn);
-		GetPawn()->bUseControllerRotationYaw = true;
-	}
-	else {
-		ClearFocus(EAIFocusPriority::Gameplay);
-	}
-	MoveToActor(PlayerPawn, 10);
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
+	if (GetBlackboardComponent()->GetValueAsBool(TEXT("isBuyProduct"))) {
+		index++;
+	}
+
+	TArray<AActor*> FoundActors;
+
+	FName TargetTag = FName(*ProductName[index]);
+
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
+	if (FoundActors[0]==nullptr)return;
+	GetBlackboardComponent()->SetValueAsObject(TEXT("PlayerClass"), PlayerPawn);
+	GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
+	//GetBlackboardComponent()->SetValueAsBool(TEXT("isBuyProduct"), isBuyProduct[index]);
+	//UE_LOG(LogTemp, Warning, TEXT(">>>%s"), *FoundActors[0]->GetActorLocation().ToString());
 }
