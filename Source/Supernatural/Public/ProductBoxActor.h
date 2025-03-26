@@ -15,8 +15,8 @@ private:
 	FName ProductName;
 	FName ImagePath;
 	int32 CostPrice;
-	int32 OrderStock;
-	int32 CurrentStock;
+	int32 BoxStock;
+	int32 CurrentStock;	// 현재 Box안에 있는 재고 수
 
 	class UBoxComponent* BoxComponent;
 	class UStaticMeshComponent* StaticMeshComponent;
@@ -26,7 +26,7 @@ public:
 	FName ProductNameGetter();
 	FName ImagePathGetter();
 	int32 CostPriceGetter();
-	int32 OrderStockGetter();
+	int32 BoxStockGetter();
 	int32 CurrentStockGetter();
 
 public:

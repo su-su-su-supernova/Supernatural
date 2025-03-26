@@ -99,7 +99,7 @@ void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* T
 	}
 }
 
-void AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
+bool AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
 {
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *ProductName);
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
@@ -124,7 +124,7 @@ void AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid ProductName: %s"), *ProductName);
-		return;
+		return false;
 	}
 
 	if (CurrentProductCount == 0)
@@ -150,15 +150,22 @@ void AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Ignoring SetMeshesForProductNumber: Different ProductNumber or ProductType"));
 	}
+
+	return bIsFull;
 }
 
 void AsalesStandActor::AddProduct(TArray<UStaticMeshComponent*>* TargetArray)
 {
+	UE_LOG(LogTemp, Warning, TEXT("[HW] CurrentProductCount : %d"), CurrentProductCount);
+
 	if (CurrentProductCount >= ProductCountMax)
 	{
 		bIsFull = true;
 		return;
 	}
+	
 	(*TargetArray)[CurrentProductCount]->SetVisibility(true);
 	CurrentProductCount++;
+
+	bIsFull = false;
 }

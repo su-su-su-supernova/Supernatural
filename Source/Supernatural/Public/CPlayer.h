@@ -80,9 +80,8 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Line Trace")
     bool bIsPerformingLineTrace = false;
 
-	FVector StartPos, EndPos;
+	void PerformLineTrace(float InInteractionDistance);
 
-    void PerformLineTrace(float InInteractionDistance, FVector InStartPos, FVector InEndPos);
     void SetInputMode();
 
 
@@ -130,7 +129,7 @@ private:
     bool bIsGrabBoxInputEntered = false;
 
     UPROPERTY(EditAnywhere, Category = "GrabBox")
-    float InteractionDistanceBox = 200.f;
+    float InteractionDistanceBox = 100.f;
 
 	// 현재 들고 있는 박스
 	UPROPERTY(EditAnywhere, Category = "GrabBox")
@@ -140,10 +139,8 @@ private:
 	FName SocketAttachBox = TEXT("AttachBox");
 
 	// 박스 안 물품의 정보
-	FString ProductName;
-	int32 ProductCostPrice;
-	int32 ProductOrderStock;
-	int32 ProductCurrentStock;
+	FString ProductName;		
+	int32 ProductCurrentStock; // 현재 박스 안에 있는 재고수
 
     // GrabBox input이 들어왔을 때 실행
     void GrabBoxInputStart();
@@ -168,7 +165,7 @@ private:
 
     // Line Trace 탐색 거리
     UPROPERTY(EditDefaultsOnly, Category = "DP")
-    float InteractionDistanceStand = 200;
+    float InteractionDistanceStand = 150;
 
     UPROPERTY(EditDefaultsOnly, Category = "DP")
     class ACLineTraceZone* LineTraceZone;
@@ -183,14 +180,11 @@ private:
 
     // 현재 물품을 진열하고 있는가
     UPROPERTY(EditDefaultsOnly, Category = "DP")
-    bool bIsDisplayingProduct;
+    bool bIsDisplayingProduct = false;
 
 	// 물품을 진열할 선반
 	UPROPERTY(EditDefaultsOnly, Category = "DP")
 	class AsalesStandActor* Stand;
-
-    // 현재 몇 개의 물품이 진열되었는가
-    int32 CurDP = 0;
 
     // DP input이 들어왔을 때 실행
     void DPStart();
@@ -202,6 +196,4 @@ private:
     void DPCompleted();
 
 #pragma endregion
-	/////////////////****//////
-	bool isHitStand=false;
 };

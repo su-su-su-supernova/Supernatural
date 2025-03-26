@@ -69,7 +69,7 @@ private:
 	bool bIsFull = false;
 
 public:
-	void SetMeshesForProductNumber(FString ProductType);
+	bool SetMeshesForProductNumber(FString ProductType);
 
 
 };

@@ -40,14 +40,15 @@ void AProductBoxActor::Tick(float DeltaTime)
 
 }
 
-void AProductBoxActor::SetBoxInfo(FName PdName, FName ImgPath, int32 CtPrice, int32 OdStock)
+void AProductBoxActor::SetBoxInfo(FName PdName, FName ImgPath, int32 CtPrice, int32 BxStock)
 {
 	this->ProductName = PdName;
 	this->ImagePath = ImgPath;
 	this->CostPrice = CtPrice;
-	this->OrderStock = OdStock;
-
+	this->BoxStock = BxStock;
+	this->CurrentStock = BxStock;
 }
+
 void AProductBoxActor::SetCurrentStock(int32 InValue)
 {
 	this->CurrentStock = InValue;
@@ -73,9 +74,9 @@ int32 AProductBoxActor::CostPriceGetter()
 	return CostPrice;
 }
 
-int32 AProductBoxActor::OrderStockGetter()
+int32 AProductBoxActor::BoxStockGetter()
 {
-	return OrderStock;
+	return BoxStock;
 }
 
 int32 AProductBoxActor::CurrentStockGetter()
