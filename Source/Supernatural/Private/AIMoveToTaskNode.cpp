@@ -41,6 +41,7 @@ void UAIMoveToTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	if (!AiController || !PlayerPawn)
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+
 		return;
 	}
 
@@ -49,10 +50,11 @@ void UAIMoveToTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	// 이동 상태 체크
 	if (AiController->GetMoveStatus() == EPathFollowingStatus::Idle)
 	{
+		BlackboardComp = OwnerComp.GetBlackboardComponent();
+		UE_LOG(LogTemp, Warning, TEXT("next1"));
+		BlackboardComp->SetValueAsBool(TEXT("IsSelling"), true);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
-
-
 }
 // 태스크가 중단(abort)될 때 호출되어 정리 작업을 수행합니다.
 // - OwnerComp: 비헤이비어 트리 컴포넌트.
@@ -76,5 +78,5 @@ void UAIMoveToTaskNode::FindActor()
 		AiController->ClearFocus(EAIFocusPriority::Gameplay);
 		AiController->GetCharacter()->GetCharacterMovement()->bOrientRotationToMovement = false;
 	}
-	AiController->MoveToActor(ProductActor, 5);
+	AiController->MoveToActor(ProductActor, 0);
 }

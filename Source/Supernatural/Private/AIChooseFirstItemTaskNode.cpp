@@ -4,6 +4,7 @@
 #include "AIChooseFirstItemTaskNode.h"
 #include "SuperGameMode.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "SuperAIController.h"
 
 UAIChooseFirstItemTaskNode::UAIChooseFirstItemTaskNode()
 {
@@ -13,15 +14,20 @@ UAIChooseFirstItemTaskNode::UAIChooseFirstItemTaskNode()
 EBTNodeResult::Type UAIChooseFirstItemTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+	ASuperAIController* AIPlayerContaroller = Cast<ASuperAIController>(OwnerComp.GetAIOwner());
 
-
-	return EBTNodeResult::Succeeded;
+	if (AIPlayerContaroller->SelectNextProduct()) {
+		return EBTNodeResult::Succeeded;
+	}
+	return EBTNodeResult::Failed;
 
 }
 
 void UAIChooseFirstItemTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+
+
 }
 
 EBTNodeResult::Type UAIChooseFirstItemTaskNode::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

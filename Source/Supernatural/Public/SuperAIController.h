@@ -34,6 +34,7 @@ private:
 	bool isBuyProduct[4] = { false, false, false, false };
 
 	int32 index = 0;
-
-	void SelectNextProduct();
+public:
+	bool SelectNextProduct();
+	void BuyCheck();
 };

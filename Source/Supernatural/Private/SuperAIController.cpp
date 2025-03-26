@@ -30,25 +30,12 @@ void ASuperAIController::BeginPlay()
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	ACPlayer* player = Cast<ACPlayer>(PlayerPawn);
 	GetBlackboardComponent()->SetValueAsObject(TEXT("PlayerClass"), player);
-	for (int i = 0; i < 4; i++) {1
+	GetBlackboardComponent()->SetValueAsBool(TEXT("IsPurchase"), false);
+	for (int i = 0; i < 4; i++) {
 		randomVaule = FMath::RandRange(0, GameMode->Product.Num() - 1);
 		ProductName[i]=(GameMode->GetProductDataByIndex(randomVaule)->ProductName);
+		UE_LOG(LogTemp, Warning, TEXT("index : %s"), *ProductName[i]);
 	}
-	TArray<AActor*> FoundActors;
-
-	FName TargetTag = FName(*ProductName[index]);
-
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
-	if (FoundActors[0] == nullptr)return;
-	GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
-	//SelectNextProduct();
-
-
-
-	//GetBlackboardComponent()->SetValueAsBool(TEXT("isBuyProduct"), isBuyProduct[index]);
-
-
-
 }
 
 void ASuperAIController::Tick(float DeltaSeconds)
@@ -56,25 +43,48 @@ void ASuperAIController::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	if (!ProductName) return;
 	//SelectNextProduct();
+	isBuyProduct[index] = GetBlackboardComponent()->GetValueAsBool(TEXT("IsSelling"));
 
+	BuyCheck();
 }
-
-void ASuperAIController::SelectNextProduct()
+bool ASuperAIController::SelectNextProduct()
 {
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
-	if (GetBlackboardComponent()->GetValueAsBool(TEXT("isBuyProduct"))) {
-		index++;
+
+	if (!ProductName[index].IsEmpty()) {
+		TArray<AActor*> FoundActors;
+
+		FName TargetTag = FName(*ProductName[index]);
+
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
+		if (isBuyProduct[index]) {
+			index++;
+			UE_LOG(LogTemp, Warning, TEXT("Add Index :%d"), index);
+
+		}
+		if (FoundActors[0] == nullptr)return false;
+		GetBlackboardComponent()->SetValueAsObject(TEXT("PlayerClass"), PlayerPawn);
+		GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
+		GetBlackboardComponent()->SetValueAsBool(TEXT("IsSelling"), isBuyProduct[index]);
+
+
+		return true;
+	}
+	else {
+		return false;
 	}
 
-	TArray<AActor*> FoundActors;
+}
 
-	FName TargetTag = FName(*ProductName[index]);
-
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
-	if (FoundActors[0]==nullptr)return;
-	GetBlackboardComponent()->SetValueAsObject(TEXT("PlayerClass"), PlayerPawn);
-	GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
-	//GetBlackboardComponent()->SetValueAsBool(TEXT("isBuyProduct"), isBuyProduct[index]);
-	//UE_LOG(LogTemp, Warning, TEXT(">>>%s"), *FoundActors[0]->GetActorLocation().ToString());
+void ASuperAIController::BuyCheck()
+{
+	for (int i = 0; i < 4; i++) {
+		if (!isBuyProduct[i]) {
+			return;
+		}
+		else {
+			GetBlackboardComponent()->SetValueAsBool(TEXT("IsPurchase"), true);
+		}
+	}
 }
