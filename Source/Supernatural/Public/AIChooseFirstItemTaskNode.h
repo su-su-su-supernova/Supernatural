@@ -27,8 +27,4 @@ public:
     // 태스크가 중단(abort)될 때 호출되어 정리 작업을 수행합니다.
     virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-
-
-
-
 };

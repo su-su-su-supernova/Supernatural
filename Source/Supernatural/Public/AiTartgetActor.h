@@ -10,8 +10,8 @@ UCLASS()
 class SUPERNATURAL_API AAiTartgetActor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AAiTartgetActor();
 
@@ -19,11 +19,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 private:
 	class UBoxComponent* BoxComp;
+
+private:
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 };

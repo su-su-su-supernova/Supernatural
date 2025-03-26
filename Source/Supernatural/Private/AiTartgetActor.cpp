@@ -3,6 +3,7 @@
 
 #include "AiTartgetActor.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AAiTartgetActor::AAiTartgetActor()
@@ -30,3 +31,10 @@ void AAiTartgetActor::Tick(float DeltaTime)
 
 }
 
+void AAiTartgetActor::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	// TODO Index 오버랩 처리 해야함_이효원
+	//if (UGameplayStatics::GetPlayerCharacter(GetWorld(), 0) == Cast<ACharacter>(OtherActor))
+	//	Index++;
+
+}
