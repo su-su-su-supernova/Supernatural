@@ -194,6 +194,24 @@ private:
 
     // DP input이 끝났을 때 실행
     void DPCompleted();
+#pragma endregion
+
+
+#pragma region Calculate
+    UPROPERTY(EditDefaultsOnly, Category = "Calculate")
+    class UInputAction* IA_Calculate;
+
+    // 카드 구별용 tag
+    const FName CARDTAG = FName("Card");
 
 #pragma endregion
+
+#pragma region Haptic
+public:
+	UPROPERTY(EditAnywhere, Category = "Haptic")
+	class UHapticFeedbackEffect_Curve* HapticClick;
+	UPROPERTY(EditAnywhere, Category = "Haptic")
+	class UHapticFeedbackEffect_Curve* HapticAICollide;
+#pragma endregion
+
 };
