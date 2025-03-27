@@ -34,7 +34,8 @@ void ASuperAIController::BeginPlay()
 	for (int i = 0; i < 4; i++) {
 		randomVaule = FMath::RandRange(0, GameMode->Product.Num() - 1);
 		ProductName[i]=(GameMode->GetProductDataByIndex(randomVaule)->ProductName);
-		UE_LOG(LogTemp, Warning, TEXT("index : %s"), *ProductName[i]);
+
+		//UE_LOG(LogTemp, Warning, TEXT("index : %s"), *ProductName[i]);
 	}
 	GetBlackboardComponent()->SetValueAsBool(TEXT("IsSelling"), false);
 

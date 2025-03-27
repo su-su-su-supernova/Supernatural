@@ -4,6 +4,7 @@
 #include "AiCharacter.h"
 #include "SuperGameMode.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include <SuperAIController.h>
 
 // Sets default values
 AAiCharacter::AAiCharacter()
@@ -20,7 +21,19 @@ void AAiCharacter::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = 600;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
-
+	
+	if (auto ai = Cast<AAIController>(GetController()))
+	{
+		if (auto myAi = Cast<ASuperAIController>(ai))
+		{
+			for (int i = 0; i < 4; ++i)
+			{
+				UE_LOG(LogTemp, Warning,
+					TEXT("Controller Name: %s\nPawn Name : %s\nProductName : %s"),
+						*myAi->GetName(), *this->GetName(), *myAi->ProductName[i]);
+			}
+		}
+	}
 }
 
 // Called every frame

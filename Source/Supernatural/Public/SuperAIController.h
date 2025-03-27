@@ -30,8 +30,12 @@ private:
 	int32 randomVaule = 0;
 	class ASuperGameMode* GameMode;
 
+public:
 	FString ProductName[4] = {};
-	bool isBuyProduct[4] = { false, false, false, false };
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<bool> isBuyProduct = { false, false, false, false };
+	//bool isBuyProduct[4] = { false, false, false, false };
 
 	int32 index = 0;
 public:
