@@ -38,7 +38,7 @@ ACCounter::ACCounter()
 	CasherBody->SetRelativeRotation(FRotator(0, 90, 0));
 	CasherBody->SetRelativeScale3D(FVector(1.000000, 1.537776, 1.000000));
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCasher(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCasher(TEXT("/Script/Engine.StaticMesh'/Game/MMSupermarket/Equipment/Mesh/SM_CheckoutCounter_01.SM_CheckoutCounter_01'"));
 	if (tmpCasher.Succeeded()) CasherMesh = tmpCasher.Object;
 	CasherBody->SetStaticMesh(CasherMesh);
 }
