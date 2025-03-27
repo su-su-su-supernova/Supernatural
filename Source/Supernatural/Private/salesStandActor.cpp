@@ -23,6 +23,12 @@ AsalesStandActor::AsalesStandActor()
 	BoxComp->SetBoxExtent(FVector(95, 25, 25));
 	BoxComp->SetupAttachment(RootComponent);
 
+	TargetComp= CreateDefaultSubobject<UBoxComponent>(TEXT("TargetComp"));
+	TargetComp->SetBoxExtent(FVector(95, 25, 25));
+	TargetComp->SetRelativeLocation(FVector(-54,117,29));
+	TargetComp->SetCollisionProfileName(TEXT("ProductTarget"));
+	TargetComp->SetupAttachment(RootComponent);
+
 	SceneComp5 = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp5"));
 	SceneComp5->SetupAttachment(BoxComp);
 	SceneComp10 = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp10"));
@@ -41,11 +47,7 @@ AsalesStandActor::AsalesStandActor()
 void AsalesStandActor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//for (int i = 0; i < 10; i++) {
-	//	if (ProductMeshes[i] == nullptr) return;
-	//ProductMeshes[i]->SetStaticMesh(CachedProducts[EProductDivide::Snack3].Snack1);
-	//}
+	Tags.Add(TEXT("Cake"));
 
 }
 
@@ -101,7 +103,8 @@ void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* T
 
 void AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *ProductName);
+	Tags.Add(*ProductName);
+
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
 	EProductDivide ProductType;
 	int32 ProductNumber = 0; // √ ±‚»≠

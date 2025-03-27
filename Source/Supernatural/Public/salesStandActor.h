@@ -26,15 +26,14 @@ public:
 public:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* BoxComp;
+	UPROPERTY(EditAnywhere)
+
+	class UBoxComponent* TargetComp;
 	class UStaticMeshComponent* MeshComp;
 
 	class UProductSalesStandDataAsset* ProductSalesStandDataAsset;
 
 	class UStaticMeshComponent* ProductMesh;
-
-	class USelif_5Component* Comp5;
-	class USelif_10Component* Comp10;
-	class USelif_15Component* Comp15;
 	class USelif_BaseComponent* SelifBaseComp;
 	class USceneComponent* SceneComp5;
 	class USceneComponent* SceneComp10;
@@ -69,6 +68,7 @@ private:
 
 public:
 	void SetMeshesForProductNumber(FString ProductType);
+
 
 
 };

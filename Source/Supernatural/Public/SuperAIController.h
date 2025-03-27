@@ -32,13 +32,15 @@ private:
 
 public:
 	FString ProductName[4] = {};
+	FString CurrentName;
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<bool> isBuyProduct = { false, false, false, false };
 	//bool isBuyProduct[4] = { false, false, false, false };
 
+	UPROPERTY(VisibleAnywhere)
 	int32 index = 0;
 public:
 	bool SelectNextProduct();
-	void BuyCheck();
+	void AddIndex();
 };

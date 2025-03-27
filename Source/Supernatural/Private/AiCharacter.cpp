@@ -5,6 +5,8 @@
 #include "SuperGameMode.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <SuperAIController.h>
+#include "AiTartgetActor.h"
+#include "salesStandActor.h"
 
 // Sets default values
 AAiCharacter::AAiCharacter()
@@ -21,7 +23,7 @@ void AAiCharacter::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = 600;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
-	
+
 	if (auto ai = Cast<AAIController>(GetController()))
 	{
 		if (auto myAi = Cast<ASuperAIController>(ai))
@@ -47,5 +49,24 @@ void AAiCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+	//if (AAiTartgetActor* ch = Cast<AAiTartgetActor>(OtherActor)) {
+	//	isBegin = true;
+	//	UE_LOG(LogTemp, Warning, TEXT("tq"));
+	//}
+	//if (AsalesStandActor* Sales = Cast<AsalesStandActor>(OtherActor)) {
+	//	isBegin = true;
+	//	UE_LOG(LogTemp, Warning, TEXT("tq"));
+	//}
+	ASuperAIController* pc = Cast<ASuperAIController>(GetController());
+	if (OtherActor->Tags.Contains(*pc->CurrentName)) {
+		isBegin = true;
+		UE_LOG(LogTemp, Warning, TEXT("name: %s"), *pc->CurrentName);
+	}
 }
 

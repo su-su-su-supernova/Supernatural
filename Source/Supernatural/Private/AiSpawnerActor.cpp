@@ -24,7 +24,7 @@ AAiSpawnerActor::AAiSpawnerActor()
 void AAiSpawnerActor::BeginPlay()
 {
 	Super::BeginPlay();
-	for(int i=0;i<3;i++){
+	for(int i=0;i<10;i++){
 	AAiCharacter* AiCharacter = GetWorld()->SpawnActorDeferred<AAiCharacter>(AiCharacterSample, ArrowComp->GetComponentTransform());
 	//AiCharacter->SetActorRotation(FRotator(-90,180,0));
 	if (AiCharacter) {

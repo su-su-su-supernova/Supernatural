@@ -16,23 +16,17 @@ EBTNodeResult::Type UAIChooseFirstItemTaskNode::ExecuteTask(UBehaviorTreeCompone
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	ASuperAIController* AIPlayerContaroller = Cast<ASuperAIController>(OwnerComp.GetAIOwner());
 
-	if (BlackboardComp->GetValueAsBool(TEXT("IsPurchase"))) {
-		UE_LOG(LogTemp, Log, TEXT("ASDASDSA"));
-		return EBTNodeResult::Failed;
-	}
-
-	if (AIPlayerContaroller->SelectNextProduct()) {
+	if(AIPlayerContaroller->SelectNextProduct())
 		return EBTNodeResult::Succeeded;
-	}
+
 	return EBTNodeResult::Failed;
+
 
 }
 
 void UAIChooseFirstItemTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-
-
 }
 
 EBTNodeResult::Type UAIChooseFirstItemTaskNode::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

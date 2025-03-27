@@ -29,15 +29,20 @@ void ASuperAIController::BeginPlay()
 	if (!GameMode)return;
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	ACPlayer* player = Cast<ACPlayer>(PlayerPawn);
-	GetBlackboardComponent()->SetValueAsObject(TEXT("PlayerClass"), player);
-	GetBlackboardComponent()->SetValueAsBool(TEXT("IsPurchase"), false);
-	for (int i = 0; i < 4; i++) {
-		randomVaule = FMath::RandRange(0, GameMode->Product.Num() - 1);
-		ProductName[i]=(GameMode->GetProductDataByIndex(randomVaule)->ProductName);
-
-		//UE_LOG(LogTemp, Warning, TEXT("index : %s"), *ProductName[i]);
+	TArray<int32> AvailableIndices;
+	for (int32 i = 0; i < GameMode->Product.Num(); i++) {
+		AvailableIndices.Add(i); // 0, 1, 2, 3 등 인덱스 추가
 	}
-	GetBlackboardComponent()->SetValueAsBool(TEXT("IsSelling"), false);
+
+	// 배열 크기가 4로 고정되어 있으므로, 최대 4개만 선택
+	for (int i = 0; i < 4 && AvailableIndices.Num() > 0; i++) {
+		int32 RandomIndex = FMath::RandRange(0, AvailableIndices.Num() - 1); // 남은 인덱스 중 하나 선택
+		int32 SelectedIndex = AvailableIndices[RandomIndex]; // 선택된 인덱스
+		ProductName[i] = GameMode->GetProductDataByIndex(SelectedIndex)->ProductName; // 제품 이름 할당
+		AvailableIndices.RemoveAt(RandomIndex); // 사용한 인덱스 제거 (중복 방지)
+
+		UE_LOG(LogTemp, Warning, TEXT("index : %s"), *ProductName[i]);
+	}
 
 }
 
@@ -45,43 +50,26 @@ void ASuperAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	if (!ProductName) return;
-	//SelectNextProduct();
-	isBuyProduct[index] = GetBlackboardComponent()->GetValueAsBool(TEXT("IsSelling"));
+	//isBuyProduct[index] = GetBlackboardComponent()->GetValueAsBool(TEXT("IsSelling"));
+	//UE_LOG(LogTemp, Warning, TEXT("Add Index :%d"), index);
 
-	BuyCheck();
 }
 
 bool ASuperAIController::SelectNextProduct()
 {
+	if (index >= 4)return false;
+	FName TargetTag = FName(*ProductName[index]);
+	CurrentName = ProductName[index];
+	TArray<AActor*> FoundActors;
 
-	if (isBuyProduct[index])
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Add Index :%d"), index);
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
 
-		index++;
-	}
-	if(!(isBuyProduct[index]))
-	{
-		FName TargetTag = FName(*ProductName[index]);
-
-		TArray<AActor*> FoundActors;
-
-		UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
-
-		GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
-		GetBlackboardComponent()->SetValueAsBool(TEXT("IsSelling"), isBuyProduct[index]);
-
-	}
+	GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
+	GetBlackboardComponent()->SetValueAsBool(TEXT("IsSelling"), isBuyProduct[index]);
 	return true;
 }
 
-void ASuperAIController::BuyCheck()
+void ASuperAIController::AddIndex()
 {
-	for (int i = 0; i < 4; i++) {
-		if (!isBuyProduct[i]) {
-			return;
-		}
-	}
-
-	GetBlackboardComponent()->SetValueAsBool(TEXT("IsPurchase"), true);
+	index++;
 }

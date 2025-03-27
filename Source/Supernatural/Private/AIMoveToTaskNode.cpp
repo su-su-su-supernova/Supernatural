@@ -20,12 +20,9 @@ UAIMoveToTaskNode::UAIMoveToTaskNode()
 EBTNodeResult::Type UAIMoveToTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	BlackboardComp = OwnerComp.GetBlackboardComponent();
-	UObject* PlayerObject = BlackboardComp->GetValueAsObject(TEXT("PlayerClass"));
 	UObject* ProductObject = BlackboardComp->GetValueAsObject(TEXT("ProductClass"));
-	PlayerPawn = Cast<APawn>(PlayerObject);
 	ProductActor = Cast<AActor>(ProductObject);
 	AiController = Cast<ASuperAIController>(OwnerComp.GetAIOwner());
-	PlayerPawn->bUseControllerRotationYaw = false;
 	//UE_LOG(LogTemp, Warning, TEXT(">>>%s"),ProductActor->GetActorLocation().ToString());
 
 	return EBTNodeResult::InProgress;
@@ -38,21 +35,16 @@ void UAIMoveToTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
-	if (!AiController || !PlayerPawn)
-	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-
-		return;
-	}
+	ASuperAIController* PC = Cast<ASuperAIController>(OwnerComp.GetOwner());
 
 	FindActor();
-
+	AAiCharacter* ai = Cast<AAiCharacter>(PC->GetCharacter());
 	// 이동 상태 체크
-	if (AiController->GetMoveStatus() == EPathFollowingStatus::Idle)
+	if (ai->isBegin)
 	{
 		BlackboardComp = OwnerComp.GetBlackboardComponent();
-		UE_LOG(LogTemp, Warning, TEXT("next1"));
 		BlackboardComp->SetValueAsBool(TEXT("IsSelling"), true);
+		ai->isBegin = false; PC->AddIndex();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 }
@@ -69,7 +61,6 @@ EBTNodeResult::Type UAIMoveToTaskNode::AbortTask(UBehaviorTreeComponent& OwnerCo
 
 void UAIMoveToTaskNode::FindActor()
 {
-	if (!AiController)return;
 	if (AiController->LineOfSightTo(ProductActor)) {
 		AiController->SetFocus(ProductActor);
 		AiController->GetCharacter()->GetCharacterMovement()->bOrientRotationToMovement = true;
