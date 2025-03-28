@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 
-/**
- * 
- */
-class SUPERNATURAL_API EAIState
+UENUM(BlueprintType)
+enum class  EAIState:uint8
 {
-public:
-	EAIState();
-	~EAIState();
+	FindProduct         UMETA(DisplayName = "상품찾기"),
+	MoveToProduct       UMETA(DisplayName = "상품으로이동"),
+	ProductFindFailed   UMETA(DisplayName = "상품찾기실패"),
+	MoveToCounter       UMETA(DisplayName = "카운터이동"),
+	ArriveAtCounter     UMETA(DisplayName = "카운터도착"),
+	LineUp             UMETA(DisplayName = "줄서기")
+
 };

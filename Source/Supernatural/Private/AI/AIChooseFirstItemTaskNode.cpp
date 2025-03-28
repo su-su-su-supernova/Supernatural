@@ -15,13 +15,12 @@ EBTNodeResult::Type UAIChooseFirstItemTaskNode::ExecuteTask(UBehaviorTreeCompone
 {
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	ASuperAIController* AIPlayerContaroller = Cast<ASuperAIController>(OwnerComp.GetAIOwner());
-
-	if(AIPlayerContaroller->SelectNextProduct())
+	if (AIPlayerContaroller->SelectNextProduct()) {
 		return EBTNodeResult::Succeeded;
-
-	return EBTNodeResult::Failed;
-
-
+	}
+	else {
+		return EBTNodeResult::Failed;
+	}
 }
 
 void UAIChooseFirstItemTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)

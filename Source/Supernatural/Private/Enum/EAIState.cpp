@@ -2,11 +2,3 @@
 
 
 #include "EAIState.h"
-
-EAIState::EAIState()
-{
-}
-
-EAIState::~EAIState()
-{
-}

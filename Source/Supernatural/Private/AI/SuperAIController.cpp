@@ -9,6 +9,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "SuperGameMode.h"
 #include "CPlayer.h"
+#include "EAIState.h"
 
 ASuperAIController::ASuperAIController()
 {
@@ -48,8 +49,6 @@ void ASuperAIController::BeginPlay()
 void ASuperAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (!ProductName) return;
-
 }
 
 bool ASuperAIController::SelectNextProduct()
@@ -57,16 +56,30 @@ bool ASuperAIController::SelectNextProduct()
 	if (index >= 4)return false;
 	FName TargetTag = FName(*ProductName[index]);
 	CurrentName = ProductName[index];
-	TArray<AActor*> FoundActors;
-
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
+	if (FoundActors.Num() <= 0) {
+		UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>Fail"));
+		SearchFailedProduct.Push(ProductName[index]);
+		AddIndex();
+		return false;
+	}
+	if (FoundActors.Num() > 0) {
+		GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
+		GetBlackboardComponent()->SetValueAsBool(TEXT("IsSelling"), isBuyProduct[index]);
+	}
 
-	GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
-	GetBlackboardComponent()->SetValueAsBool(TEXT("IsSelling"), isBuyProduct[index]);
 	return true;
 }
 
 void ASuperAIController::AddIndex()
 {
 	index++;
+}
+
+bool ASuperAIController::ChangeState()
+{
+	if (index >= 4 && SearchFailedProduct.Num() > 0) {
+		return true;
+	}
+	else return false;
 }

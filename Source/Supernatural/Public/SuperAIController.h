@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "CProductDataTable.h"
+#include "EAIState.h"
 #include "SuperAIController.generated.h"
 
 /**
@@ -36,11 +37,15 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<bool> isBuyProduct = { false, false, false, false };
-	//bool isBuyProduct[4] = { false, false, false, false };
-
+	TArray<FString>SearchFailedProduct;
 	UPROPERTY(VisibleAnywhere)
 	int32 index = 0;
 public:
 	bool SelectNextProduct();
 	void AddIndex();
+	bool ChangeState();
+public:
+	FVector TargetLocation;
+	EAIState AIState = EAIState::FindProduct;
+	TArray<AActor*> FoundActors;
 };

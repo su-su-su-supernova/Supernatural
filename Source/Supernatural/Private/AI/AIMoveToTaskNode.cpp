@@ -47,6 +47,8 @@ void UAIMoveToTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 		ai->isBegin = false; PC->AddIndex();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
+
+
 }
 // 태스크가 중단(abort)될 때 호출되어 정리 작업을 수행합니다.
 // - OwnerComp: 비헤이비어 트리 컴포넌트.
