@@ -54,15 +54,6 @@ void AAiCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-
-	//if (AAiTartgetActor* ch = Cast<AAiTartgetActor>(OtherActor)) {
-	//	isBegin = true;
-	//	UE_LOG(LogTemp, Warning, TEXT("tq"));
-	//}
-	//if (AsalesStandActor* Sales = Cast<AsalesStandActor>(OtherActor)) {
-	//	isBegin = true;
-	//	UE_LOG(LogTemp, Warning, TEXT("tq"));
-	//}
 	ASuperAIController* pc = Cast<ASuperAIController>(GetController());
 	if (OtherActor->Tags.Contains(*pc->CurrentName)) {
 		isBegin = true;

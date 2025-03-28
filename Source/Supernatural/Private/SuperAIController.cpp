@@ -31,7 +31,7 @@ void ASuperAIController::BeginPlay()
 	ACPlayer* player = Cast<ACPlayer>(PlayerPawn);
 	TArray<int32> AvailableIndices;
 	for (int32 i = 0; i < GameMode->Product.Num(); i++) {
-		AvailableIndices.Add(i); // 0, 1, 2, 3 등 인덱스 추가
+		AvailableIndices.Add(i);
 	}
 
 	// 배열 크기가 4로 고정되어 있으므로, 최대 4개만 선택
@@ -43,15 +43,12 @@ void ASuperAIController::BeginPlay()
 
 		UE_LOG(LogTemp, Warning, TEXT("index : %s"), *ProductName[i]);
 	}
-
 }
 
 void ASuperAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	if (!ProductName) return;
-	//isBuyProduct[index] = GetBlackboardComponent()->GetValueAsBool(TEXT("IsSelling"));
-	//UE_LOG(LogTemp, Warning, TEXT("Add Index :%d"), index);
 
 }
 
