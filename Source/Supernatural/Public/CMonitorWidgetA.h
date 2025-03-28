@@ -27,7 +27,7 @@ private:
 	int32 PlayerCalculated = 0;
 	FString InputCost = "0";
 
-	/* Number Buttons*/
+	/* Buttons*/
 public:
 	UPROPERTY(meta = (BindWidget))
 	class UWrapBox* WrapBox;
