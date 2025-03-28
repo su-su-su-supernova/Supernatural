@@ -1,76 +1,115 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "CMonitorWidgetA.h"
+ï»¿#include "CMonitorWidgetA.h"
 #include "Components/Button.h"
 #include "CMonitorButton.h"
+#include "Components/TextBlock.h"
+#include "Components/WrapBox.h"
+#include "Components/VerticalBox.h"
+
+
+UCMonitorWidgetA::UCMonitorWidgetA(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) // ë¶€ëª¨ í´ëž˜ìŠ¤ ì´ˆê¸°í™”
+{
+}
 
 void UCMonitorWidgetA::NativeConstruct()
 {
 	Super::NativeConstruct();
+	SetWrapBox();
+
+	SetVerticalBox();
+
 }
 
-void UCMonitorWidgetA::OnMonitorButtonClicked(FString InButtonName)
-{
-	if (!InButtonName.IsEmpty())
-	{
-		FString tmp, type;
-		InButtonName.Split(TEXT("B_"), &tmp, &type);
-		UE_LOG(LogTemp, Warning, TEXT(">>> Button Type : %s"), *type);
 
-		// ¹®ÀÚ¿­ÀÇ ¸Ç ¸¶Áö¸· ¹®ÀÚ¸¦ Áö¿ò
-		if (type.Equals(TEXT("Delete"))) 
-			DeleteLastInput(type);
-		// ÀÔ·Â¹ÞÀº ¹®ÀÚ¿­À» ¼ýÀÚ·Î º¯È¯ÇÏ´Â ÀÛ¾÷ ½ÇÇà
-		else if (type.Equals(TEXT("Complete"))) 
-			ConvertInputToString(type);
-		else 
-			NumberEntered(type);
+void UCMonitorWidgetA::OnMonitorButtonClicked(int32 InButtonValue)
+{
+	switch (InButtonValue)
+	{
+		case 10:
+			DeleteLastInput();
+			break;
+		case 12:
+			ConvertInputToString();
+			break;
+		default:
+			NumberEntered(InButtonValue);
+			break;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT(">>> s : %s <<<"), *EnteredValue);
+
+	UE_LOG(LogTemp, Warning, TEXT(">>> s : %s <<<"), *InputCost);
 }
 
-void UCMonitorWidgetA::NumberEntered(FString InType)
+void UCMonitorWidgetA::NumberEntered(int32 InType)
 {
-	if (EnteredValue.Equals("0"))
+	FString value = InType == 11 ? "0" : FString::FromInt(InType);
+	if (InputCost.Equals("0"))
 	{
-		if (InType.Equals("0")) return;
-		EnteredValue = InType;
+		if (InType == 11) return;
+		InputCost = value;
 		return;
 	}
-	EnteredValue += InType;
+	InputCost += value;
 }
 
-void UCMonitorWidgetA::DeleteLastInput(FString InType)
+void UCMonitorWidgetA::DeleteLastInput()
 {
-	UE_LOG(LogTemp, Warning, TEXT(">>> [DELETE before] %s <<<"), *EnteredValue);
+	UE_LOG(LogTemp, Warning, TEXT(">>> [DELETE before] %s <<<"), *InputCost);
 
-	// ¹®ÀÚ¿­ÀÇ ¸Ç ¸¶Áö¸· ¹®ÀÚ¸¦ Áö¿ò
-	EnteredValue = EnteredValue.LeftChop(1);
-	UE_LOG(LogTemp, Warning, TEXT(">>> [DELETE after] %s <<<"), *EnteredValue);
+	// ë¬¸ìžì—´ì˜ ë§¨ ë§ˆì§€ë§‰ ë¬¸ìžë¥¼ ì§€ì›€
+	InputCost = InputCost.LeftChop(1);
+	UE_LOG(LogTemp, Warning, TEXT(">>> [DELETE after] %s <<<"), *InputCost);
 }
 
-void UCMonitorWidgetA::ConvertInputToString(FString InType)
+void UCMonitorWidgetA::ConvertInputToString()
 {
-	UE_LOG(LogTemp, Warning, TEXT(">>> [COMPLETE before] %s <<<"), *EnteredValue);
+	UE_LOG(LogTemp, Warning, TEXT(">>> [COMPLETE before] %s <<<"), *InputCost);
 
-	// ÀÔ·Â¹ÞÀº °ªÀ» Á¤¼ö·Î º¯È¯
-	PlayerCalculated = FCString::Atoi(*EnteredValue);
+	// ìž…ë ¥ë°›ì€ ê°’ì„ ì •ìˆ˜ë¡œ ë³€í™˜
+	PlayerCalculated = FCString::Atoi(*InputCost);
 
-	// ÀÔ·Â¹ÞÀº °ªÀ» DT¿¡ ¹Ý¿µ
+	// ìž…ë ¥ë°›ì€ ê°’ì„ DTì— ë°˜ì˜
 
-	// »ç¿ëÀÚ ÀÔ·Â°ª ÃÊ±âÈ­
-	EnteredValue = "0";
-	UE_LOG(LogTemp, Warning, TEXT(">>> [COMPLETE after] %s <<<"), *EnteredValue);
+	// ì‚¬ìš©ìž ìž…ë ¥ê°’ ì´ˆê¸°í™”
+	InputCost = "0";
+	UE_LOG(LogTemp, Warning, TEXT(">>> [COMPLETE after] %s <<<"), *InputCost);
 }
 
 void UCMonitorWidgetA::SetWrapBox()
 {
-	for (int i = 0; i < 12; i++)
+	for (int32 i = 1; i <= 12; i++)
 	{
+		// ë²„íŠ¼ ìƒì„±
 		MonitorButton = CreateWidget<UCMonitorButton>(this, MonitorButtonBP);
-		//MonitorButton->Text = SetText();
+		MonitorButton->ButtonIndex = i;
+		MonitorButton->SetMonitorReference(this);
 
+		// ë²„íŠ¼ ì •ë³´ ì¶”ê°€
+		if(i == 10)
+			MonitorButton->Text->SetText(FText::FromString("<"));
+		else if(i == 11)
+			MonitorButton->Text->SetText(FText::AsNumber(0));
+		else if(i == 12)
+			MonitorButton->Text->SetText(FText::FromString(TEXT("â—")));
+		else
+			MonitorButton->Text->SetText(FText::AsNumber(i));
+
+		// Wrapboxì— ì¶”ê°€
+		WrapBox->AddChildToWrapBox(MonitorButton);
+
+		UE_LOG(LogTemp, Warning, TEXT(">>> Button name : %s"), *(MonitorButton->GetName()));
 	}
 }
+
+void UCMonitorWidgetA::SetVerticalBox()
+{
+	//TextTotalCost->SetText(FText::Format(NSLOCTEXT("UI", "TotalCost", "í•©ê³„ : {0}"), TotalCost));
+	//TextTotalCost->SetText(FText::Format(NSLOCTEXT("UI", "TotalCost", "í•©ê³„ : {0}"), FString::FromInt(TotalCost)));
+	TextTotalCost->SetText(FText::FromString(FString::Printf(TEXT("í•©ê³„ : %d"), TotalCost)));
+	VerticalBox->AddChildToVerticalBox(TextTotalCost);
+
+	//TextInputCost->SetText(FText::Format(NSLOCTEXT("UI", "InputCost", "í˜„ìž¬ ê¸ˆì•¡ : {0}"), InputCost));
+	TextInputCost->SetText(FText::FromString(FString::Printf(TEXT("í˜„ìž¬ ê¸ˆì•¡ : %s"), *InputCost)));
+	VerticalBox->AddChildToVerticalBox(TextInputCost);
+}
+
+

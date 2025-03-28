@@ -6,11 +6,16 @@
 void UCMonitorButton::NativeConstruct()
 {
     Super::NativeConstruct();
-
     Button->OnClicked.AddDynamic(this, &UCMonitorButton::OnButtonClicked);
 }
 
 void UCMonitorButton::OnButtonClicked()
 {
-    Monitor->OnMonitorButtonClicked(Button->GetName());
+    UE_LOG(LogTemp, Warning, TEXT(">>> Button : %d"), ButtonIndex);
+    MonitorWidget->OnMonitorButtonClicked(ButtonIndex);
+}
+
+void UCMonitorButton::SetMonitorReference(UCMonitorWidgetA* InMonitorWidget)
+{
+    MonitorWidget = InMonitorWidget;
 }

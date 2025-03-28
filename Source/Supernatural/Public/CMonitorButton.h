@@ -19,7 +19,12 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Button;
 
-	class UCMonitorWidgetA* Monitor;
+	class UCMonitorWidgetA* MonitorWidget;
 
+	UFUNCTION()
 	void OnButtonClicked();
+
+	void SetMonitorReference(UCMonitorWidgetA* InMonitorWidget);
+
+	int32 ButtonIndex;
 };
