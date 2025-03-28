@@ -1,0 +1,5 @@
+---,ProductName,ImagePath,CostPrice,SellingPrice,ShelfStock,StorageStock,OrderStock,BoxStock,bIsDisplayed,MaxShelfStock
+1,Cereal,/Script/Engine.Texture2D'/Game/DYL/Images/BG.BG',5000,7500,0,0,30,10,FALSE,5
+2,Coke,/Script/Engine.Texture2D'/Game/DYL/Images/BG.BG',500,800,0,0,60,30,FALSE,10
+3,Tea,/Script/Engine.Texture2D'/Game/DYL/Images/BG.BG',1500,3000,0,0,60,30,FALSE,15
+4,Cake,/Script/Engine.Texture2D'/Game/DYL/Images/BG.BG',5000,12000,0,0,20,20,FALSE,5
