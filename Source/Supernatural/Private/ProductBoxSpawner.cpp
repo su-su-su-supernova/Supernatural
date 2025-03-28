@@ -36,9 +36,11 @@ void AProductBoxSpawner::Tick(float DeltaTime)
 void AProductBoxSpawner::SpawnBoxHandler(FName ProductName, FName ImagePath, int32 CostPrice, int32 OrderStock)
 {
 	//AProductBoxActor* ProductBoxActor = Cast<AProductBoxActor>(BoxClass);
-	ProductBoxActor = GetWorld()->SpawnActor<AProductBoxActor>(BoxClass, ArrowComp->GetComponentTransform());
+	ProductBoxActor = GetWorld()->SpawnActorDeferred<AProductBoxActor>(BoxClass, ArrowComp->GetComponentTransform());
 	if (ProductBoxActor) {
 		ProductBoxActor->SetBoxInfo(ProductName, ImagePath, CostPrice, OrderStock);
+		ProductBoxActor->FinishSpawning(ArrowComp->GetComponentTransform());
+
 	}
 
 }

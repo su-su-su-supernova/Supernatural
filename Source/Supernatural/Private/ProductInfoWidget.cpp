@@ -11,8 +11,6 @@ void UProductInfoWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	AddBTN->OnClicked.AddDynamic(this, &UProductInfoWidget::OnButtonClicked);
-
-
 }
 
 void UProductInfoWidget::OnButtonClicked()
@@ -21,7 +19,10 @@ void UProductInfoWidget::OnButtonClicked()
     {
         return;
     }
-    MainBoardRef->SetVerticalBox(ProductName->GetText(),ProductCount->GetText(),CostPriceSum->GetText());
+	if (ProductName == nullptr) { return; }
+	if (ProductCount == nullptr) { return; }
+	if (CostPriceSum == nullptr) { return; }
+	MainBoardRef->SetVerticalBox(ProductName->GetText(), ProductCount->GetText(), CostPriceSum->GetText());
 }
 
 void UProductInfoWidget::SetMainBoardReference(UMainBoardWidget* InMainBoard)

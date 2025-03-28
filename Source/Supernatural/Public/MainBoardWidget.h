@@ -52,6 +52,7 @@ public:
     void OnButtonClicked();
 private:
 	class ASuperGameMode* GameMode;
+	class AProductBoxSpawner* productBox;
 public:
 	void SpawnProductBox(FText product);
 	void SetVerticalBox(FText ProductName, FText CostPrice, FText CostPriceSum);

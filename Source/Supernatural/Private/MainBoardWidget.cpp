@@ -26,24 +26,28 @@ void UMainBoardWidget::NativeConstruct()
     if (!GameMode)return;
     SetInfoWidget(GameMode->Product);
     purchaseButton->OnClicked.AddDynamic(this, &UMainBoardWidget::OnButtonClicked);
+    FVector SpawnLocation(20.0f, 400.0f, 60.0f);
+    FTransform SpawnTransform(SpawnLocation);
+    productBox = GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform);
 }
 void UMainBoardWidget::OnButtonClicked()
 {
     if (selectArrayProduct.Num()<=0)return;
 
     for (auto product : selectArrayProduct) {
+        if (selectArrayProduct.Num() <= 0)return;
+
         SpawnProductBox(product);
     }
+    selectArrayProduct.Empty();
+    ProductVerticalBox->ClearChildren();
 }
 
 void UMainBoardWidget::SetInfoWidget(TMap<FString, FProductData*> Product)
 {
     for (int i = 0; i < Product.Num(); i++) {
         ProductInfoWidget = CreateWidget<UProductInfoWidget>(this, ProductInfoWidgetTool);
-        //ProductInfoWidget->SetMainBoardReference(this);
-        // InfoWidget에 MainBoardWidget 참조 전달
         ProductInfoWidget->SetMainBoardReference(this);
-        // 화면에 추가 (예: Canvas Panel에 추가했다고 가정)
         if (GameMode)
         {
             FProductData* Data= GameMode->GetProductDataByIndex(i);
@@ -63,16 +67,15 @@ void UMainBoardWidget::SpawnProductBox(FText product)
 {
     if (!GameMode)return;
     if (product.IsEmpty())return;
-    FVector SpawnLocation(20.0f, 400.0f, 60.0f);
-    FTransform SpawnTransform(SpawnLocation);
+
     //FName name = FName(GameMode->Product[product.ToString()]->ProductName);
 
     FProductData* Data = GameMode->GetProductData(product.ToString());
-
-    GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform)->
-        SpawnBoxHandler(FName(Data->ProductName),FName(Data->ImagePath), Data->CostPrice, Data->BoxStock);
-    selectArrayProduct.Empty();
-    ProductVerticalBox->ClearChildren();
+    if(Data&& GameMode){
+        if (productBox) {
+            productBox->SpawnBoxHandler(FName(Data->ProductName), FName(Data->ImagePath), Data->CostPrice, Data->BoxStock);
+        }
+    }
 }
 
 void UMainBoardWidget::SetVerticalBox(FText ProductName, FText ProductCount, FText CostPriceSum)
