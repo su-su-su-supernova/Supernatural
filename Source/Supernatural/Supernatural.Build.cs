@@ -12,9 +12,6 @@ public class Supernatural : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-		PublicIncludePaths.AddRange(new string[] { "AI", "Computer", "Counter", "Data",
-			"Enum", "Player", "Product", "Shelf", "Widget"});
-
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 
