@@ -76,11 +76,12 @@ private:
 #pragma endregion
 
 
-    // Custom Line Trace
+    // Line Trace
     UPROPERTY(EditDefaultsOnly, Category = "Line Trace")
     bool bIsPerformingLineTrace = false;
 
-    void PerformLineTrace(float InInteractionDistance);
+	void PerformLineTrace(float InInteractionDistance);
+
     void SetInputMode();
 
 
@@ -128,7 +129,7 @@ private:
     bool bIsGrabBoxInputEntered = false;
 
     UPROPERTY(EditAnywhere, Category = "GrabBox")
-    float InteractionDistanceBox = 30.f;
+    float InteractionDistanceBox = 100.f;
 
 	// 현재 들고 있는 박스
 	UPROPERTY(EditAnywhere, Category = "GrabBox")
@@ -138,9 +139,8 @@ private:
 	FName SocketAttachBox = TEXT("AttachBox");
 
 	// 박스 안 물품의 정보
-	FString ProductName;
-	int32 ProductCostPrice;
-	int32 ProductOrderStock;
+	FString ProductName;		
+	int32 ProductCurrentStock; // 현재 박스 안에 있는 재고수
 
     // GrabBox input이 들어왔을 때 실행
     void GrabBoxInputStart();
@@ -165,7 +165,7 @@ private:
 
     // Line Trace 탐색 거리
     UPROPERTY(EditDefaultsOnly, Category = "DP")
-    float InteractionDistanceStand = 100.f;
+    float InteractionDistanceStand = 150;
 
     UPROPERTY(EditDefaultsOnly, Category = "DP")
     class ACLineTraceZone* LineTraceZone;
@@ -180,14 +180,11 @@ private:
 
     // 현재 물품을 진열하고 있는가
     UPROPERTY(EditDefaultsOnly, Category = "DP")
-    bool bIsDisplayingProduct;
+    bool bIsDisplayingProduct = false;
 
 	// 물품을 진열할 선반
 	UPROPERTY(EditDefaultsOnly, Category = "DP")
 	class AsalesStandActor* Stand;
-
-    // 현재 몇 개의 물품이 진열되었는가
-    int32 CurDP = 0;
 
     // DP input이 들어왔을 때 실행
     void DPStart();
@@ -197,8 +194,24 @@ private:
 
     // DP input이 끝났을 때 실행
     void DPCompleted();
+#pragma endregion
+
+
+#pragma region Calculate
+    UPROPERTY(EditDefaultsOnly, Category = "Calculate")
+    class UInputAction* IA_Calculate;
+
+    // 카드 구별용 tag
+    const FName CARDTAG = FName("Card");
 
 #pragma endregion
-	/////////////////****//////
-	bool isHitStand=false;
+
+#pragma region Haptic
+public:
+	UPROPERTY(EditAnywhere, Category = "Haptic")
+	class UHapticFeedbackEffect_Curve* HapticClick;
+	UPROPERTY(EditAnywhere, Category = "Haptic")
+	class UHapticFeedbackEffect_Curve* HapticAICollide;
+#pragma endregion
+
 };

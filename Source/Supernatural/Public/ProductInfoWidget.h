@@ -30,7 +30,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* BoxStock;
 
-		UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* CostPrice;
 
 	UPROPERTY(meta = (BindWidget))
