@@ -78,7 +78,7 @@ void ASuperGameMode::LoadProductData()
 
     for (auto p : Product)
     {
-        UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>> Product : %s / Price : %d"), *p.Key, p.Value->SellingPrice);
+        UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>> Product : %s / Enum : %d"), *p.Key, p.Value->ProductEnum);
     }
 }
 
