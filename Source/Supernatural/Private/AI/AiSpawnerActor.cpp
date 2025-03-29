@@ -24,23 +24,11 @@ AAiSpawnerActor::AAiSpawnerActor()
 void AAiSpawnerActor::BeginPlay()
 {
 	Super::BeginPlay();
-	for(int i=0;i<5;i++){
-	AAiCharacter* AiCharacter = GetWorld()->SpawnActorDeferred<AAiCharacter>(AiCharacterSample, ArrowComp->GetComponentTransform());
-	//AiCharacter->SetActorRotation(FRotator(-90,180,0));
-	if (AiCharacter) {
-		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(ArrowComp->GetComponentLocation()); // 위치만 가져옴
-		SpawnTransform.SetRotation(FQuat::Identity); // 회전을 기본값(0, 0, 0)으로 설정
-		SpawnTransform.SetScale3D(FVector(1.0f, 1.0f, 1.0f));
-		AiCharacter->FinishSpawning(SpawnTransform);
+	//for(int i=0;i<5;i++){
 
-		ASuperAIController* AIController = GetWorld()->SpawnActor<ASuperAIController>(ASuperAIController::StaticClass(), SpawnTransform);
-		if (AIController)
-		{
-			AIController->Possess(AiCharacter);
-		}
-	}
-	}
+	//AiCharacter->SetActorRotation(FRotator(-90,180,0));
+
+	//}
 
 }
 
@@ -48,6 +36,25 @@ void AAiSpawnerActor::BeginPlay()
 void AAiSpawnerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (CurrentTime >= 5) {
+		AAiCharacter* AiCharacter = GetWorld()->SpawnActorDeferred<AAiCharacter>(AiCharacterSample, ArrowComp->GetComponentTransform());
+		if (AiCharacter) {
+			FTransform SpawnTransform;
+			SpawnTransform.SetLocation(ArrowComp->GetComponentLocation()); // 위치만 가져옴
+			SpawnTransform.SetRotation(FQuat::Identity); // 회전을 기본값(0, 0, 0)으로 설정
+			SpawnTransform.SetScale3D(FVector(1.0f, 1.0f, 1.0f));
+			AiCharacter->FinishSpawning(SpawnTransform);
+
+			ASuperAIController* AIController = GetWorld()->SpawnActor<ASuperAIController>(ASuperAIController::StaticClass(), SpawnTransform);
+			if (AIController)
+			{
+				AIController->Possess(AiCharacter);
+			}
+		}
+		CurrentTime = 0.0f;
+	}
+	CurrentTime += DeltaTime;
 
 }
 

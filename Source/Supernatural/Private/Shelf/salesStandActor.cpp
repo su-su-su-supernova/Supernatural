@@ -43,11 +43,9 @@ AsalesStandActor::AsalesStandActor()
 void AsalesStandActor::BeginPlay()
 {
 	Super::BeginPlay();
-	//Tags.Add(TEXT("Cake"));
 
 }
 
-// Called every frame
 void AsalesStandActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
