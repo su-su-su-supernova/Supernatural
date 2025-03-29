@@ -43,7 +43,7 @@ AsalesStandActor::AsalesStandActor()
 void AsalesStandActor::BeginPlay()
 {
 	Super::BeginPlay();
-	Tags.Add(TEXT("Cake"));
+	//Tags.Add(TEXT("Cake"));
 
 }
 
@@ -55,6 +55,7 @@ void AsalesStandActor::Tick(float DeltaTime)
 
 void AsalesStandActor::settingProductMesh(int32 v)
 {
+
 	int32 ProductNumber = 0;
 	USceneComponent* TargetSceneComp = nullptr;
 	EProductDivide ProductType = EProductDivide::Snack1;
@@ -99,7 +100,11 @@ void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* T
 
 bool AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
 {
-	Tags.Add(*ProductName);
+	Tags.Push(*ProductName);
+	Tags.Add(TEXT("Cake"));
+	for (auto a : Tags) {
+		Tags.RemoveAt(Tags.Find(TEXT("Cake")));
+	}
 
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
 	EProductDivide ProductType;
@@ -162,7 +167,7 @@ void AsalesStandActor::AddProduct(TArray<UStaticMeshComponent*>* TargetArray)
 		bIsFull = true;
 		return;
 	}
-	
+
 	(*TargetArray)[CurrentProductCount]->SetVisibility(true);
 	CurrentProductCount++;
 
