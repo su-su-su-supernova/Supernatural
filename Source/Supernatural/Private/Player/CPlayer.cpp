@@ -15,6 +15,8 @@
 #include "salesStandActor.h"
 #include "CLineTraceZone.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/BoxComponent.h"
+#include "CCounter.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h"
 
 ACPlayer::ACPlayer()
 {
@@ -52,6 +54,9 @@ ACPlayer::ACPlayer()
 
 	ConstructorHelpers::FObjectFinder<UInputAction> tmpIADP(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_DP.IA_DP'"));
 	if (tmpIAGrabBox.Succeeded()) IA_DP = tmpIADP.Object;
+
+	ConstructorHelpers::FObjectFinder<UInputAction> tmpIACalculate(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_Calculate.IA_Calculate'"));
+	if (tmpIAGrabBox.Succeeded()) IA_Calculate = tmpIACalculate.Object;
 
 
 	/* Motion Controller - Left Hand */
@@ -91,7 +96,6 @@ ACPlayer::ACPlayer()
 	WidgetInteraction->InteractionDistance = InteractionDistanceWidget;
 	WidgetInteraction->InteractionSource = EWidgetInteractionSource::World;
 	WidgetInteraction->TraceChannel = ECollisionChannel::ECC_Visibility;
-
 }
 
 void ACPlayer::BeginPlay()
@@ -121,6 +125,10 @@ void ACPlayer::Tick(float DeltaTime)
 	// Shelf로부터 일정 거리 앞에 있으면 Shelf와의 interaction 체크를 위해 Custom Ray Trace 실행
 	if (bIsHitByStand)
 		PerformLineTrace(InteractionDistanceStand);
+
+	// Counter에 들어왔으면 상품 바코드 찍기와 카운터 모니터 버튼 클릭을 위해 Custom Ray Trace 실행
+	if (bIsHitByCounter)
+		PerformLineTrace(InteractionDistanceWidget);
 }
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -149,6 +157,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		inputSystem->BindAction(IA_GrabBox, ETriggerEvent::Completed, this, &ACPlayer::GrabBoxInputCompleted);
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Started, this, &ACPlayer::DPStart);
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Completed, this, &ACPlayer::DPCompleted);
+		inputSystem->BindAction(IA_Calculate, ETriggerEvent::Started, this, &ACPlayer::CalculateInputStarted);
+		inputSystem->BindAction(IA_Calculate, ETriggerEvent::Completed, this, &ACPlayer::CalculateInputCompleted);
 	}
 }
 
@@ -164,15 +174,20 @@ void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 			if (!bIsHitByStand)
 			{
 				bIsHitByStand = true;
-				UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Stand >>>>>>>>>>>>>>>>>>>"));
+				//UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Stand >>>>>>>>>>>>>>>>>>>"));
 			}
+		}
+		else if (OtherActor->ActorHasTag(COUNTERTAG))
+		{
+			bIsHitByCounter = true;
+			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Counter >>>>>>>>>>>>>>>>>>>"));
 		}
 		else
 		{
 			if (!bIsHitByMainBoard)
             {
                 bIsHitByMainBoard = true;
-                UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Computer >>>>>>>>>>>>>>>>>>>"));
+                //UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Computer >>>>>>>>>>>>>>>>>>>"));
 				
             }
 		}
@@ -187,6 +202,11 @@ void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		{
 			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Stand >>>>>>>>>>>>>>>>>>>"));
 			bIsHitByStand = false;
+		}
+		else if (OtherActor->ActorHasTag(COUNTERTAG))
+		{
+			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Counter >>>>>>>>>>>>>>>>>>>"));
+			bIsHitByCounter = false;
 		}
 		else 
 		{
@@ -248,8 +268,6 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		/* Display Product */
 		if (hitResult.GetActor()->ActorHasTag(STANDTAG) && bIsGrabbingBox)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
-
 			// hit된 stand를 명시한다
 			Stand = Cast<AsalesStandActor>(hitResult.GetActor());
 
@@ -270,17 +288,19 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 				LiftBox();
 		}
 
-
 		/* Click UI */
 		if (bIsClickUIInputEntered && bIsHitByMainBoard && !bIsGrabbingBox)
 		{
-            //UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> hitResult : %s"), *(hitResult.ToString()));
 			// Widget Interaction에 Custom ray tracing 결과 전달
 			WidgetInteraction->SetCustomHitResult(hitResult);
-			//return;
 		}
 
-		//bIsLineTraceToStand = false;
+		/* Calculate */
+		if (hitResult.GetComponent()->ComponentHasTag(PRODUCTTAG) && bIsCalculateInputEntered)
+		{
+			UStaticMeshComponent* product = Cast<UStaticMeshComponent>(hitResult.GetComponent());
+			Calculate(product);
+		}
 	}
 }
 
@@ -453,6 +473,51 @@ void ACPlayer::DPCompleted()
 	bIsDPInputEntered = false;
 
 	UE_LOG(LogTemp, Error, TEXT(">>>>> DP Input Complete"));
+}
+#pragma endregion
+
+
+#pragma region Calculate
+
+void ACPlayer::CalculateInputStarted()
+{
+	bIsCalculateInputEntered = true;
+}
+
+void ACPlayer::CalculateInputCompleted()
+{
+	bIsCalculateInputEntered = false;
+}
+
+void ACPlayer::Calculate(UStaticMeshComponent* InProduct)
+{
+	// Counter에 Customer가 없다면 종료
+	if( !(Counter->GetIsCustomerArrived()) ) return;
+
+	// Counter에 계산할 물품이 없다면 종료
+	if( !(Counter->GetIsProductsOnCounter()) ) return;
+
+	// Counter에 있는 모든 물품을 리더기로 인식시켰다면 종료
+	if(Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
+	{
+		Counter->SetIsProductsOnCounter(false);
+		Counter->SetCanCalculate(false);
+		return;
+	}
+
+	// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
+	Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
+
+	// 바코드를 인식한 상품의 가격과 상품명 정보를 가져온다
+	FString name = InProduct->GetName();
+	FString tmp, tmpIdx;
+	name.Split(TEXT("CounterProduct_"), &tmp, &tmpIdx);
+	
+	int32 index = FCString::Atoi(*tmpIdx);
+	
+
+	// AI가 구매한 물품들의 총 액수를 갱신한다
+	
 }
 
 #pragma endregion
