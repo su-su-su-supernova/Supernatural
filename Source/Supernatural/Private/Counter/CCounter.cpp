@@ -56,6 +56,7 @@ ACCounter::ACCounter()
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> tmpCard(TEXT("/Script/Engine.SkeletalMesh'/Game/DYL/Assets/cc0-magnet-card/source/MagnetCard1.MagnetCard1'"));
 	if(tmpCard.Succeeded()) CreditCard->SetSkeletalMesh(tmpCard.Object);
+	CreditCard->SetVisibility(false);
 
 	// AI Spawn Point
 	AISpawnPoint = CreateDefaultSubobject<UBoxComponent>(TEXT("AISpawnPoint"));
@@ -130,11 +131,12 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		bIsProductsOnCounter = true;
 		bCanCalculate = true;
 
-		// Player가 물품 계산을 위해 카운터 위에 있는 제품들을 클릭한다
+		// 계산에 사용할 데이터들을 초기화해준다
 		NCountedItems = 0;
 		TotalCost = 0;
 		InputCost = 0;
 
+		// Player가 물품 계산을 위해 카운터 위에 있는 제품들을 클릭한다
 	}
 }
 

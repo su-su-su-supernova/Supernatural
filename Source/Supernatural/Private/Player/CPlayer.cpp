@@ -17,6 +17,7 @@
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/BoxComponent.h"
 #include "CCounter.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h"
+#include "SuperGameMode.h"
 
 ACPlayer::ACPlayer()
 {
@@ -96,6 +97,9 @@ ACPlayer::ACPlayer()
 	WidgetInteraction->InteractionDistance = InteractionDistanceWidget;
 	WidgetInteraction->InteractionSource = EWidgetInteractionSource::World;
 	WidgetInteraction->TraceChannel = ECollisionChannel::ECC_Visibility;
+
+	/* GameMode */
+	SuperGameMode = CreateDefaultSubobject<ASuperGameMode>(TEXT("SuperGameMode"));
 }
 
 void ACPlayer::BeginPlay()
@@ -514,7 +518,22 @@ void ACPlayer::Calculate(UStaticMeshComponent* InProduct)
 	name.Split(TEXT("CounterProduct_"), &tmp, &tmpIdx);
 	
 	int32 index = FCString::Atoi(*tmpIdx);
+
+	FString purchasedName;
+	switch (Counter->GetShoppingList()[index])
+	{
+		case EProductDivide::Snack1:
+			purchasedName = TEXT("Cereal");
+			break;
+		case EProductDivide::Snack2:
+			purchasedName = TEXT("Coke");
+			break;
+		case EProductDivide::Snack3:
+			purchasedName = TEXT("Tea");
+			break;
+	}
 	
+	FProductData* purchasedProduct = SuperGameMode->GetProductData(*purchasedName);
 
 	// AI가 구매한 물품들의 총 액수를 갱신한다
 	

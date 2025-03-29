@@ -220,6 +220,8 @@ private:
 
 	class ACCounter* Counter;
 
+	class ASuperGameMode* SuperGameMode;
+
 #pragma endregion
 
 #pragma region Haptic
