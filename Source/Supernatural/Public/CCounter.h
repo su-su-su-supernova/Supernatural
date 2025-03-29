@@ -19,26 +19,35 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Counter")
 	class UStaticMeshComponent* CounterBody;
-	UPROPERTY(EditAnywhere)
+
+	UPROPERTY(EditAnywhere, Category = "Counter")
 	class UStaticMesh* BodyMesh;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Counter")
+	class UBoxComponent* AISpawnPoint;
+
+	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UStaticMeshComponent* CounterMonitor;
-	UPROPERTY(EditAnywhere)
+
+	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UStaticMesh* MonitorMesh;
-	UPROPERTY(EditAnywhere)
+
+	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UMaterial* MonitorMat;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UWidgetComponent* WidgetComponent;
 
-	/*UPROPERTY(EditAnywhere)
-	TSubclassOf<class UCounterMonitorWidget> MonitorWidget;*/
-
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Casher")
 	class UStaticMeshComponent* CasherBody;
-	UPROPERTY(EditAnywhere)
+
+	UPROPERTY(EditAnywhere, Category = "Casher")
 	class UStaticMesh* CasherMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Calculate")
+	class USkeletalMeshComponent* CreditCard;
+
+	
 };
