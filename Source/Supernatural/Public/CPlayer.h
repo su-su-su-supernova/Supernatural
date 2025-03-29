@@ -201,8 +201,26 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Calculate")
     class UInputAction* IA_Calculate;
 
+	// 카운터 구별용 tag
+	const FName COUNTERTAG = FName("Counter");
+
     // 카드 구별용 tag
     const FName CARDTAG = FName("Card");
+
+	// 상품 구별용 tag
+	const FName PRODUCTTAG = FName("Product");
+
+	bool bIsHitByCounter = false;
+	bool bIsCalculateInputEntered = false;
+	//bool bIsCalculating = false;
+
+	void CalculateInputStarted();
+	void CalculateInputCompleted();
+	void Calculate(UStaticMeshComponent* InProduct);
+
+	class ACCounter* Counter;
+
+	class ASuperGameMode* SuperGameMode;
 
 #pragma endregion
 
