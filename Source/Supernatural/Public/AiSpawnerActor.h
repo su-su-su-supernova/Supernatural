@@ -11,8 +11,8 @@ UCLASS()
 class SUPERNATURAL_API AAiSpawnerActor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AAiSpawnerActor();
 
@@ -20,7 +20,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -29,5 +29,7 @@ private:
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<AAiCharacter> AiCharacterSample;
+
+	float CurrentTime = 0.0f;
 
 };

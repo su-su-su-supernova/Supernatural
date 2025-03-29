@@ -26,12 +26,8 @@ public:
 
 	TMap<FString, FProductData*> Product;
 
-	//UPROPERTY(EditAnywhere, Category = "DataAsset")
-	//class UCProductDataAsset* DAProduct;
-
 	void LoadProductDT(UScriptStruct* InStruct);
 
-	// void CreateProductDataAsset(UDataTable* InDT);
 
     FProductData* GetProductData(const FString& ProductName) const;
 
@@ -39,5 +35,13 @@ public:
 
 	void LoadProductData();
 
+	int32 GenerateTicketNumber();
 
+	void IncrementTicketCount();
+	void IncrementGameModeTicketCount();
+	int32 GenerateGameModeTicketNumber();
+private:
+
+	int32 TicketNumber = 1;
+	int32 GameModeTicketNumber = 1;
 };

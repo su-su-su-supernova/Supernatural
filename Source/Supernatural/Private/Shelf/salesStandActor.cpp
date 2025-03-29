@@ -43,11 +43,9 @@ AsalesStandActor::AsalesStandActor()
 void AsalesStandActor::BeginPlay()
 {
 	Super::BeginPlay();
-	//Tags.Add(TEXT("Cake"));
 
 }
 
-// Called every frame
 void AsalesStandActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -102,9 +100,9 @@ bool AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
 {
 	Tags.Push(*ProductName);
 	Tags.Add(TEXT("Cake"));
-	for (auto a : Tags) {
-		Tags.RemoveAt(Tags.Find(TEXT("Cake")));
-	}
+	//for (auto a : Tags) {
+	//	Tags.RemoveAt(Tags.Find(TEXT("Cake")));
+	//}
 
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
 	EProductDivide ProductType;
