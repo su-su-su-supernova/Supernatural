@@ -102,9 +102,9 @@ bool AsalesStandActor::SetMeshesForProductNumber(FString ProductName)
 {
 	Tags.Push(*ProductName);
 	Tags.Add(TEXT("Cake"));
-	for (auto a : Tags) {
-		Tags.RemoveAt(Tags.Find(TEXT("Cake")));
-	}
+	//for (auto a : Tags) {
+	//	Tags.RemoveAt(Tags.Find(TEXT("Cake")));
+	//}
 
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
 	EProductDivide ProductType;

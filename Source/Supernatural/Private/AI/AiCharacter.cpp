@@ -59,5 +59,13 @@ void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		isBegin = true;
 		UE_LOG(LogTemp, Warning, TEXT("name: %s"), *pc->CurrentName);
 	}
+	if (OtherActor->Tags.Contains(TEXT("Counter"))) {
+		isBegin = true;
+		ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+		g->IncrementGameModeTicketCount();
+	}
+	if (OtherActor->Tags.Contains(TEXT("End"))) {
+		isBegin = true;
+	}
 }
 

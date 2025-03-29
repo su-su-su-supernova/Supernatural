@@ -9,6 +9,7 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "SuperGameMode.h"
 
 
 UProductFindFailedTaskNode::UProductFindFailedTaskNode()
@@ -21,9 +22,8 @@ EBTNodeResult::Type UProductFindFailedTaskNode::ExecuteTask(UBehaviorTreeCompone
     Super::ExecuteTask(OwnerComp, NodeMemory);
 
     ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
-
-    AiController->TargetLocation = getRandomLocation();
-    return EBTNodeResult::InProgress;
+        AiController->TargetLocation = getRandomLocation();
+        return EBTNodeResult::InProgress;
 }
 
 void UProductFindFailedTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
@@ -31,15 +31,18 @@ void UProductFindFailedTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uin
     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
     ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
+    ASuperGameMode* Gamemode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
     if (!AiController) {
         FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
         return;
     }
-    //if (FoundActors.Num()>=0) {
-    //    FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-    //}
-    //else
-    //    FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+    if (Gamemode->GenerateGameModeTicketNumber() == AiController->TicketNumber) {
+        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+        return;
+
+    }
+
+
 
 
     float AcceptableRadius = 100.0f;

@@ -32,7 +32,7 @@ private:
 	class ASuperGameMode* GameMode;
 
 public:
-	FString ProductName[4] = {};
+	TArray<FString> ProductName;
 	FString CurrentName;
 
 	UPROPERTY(VisibleAnywhere)
@@ -43,9 +43,14 @@ public:
 public:
 	bool SelectNextProduct();
 	void AddIndex();
-	bool ChangeState();
+	void BFS(TArray<FString>ProductNames);
+
 public:
 	FVector TargetLocation;
 	EAIState AIState = EAIState::FindProduct;
 	TArray<AActor*> FoundActors;
+	int32 TicketNumber = 0;
+
+	bool isSucceeded = false;
+
 };

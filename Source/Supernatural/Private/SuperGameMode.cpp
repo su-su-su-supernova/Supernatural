@@ -28,7 +28,7 @@ void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
     {
         // Data Table의 Row Struct를 정의한다
         DTProduct->RowStruct = InStruct;
-        
+
         // 파일 데이터를 바탕으로 Data Table을 생성한다
         TArray<FString> errorMessages = DTProduct->CreateTableFromCSVString(csvFileData);
 
@@ -50,7 +50,7 @@ void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
     // CSV 파일 데이터를 불러오는 데 실패했다면
     else
         UE_LOG(LogTemp, Error, TEXT(">> Failed to load CSV file from path: %s"), *csvFilePath);
-    
+
 }
 void ASuperGameMode::LoadProductData()
 {
@@ -81,6 +81,29 @@ void ASuperGameMode::LoadProductData()
         UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>> Product : %s / Price : %d"), *p.Key, p.Value->SellingPrice);
     }
 }
+
+int32 ASuperGameMode::GenerateTicketNumber()
+{
+    return TicketNumber;
+}
+
+void ASuperGameMode::IncrementTicketCount()
+{
+    TicketNumber++;
+}
+
+void ASuperGameMode::IncrementGameModeTicketCount()
+{
+    GameModeTicketNumber++;
+}
+
+int32 ASuperGameMode::GenerateGameModeTicketNumber()
+{
+    UE_LOG(LogTemp, Log, TEXT("TICK%d"), GameModeTicketNumber);
+
+    return GameModeTicketNumber;
+}
+
 FProductData* ASuperGameMode::GetProductData(const FString& ProductName) const
 {
     FProductData* const* FoundData = Product.Find(ProductName);
@@ -94,7 +117,6 @@ FProductData* ASuperGameMode::GetProductData(const FString& ProductName) const
         return nullptr;
     }
 }
-
 FProductData* ASuperGameMode::GetProductDataByIndex(int32 Index) const
 {
     if (Product.Num() == 0)
@@ -118,6 +140,5 @@ FProductData* ASuperGameMode::GetProductDataByIndex(int32 Index) const
         }
         CurrentIndex++;
     }
-
     return nullptr;
 }
