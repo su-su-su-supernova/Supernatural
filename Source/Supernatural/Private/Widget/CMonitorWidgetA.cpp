@@ -4,6 +4,12 @@
 #include "Components/TextBlock.h"
 #include "Components/WrapBox.h"
 #include "Components/VerticalBox.h"
+#include "SlateBasics.h"        // Slate 기본 기능
+#include "SlateCore.h"          // SlateCore 관련 (FSlateBrush 등)
+#include "Styling/SlateTypes.h" // FButtonStyle 정의
+#include "Styling/SlateColor.h" // FSlateColor 관련
+#include "Widgets/Input/SButton.h" // SButton 위젯 관련
+#include "../../../../../../../Source/Runtime/UMG/Public/Components/CanvasPanelSlot.h"
 
 
 UCMonitorWidgetA::UCMonitorWidgetA(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) // 부모 클래스 초기화
@@ -34,9 +40,6 @@ void UCMonitorWidgetA::OnMonitorButtonClicked(int32 InButtonValue)
 			NumberEntered(InButtonValue);
 			break;
 	}
-
-
-	UE_LOG(LogTemp, Warning, TEXT(">>> s : %s <<<"), *InputCost);
 }
 
 void UCMonitorWidgetA::NumberEntered(int32 InType)
@@ -53,17 +56,14 @@ void UCMonitorWidgetA::NumberEntered(int32 InType)
 
 void UCMonitorWidgetA::DeleteLastInput()
 {
-	UE_LOG(LogTemp, Warning, TEXT(">>> [DELETE before] %s <<<"), *InputCost);
-
+	if(InputCost.Equals("0")) return;
+	else if(InputCost.Len() == 1) InputCost = "0";
 	// 문자열의 맨 마지막 문자를 지움
-	InputCost = InputCost.LeftChop(1);
-	UE_LOG(LogTemp, Warning, TEXT(">>> [DELETE after] %s <<<"), *InputCost);
+	else InputCost = InputCost.LeftChop(1);
 }
 
 void UCMonitorWidgetA::ConvertInputToString()
 {
-	UE_LOG(LogTemp, Warning, TEXT(">>> [COMPLETE before] %s <<<"), *InputCost);
-
 	// 입력받은 값을 정수로 변환
 	PlayerCalculated = FCString::Atoi(*InputCost);
 
@@ -71,7 +71,6 @@ void UCMonitorWidgetA::ConvertInputToString()
 
 	// 사용자 입력값 초기화
 	InputCost = "0";
-	UE_LOG(LogTemp, Warning, TEXT(">>> [COMPLETE after] %s <<<"), *InputCost);
 }
 
 void UCMonitorWidgetA::SetWrapBox()
@@ -83,31 +82,63 @@ void UCMonitorWidgetA::SetWrapBox()
 		MonitorButton->ButtonIndex = i;
 		MonitorButton->SetMonitorReference(this);
 
-		// 버튼 정보 추가
-		if(i == 10)
-			MonitorButton->Text->SetText(FText::FromString("<"));
-		else if(i == 11)
-			MonitorButton->Text->SetText(FText::AsNumber(0));
-		else if(i == 12)
-			MonitorButton->Text->SetText(FText::FromString(TEXT("●")));
-		else
-			MonitorButton->Text->SetText(FText::AsNumber(i));
+		FButtonStyle buttonStyle;
+		FSlateBrush normalBrush, hoveredBrush, pressedBrush;
+
+        normalBrush.DrawAs = ESlateBrushDrawType::RoundedBox;
+        normalBrush.OutlineSettings.CornerRadii = FVector4(0.5f, 0.5f, 0.5f, 0.5f);
+
+        hoveredBrush.DrawAs = ESlateBrushDrawType::RoundedBox;
+        hoveredBrush.OutlineSettings.CornerRadii = FVector4(0.5f, 0.5f, 0.5f, 0.5f);
+
+        pressedBrush.DrawAs = ESlateBrushDrawType::RoundedBox;
+        pressedBrush.OutlineSettings.CornerRadii = FVector4(0.5f, 0.5f, 0.5f, 0.5f);
+
+        switch (i)
+        {
+        case 10:
+            MonitorButton->Text->SetText(FText::FromString("<"));
+            normalBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("F45892FF"))));
+            hoveredBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("F4B0C3FF"))));
+            pressedBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("9B355CFF"))));
+
+            break;
+        case 11:
+            MonitorButton->Text->SetText(FText::AsNumber(0));
+            normalBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("638ABBFF"))));
+            hoveredBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("D9D9D9FF"))));
+            pressedBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("1C3B6AFF"))));
+            break;
+        case 12:
+            MonitorButton->Text->SetText(FText::FromString(TEXT("●")));
+            normalBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("7FD365FF"))));
+            hoveredBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("B0D3A9FF"))));
+            pressedBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("407032FF"))));
+            break;
+        default:
+            MonitorButton->Text->SetText(FText::AsNumber(i));
+            normalBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("638ABBFF"))));
+            hoveredBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("D9D9D9FF"))));
+            pressedBrush.TintColor = FSlateColor(FLinearColor(FColor::FromHex(TEXT("1C3B6AFF"))));
+            break;
+        }
+
+        buttonStyle.SetNormal(normalBrush);
+        buttonStyle.SetHovered(hoveredBrush);
+        buttonStyle.SetPressed(pressedBrush);
+
+        MonitorButton->Button->SetStyle(buttonStyle);
 
 		// Wrapbox에 추가
 		WrapBox->AddChildToWrapBox(MonitorButton);
-
-		UE_LOG(LogTemp, Warning, TEXT(">>> Button name : %s"), *(MonitorButton->GetName()));
 	}
 }
 
 void UCMonitorWidgetA::SetVerticalBox()
 {
-	//TextTotalCost->SetText(FText::Format(NSLOCTEXT("UI", "TotalCost", "합계 : {0}"), TotalCost));
-	//TextTotalCost->SetText(FText::Format(NSLOCTEXT("UI", "TotalCost", "합계 : {0}"), FString::FromInt(TotalCost)));
 	TextTotalCost->SetText(FText::FromString(FString::Printf(TEXT("합계 : %d"), TotalCost)));
 	VerticalBox->AddChildToVerticalBox(TextTotalCost);
 
-	//TextInputCost->SetText(FText::Format(NSLOCTEXT("UI", "InputCost", "현재 금액 : {0}"), InputCost));
 	TextInputCost->SetText(FText::FromString(FString::Printf(TEXT("현재 금액 : %s"), *InputCost)));
 	VerticalBox->AddChildToVerticalBox(TextInputCost);
 }
