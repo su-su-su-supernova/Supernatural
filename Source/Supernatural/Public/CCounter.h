@@ -49,5 +49,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Calculate")
 	class USkeletalMeshComponent* CreditCard;
 
-	
+	class UProductSalesStandDataAsset* ProductSalesStandDataAsset;
+
+	UPROPERTY(EditAnywhere, Category = "Calculate")
+	TArray<UStaticMeshComponent*> Products;
+
 };

@@ -2,7 +2,6 @@
 #include "../../../../../../../Source/Runtime/UMG/Public/Components/WidgetComponent.h"
 #include "CLineTraceZone.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/BoxComponent.h"
-#include "CProductSpawner.h"
 
 ACCounter::ACCounter()
 {
@@ -45,13 +44,6 @@ ACCounter::ACCounter()
 	if (tmpCasher.Succeeded()) CasherMesh = tmpCasher.Object;
 	CasherBody->SetStaticMesh(CasherMesh);
 
-	// Line Trace Zone
-	LineTraceZone=Cast<ACLineTraceZone>(LineTraceZoneBP);
-
-
-	LineTraceZone->SetActorRelativeLocation(FVector(-2.544815, 84.725848, -21.325992));
-	LineTraceZone->SetActorRelativeScale3D(FVector(2.102739, 1.697381, 1.282500));
-	
 	// Credit Card
 	CreditCard = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CreditCard"));
 	CreditCard->SetupAttachment(CounterBody);
@@ -70,6 +62,16 @@ ACCounter::ACCounter()
 	AISpawnPoint->SetRelativeLocation(FVector(125.000000, -80.000000, -29.000000));
 	AISpawnPoint->SetRelativeRotation(FRotator(0.000000, 90.000000, 0.000000));
 	AISpawnPoint->SetRelativeScale3D(FVector(1.500000, 1.500000, 1.000000));
+
+	// Product Sales Stand Data Asset
+	ConstructorHelpers::FObjectFinder<UProductSalesStandDataAsset> tmpProductDA(TEXT("/Script/Supernatural.ProductSalesStandDataAsset'/Game/HWL/Data/NewDataAsset.NewDataAsset'"));
+	if(tmpProductDA.Succeeded()) ProductSalesStandDataAsset = tmpProductDA.Object;
+
+	// Products
+	for (int i = 0; i < 4; i++)
+	{
+
+	}
 }
 
 void ACCounter::BeginPlay()
