@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "MainBoardWidget.h"
 #include "ProductInfoWidget.h"
 #include "Components/WrapBox.h"
 #include "Components/TextBlock.h"
@@ -9,7 +10,6 @@
 #include "SuperGameMode.h"
 #include "ProductSellWidget.h"
 #include "Components/VerticalBox.h"
-#include "MainBoardWidget.h"
 
 
 UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)

@@ -14,6 +14,9 @@ protected:
 
 public:
 	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* CanvasPanel;
+
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Text;
 
 	UPROPERTY(meta = (BindWidget))

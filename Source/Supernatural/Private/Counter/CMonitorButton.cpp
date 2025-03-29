@@ -11,7 +11,6 @@ void UCMonitorButton::NativeConstruct()
 
 void UCMonitorButton::OnButtonClicked()
 {
-    UE_LOG(LogTemp, Warning, TEXT(">>> Button : %d"), ButtonIndex);
     MonitorWidget->OnMonitorButtonClicked(ButtonIndex);
 }
 
