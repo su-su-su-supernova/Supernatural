@@ -215,8 +215,8 @@ private:
 	//bool bIsCalculating = false;
 
 	void CalculateInputStarted();
-	void CalculateInputCompleted();
-	void Calculate(UStaticMeshComponent* InProduct);
+	void ScanProductBarcode(UStaticMeshComponent* InProduct);
+	void CalculateTotalPrice();
 
 	class ACCounter* Counter;
 

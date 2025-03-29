@@ -57,9 +57,4 @@ public:
 	void SpawnProductBox(FText product);
 	void SetVerticalBox(FText ProductName, FText CostPrice, FText CostPriceSum);
 	void SetInfoWidget(TMap<FString, FProductData*> Product);
-
-
-
-
-
 };

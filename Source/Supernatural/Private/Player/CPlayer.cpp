@@ -162,7 +162,6 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Started, this, &ACPlayer::DPStart);
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Completed, this, &ACPlayer::DPCompleted);
 		inputSystem->BindAction(IA_Calculate, ETriggerEvent::Started, this, &ACPlayer::CalculateInputStarted);
-		inputSystem->BindAction(IA_Calculate, ETriggerEvent::Completed, this, &ACPlayer::CalculateInputCompleted);
 	}
 }
 
@@ -303,7 +302,7 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		if (hitResult.GetComponent()->ComponentHasTag(PRODUCTTAG) && bIsCalculateInputEntered)
 		{
 			UStaticMeshComponent* product = Cast<UStaticMeshComponent>(hitResult.GetComponent());
-			Calculate(product);
+			ScanProductBarcode(product);
 		}
 	}
 }
@@ -488,12 +487,7 @@ void ACPlayer::CalculateInputStarted()
 	bIsCalculateInputEntered = true;
 }
 
-void ACPlayer::CalculateInputCompleted()
-{
-	bIsCalculateInputEntered = false;
-}
-
-void ACPlayer::Calculate(UStaticMeshComponent* InProduct)
+void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 {
 	// Counter에 Customer가 없다면 종료
 	if( !(Counter->GetIsCustomerArrived()) ) return;
@@ -534,9 +528,28 @@ void ACPlayer::Calculate(UStaticMeshComponent* InProduct)
 	}
 	
 	FProductData* purchasedProduct = SuperGameMode->GetProductData(*purchasedName);
+	int32 productPrice = purchasedProduct->CostPrice;
 
 	// AI가 구매한 물품들의 총 액수를 갱신한다
-	
+	Counter->SetTotalCost(Counter->GetTotalCost() + productPrice);
+
+	// 카드를 받아들어야지
+
+
+	// 플레이어가 총액 입력해야지
+
+
+	// 결제 결과를 DT에 반영한다
+	(purchasedProduct->ShelfStock)--;
+	SuperGameMode->SetTotalSales(SuperGameMode->GetTotalSales() - productPrice);
+
+	// Calculate input이 끝났음을 명시한다
+	bIsCalculateInputEntered = false;
+}
+
+void ACPlayer::CalculateTotalPrice()
+{
+
 }
 
 #pragma endregion

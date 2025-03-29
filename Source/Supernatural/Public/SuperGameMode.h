@@ -44,4 +44,10 @@ private:
 
 	int32 TicketNumber = 1;
 	int32 GameModeTicketNumber = 1;
+
+	int32 TotalSales = 100000000;
+
+public:
+	int32 GetTotalSales() const { return TotalSales; }
+	void SetTotalSales(int32 InTotalSales) { TotalSales = InTotalSales; }
 };
