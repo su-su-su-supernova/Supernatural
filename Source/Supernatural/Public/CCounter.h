@@ -48,10 +48,10 @@ private:
 	class UStaticMesh* CasherMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Calculate")
-	class UStaticMeshComponent* CreditCard;
+	class UStaticMeshComponent* MagneticCard;
 
 	UPROPERTY(EditAnywhere, Category = "Calculate")
-	class UStaticMesh* CardMesh;
+	class UStaticMesh* MagneticCardMesh;
 
 	class UProductSalesStandDataAsset* ProductSalesStandDataAsset;
 

@@ -46,17 +46,17 @@ ACCounter::ACCounter()
 	if (tmpCasher.Succeeded()) CasherMesh = tmpCasher.Object;
 	CasherBody->SetStaticMesh(CasherMesh);
 
-	// Credit Card
-	CreditCard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CreditCard"));
-	CreditCard->SetupAttachment(CounterBody);
-	CreditCard->SetRelativeLocation(FVector(-56.585265, 6.646232, 2.207688));
-	CreditCard->SetRelativeRotation(FRotator(0, -30, -90));
-	CreditCard->SetRelativeScale3D(FVector(0.32));
+	// Magnetic Card
+	MagneticCard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MagneticCard"));
+	MagneticCard->SetupAttachment(CounterBody);
+	MagneticCard->SetRelativeLocation(FVector(-56.585265, 6.646232, 2.207688));
+	MagneticCard->SetRelativeRotation(FRotator(0, -30, -90));
+	MagneticCard->SetRelativeScale3D(FVector(0.32));
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCard(TEXT("/Script/Engine.SkeletalMesh'/Game/DYL/Assets/cc0-magnet-card/source/MagnetCard1.MagnetCard1'"));
-	if(tmpCard.Succeeded()) CardMesh = tmpCard.Object;
-	CreditCard->SetStaticMesh(CardMesh);
-	CreditCard->SetVisibility(false);
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCard(TEXT("/Script/Engine.StaticMesh'/Game/DYL/Meshes/Bank_Card_3D_Model/uploads_files_2492273_Card.uploads_files_2492273_Card'"));
+	if(tmpCard.Succeeded()) MagneticCardMesh = tmpCard.Object;
+	MagneticCard->SetStaticMesh(MagneticCardMesh);
+	MagneticCard->SetVisibility(false);
 
 	// AI Spawn Point
 	AISpawnPoint = CreateDefaultSubobject<UBoxComponent>(TEXT("AISpawnPoint"));
@@ -221,7 +221,12 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 		{
 			UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
 			// 여기 왜 에러...?
-			CreditCard->SetVisibility(true);
+			if (MagneticCard == nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("<<< Credit Card is EMPTY >>>"));
+				return;
+			}
+			MagneticCard->SetVisibility(true);
 			CurPayTime = 0;
 
 			UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
@@ -233,7 +238,7 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 
 void ACCounter::GrabCard()
 {
-	CreditCard->SetVisibility(false);
+	MagneticCard->SetVisibility(false);
 }
 
 void ACCounter::CalculateStart()
