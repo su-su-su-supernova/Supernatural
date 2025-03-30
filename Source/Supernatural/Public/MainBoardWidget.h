@@ -59,15 +59,11 @@ private:
 	class ASuperGameMode* GameMode;
 	class AProductBoxSpawner* productBox;
 public:
+
 	void SpawnProductBox(EProductType product);
 	void SetVerticalBox(EProductType Enum, FText ProductName, FText ProductCount, FText CostPriceSum);
 	void SetInfoWidget(TMap<EProductType, FProductData*> Product);
 
 private:
 	int32 PurchaseCost = 0;
-
-
-
-
-
 };

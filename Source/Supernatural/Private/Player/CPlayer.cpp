@@ -56,8 +56,11 @@ ACPlayer::ACPlayer()
 	ConstructorHelpers::FObjectFinder<UInputAction> tmpIADP(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_DP.IA_DP'"));
 	if (tmpIAGrabBox.Succeeded()) IA_DP = tmpIADP.Object;
 
-	ConstructorHelpers::FObjectFinder<UInputAction> tmpIACalculate(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_Calculate.IA_Calculate'"));
-	if (tmpIAGrabBox.Succeeded()) IA_Calculate = tmpIACalculate.Object;
+	ConstructorHelpers::FObjectFinder<UInputAction> tmpIAGrabCard(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_GrabCard.IA_GrabCard'"));
+	if (tmpIAGrabBox.Succeeded()) IA_GrabCard = tmpIAGrabCard.Object;
+
+	ConstructorHelpers::FObjectFinder<UInputAction> tmpIAScanBarcode(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_ScanBarcode.IA_ScanBarcode'"));
+	if (tmpIAGrabBox.Succeeded()) IA_ScanBarcode = tmpIAScanBarcode.Object;
 
 
 	/* Motion Controller - Left Hand */
@@ -98,8 +101,10 @@ ACPlayer::ACPlayer()
 	WidgetInteraction->InteractionSource = EWidgetInteractionSource::World;
 	WidgetInteraction->TraceChannel = ECollisionChannel::ECC_Visibility;
 
+
 	/* GameMode */
 	SuperGameMode = CreateDefaultSubobject<ASuperGameMode>(TEXT("SuperGameMode"));
+
 }
 
 void ACPlayer::BeginPlay()
@@ -109,7 +114,7 @@ void ACPlayer::BeginPlay()
 	auto pc = Cast<APlayerController>(GetController());
 	if(pc)
 	{
-        UE_LOG(LogTemp, Error, TEXT(">>>>>> Input Mode : GameAndUI"));
+        //UE_LOG(LogTemp, Error, TEXT(">>>>>> Input Mode : GameAndUI"));
 		pc->SetInputMode(FInputModeGameAndUI());
 	}
 }
@@ -118,19 +123,19 @@ void ACPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Main Board·ÎºÎÅÍ ÀÏÁ¤ °Å¸® ¾Õ¿¡ ÀÖÀ¸¸é Widget°úÀÇ interaction Ã¼Å©¸¦ À§ÇØ Custom Ray Trace ½ÇÇà
+	// Main Boardë¡œë¶€í„° ì¼ì • ê±°ë¦¬ ì•ì— ìˆìœ¼ë©´ Widgetê³¼ì˜ interaction ì²´í¬ë¥¼ ìœ„í•´ Custom Ray Trace ì‹¤í–‰
 	if (bIsHitByMainBoard && !bIsGrabbingBox)
 		PerformLineTrace(InteractionDistanceWidget);
 
-	// Left Trigger Slide¸¦ ´©¸£°í ÀÖÀ¸¸é Box¿ÍÀÇ interaction Ã¼Å©¸¦ À§ÇØ Custom Ray Trace ½ÇÇà
+	// Left Trigger Slideë¥¼ ëˆ„ë¥´ê³  ìˆìœ¼ë©´ Boxì™€ì˜ interaction ì²´í¬ë¥¼ ìœ„í•´ Custom Ray Trace ì‹¤í–‰
 	if (bIsGrabBoxInputEntered)
 		PerformLineTrace(InteractionDistanceBox);
 
-	// Shelf·ÎºÎÅÍ ÀÏÁ¤ °Å¸® ¾Õ¿¡ ÀÖÀ¸¸é Shelf¿ÍÀÇ interaction Ã¼Å©¸¦ À§ÇØ Custom Ray Trace ½ÇÇà
+	// Shelfë¡œë¶€í„° ì¼ì • ê±°ë¦¬ ì•ì— ìˆìœ¼ë©´ Shelfì™€ì˜ interaction ì²´í¬ë¥¼ ìœ„í•´ Custom Ray Trace ì‹¤í–‰
 	if (bIsHitByStand)
 		PerformLineTrace(InteractionDistanceStand);
 
-	// Counter¿¡ µé¾î¿ÔÀ¸¸é »óÇ° ¹ÙÄÚµå Âï±â¿Í Ä«¿îÅÍ ¸ğ´ÏÅÍ ¹öÆ° Å¬¸¯À» À§ÇØ Custom Ray Trace ½ÇÇà
+	// Counterì— ë“¤ì–´ì™”ìœ¼ë©´ ì¹´ë“œ ë°›ê¸°, ìƒí’ˆ ë°”ì½”ë“œ ì°ê¸°, ëª¨ë‹ˆí„° ë²„íŠ¼ í´ë¦­ì„ ìœ„í•´ Custom Ray Trace ì‹¤í–‰
 	if (bIsHitByCounter)
 		PerformLineTrace(InteractionDistanceWidget);
 }
@@ -161,8 +166,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		inputSystem->BindAction(IA_GrabBox, ETriggerEvent::Completed, this, &ACPlayer::GrabBoxInputCompleted);
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Started, this, &ACPlayer::DPStart);
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Completed, this, &ACPlayer::DPCompleted);
-		inputSystem->BindAction(IA_Calculate, ETriggerEvent::Started, this, &ACPlayer::CalculateInputStarted);
-		inputSystem->BindAction(IA_Calculate, ETriggerEvent::Completed, this, &ACPlayer::CalculateInputCompleted);
+		inputSystem->BindAction(IA_GrabCard, ETriggerEvent::Started, this, &ACPlayer::GrabCardInputEntered);
+		inputSystem->BindAction(IA_ScanBarcode, ETriggerEvent::Started, this, &ACPlayer::ScanBarcodeInputStarted);
 	}
 }
 
@@ -202,7 +207,7 @@ void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	{
 		if (OtherActor->ActorHasTag(STANDTAG))
 		{
-			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Stand >>>>>>>>>>>>>>>>>>>"));
+			//UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Stand >>>>>>>>>>>>>>>>>>>"));
 			bIsHitByStand = false;
 		}
 		else if (OtherActor->ActorHasTag(COUNTERTAG))
@@ -212,7 +217,7 @@ void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Computer >>>>>>>>>>>>>>>>>>>"));
+			//UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Computer >>>>>>>>>>>>>>>>>>>"));
 			bIsHitByMainBoard = false;
 		}
 	}
@@ -252,7 +257,7 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 	params.AddIgnoredActor(LineTraceZone);
 	if (bIsGrabbingBox) params.AddIgnoredActor(Box);
 
-	// Line Trace¸¦ ½ÇÇàÇÏ´Â ÁÖÃ¼¿¡ µû¶ó »ö»ó ´Ù¸£°Ô
+	// Line Traceë¥¼ ì‹¤í–‰í•˜ëŠ” ì£¼ì²´ì— ë”°ë¼ ìƒ‰ìƒ ë‹¤ë¥´ê²Œ
 	FColor drawColor;
 	if(InInteractionDistance == InteractionDistanceWidget) drawColor = FColor::Magenta;
 	else if(InInteractionDistance == InteractionDistanceStand) drawColor = FColor::Orange;
@@ -270,10 +275,10 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		/* Display Product */
 		if (hitResult.GetActor()->ActorHasTag(STANDTAG) && bIsGrabbingBox)
 		{
-			// hitµÈ stand¸¦ ¸í½ÃÇÑ´Ù
+			// hitëœ standë¥¼ ëª…ì‹œí•œë‹¤
 			Stand = Cast<AsalesStandActor>(hitResult.GetActor());
 
-			// ¼±¹İ¿¡ Line Trace°¡ µÇ¾î ÀÖ´Ù°í ¸í½ÃÇÑ´Ù
+			// ì„ ë°˜ì— Line Traceê°€ ë˜ì–´ ìˆë‹¤ê³  ëª…ì‹œí•œë‹¤
 			bIsLineTraceToStand = true;
 		}
 		else bIsLineTraceToStand = false;
@@ -282,10 +287,10 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		/* Grab Box */
 		if (bIsGrabBoxInputEntered && hitResult.GetActor()->ActorHasTag(BOXTAG) && !bIsGrabbingBox)
 		{
-			// hitµÈ box¸¦ ¸í½ÃÇÑ´Ù
+			// hitëœ boxë¥¼ ëª…ì‹œí•œë‹¤
 			Box = Cast<AProductBoxActor>(hitResult.GetActor());
 
-			// Box¸¦ µé¾î¿Ã¸°´Ù
+			// Boxë¥¼ ë“¤ì–´ì˜¬ë¦°ë‹¤
 			if (!bIsGrabbingBox)
 				LiftBox();
 		}
@@ -293,16 +298,24 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		/* Click UI */
 		if (bIsClickUIInputEntered && bIsHitByMainBoard && !bIsGrabbingBox)
 		{
-			// Widget Interaction¿¡ Custom ray tracing °á°ú Àü´Ş
+			// Widget Interactionì— Custom ray tracing ê²°ê³¼ ì „ë‹¬
 			WidgetInteraction->SetCustomHitResult(hitResult);
 		}
 
-		/* Calculate */
-		if (hitResult.GetComponent()->ComponentHasTag(PRODUCTTAG) && bIsCalculateInputEntered)
+		/* Scan Barcode */
+		if (bIsScanBarcodeInputEntered && hitResult.GetComponent()->ComponentHasTag(PRODUCTTAG))
 		{
-			UStaticMeshComponent* product = Cast<UStaticMeshComponent>(hitResult.GetComponent());
-			Calculate(product);
+			Counter = Cast<ACCounter>(hitResult.GetActor());
+			UStaticMeshComponent* hitComp = Cast<UStaticMeshComponent>(hitResult.GetComponent());
+			ScanProductBarcode(hitComp);
 		}
+
+		/* Grab Card */
+		if(bIsGrabCardInputEntered && hitResult.GetComponent()->ComponentHasTag(CARDTAG))
+			Counter->GrabCard();
+
+		/* Calculate */
+		
 	}
 }
 
@@ -312,7 +325,7 @@ void ACPlayer::SetInputMode()
 	auto* pc = GetWorld()->GetFirstPlayerController();
 	if (!pc) return;
 
-	// Line Trace¸¦ ÁøÇà ÁßÀÌ°í Widget°ú »óÈ£ÀÛ¿ë ÁßÀÏ ¶© UI ÀÔ·ÂÀ¸·Î¸¸ ÀÔ·ÂÀ» ¹Ş°Ô ÇÔ
+	// Line Traceë¥¼ ì§„í–‰ ì¤‘ì´ê³  Widgetê³¼ ìƒí˜¸ì‘ìš© ì¤‘ì¼ ë• UI ì…ë ¥ìœ¼ë¡œë§Œ ì…ë ¥ì„ ë°›ê²Œ í•¨
 	if (bIsPerformingLineTrace && WidgetInteraction)pc->SetInputMode(FInputModeUIOnly());
 	else pc->SetInputMode(FInputModeGameOnly());
 }
@@ -325,15 +338,15 @@ void ACPlayer::ClickUIStart()
 
 	if (bIsClickUIInputEntered && WidgetInteraction)
 	{
-		UE_LOG(LogTemp, Error, TEXT(">>> WidgetInteraction Success!!!"));
-		UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>>>> IsOverInteractableWidget : %d"), WidgetInteraction->IsOverInteractableWidget());
+		//UE_LOG(LogTemp, Error, TEXT(">>> WidgetInteraction Success!!!"));
+		//UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>>>> IsOverInteractableWidget : %d"), WidgetInteraction->IsOverInteractableWidget());
 
 		if (WidgetInteraction->IsOverInteractableWidget())
 		{
-			UE_LOG(LogTemp, Error, TEXT(">>> Widget Interactable widget SUCCESS !!!!!!!!!!!"));
+			//UE_LOG(LogTemp, Error, TEXT(">>> Widget Interactable widget SUCCESS !!!!!!!!!!!"));
 			WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
 			bIsClickingUI = true;
-			UE_LOG(LogTemp, Warning, TEXT(">>> Activate Click A - bIsClickingUI : %d"), bIsClickingUI);
+			//UE_LOG(LogTemp, Warning, TEXT(">>> Activate Click A - bIsClickingUI : %d"), bIsClickingUI);
 		}
 	}
 }
@@ -344,7 +357,7 @@ void ACPlayer::ClickUICompleted()
 
 	WidgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
 	bIsClickingUI = false;
-	UE_LOG(LogTemp, Warning, TEXT(">>> Deactivate Click A - bIsClickingUI : %d"), bIsClickingUI);
+	//UE_LOG(LogTemp, Warning, TEXT(">>> Deactivate Click A - bIsClickingUI : %d"), bIsClickingUI);
 }
 
 #pragma endregion
@@ -353,7 +366,7 @@ void ACPlayer::ClickUICompleted()
 #pragma region Grab Box
 void ACPlayer::GrabBoxInputStart()
 {
-	// GrabBox inputÀÌ ½ÃÀÛµÇ¾ú´Ù°í ¸í½ÃÇÑ´Ù
+	// GrabBox inputì´ ì‹œì‘ë˜ì—ˆë‹¤ê³  ëª…ì‹œí•œë‹¤
 	bIsGrabBoxInputEntered = true;
 	UE_LOG(LogTemp, Error, TEXT(">>>>> Grab Box Input Start"));
 }
@@ -362,19 +375,19 @@ void ACPlayer::LiftBox()
 {
     UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> Lift Box <<<<<<<<<<"));
 
-	// socketÀÌ ÀÖ´Ù¸é
+	// socketì´ ìˆë‹¤ë©´
 	if (SkeletalMeshLeftHand->DoesSocketExist(SocketAttachBox))
 	{
-		// Box¸¦ Àâ°í ÀÖ´Ù°í ¸í½ÃÇÑ´Ù
+		// Boxë¥¼ ì¡ê³  ìˆë‹¤ê³  ëª…ì‹œí•œë‹¤
 		bIsGrabbingBox = true;
 
-		// BoxÀÇ Symulate Physics¸¦ ²¨ÁØ´Ù
+		// Boxì˜ Symulate Physicsë¥¼ êº¼ì¤€ë‹¤
 		Box->BoxPhysicsOnOff(false);
 
-		// BoxÀÇ Ãæµ¹ Ã³¸®¸¦ ²¨ÁØ´Ù
+		// Boxì˜ ì¶©ëŒ ì²˜ë¦¬ë¥¼ êº¼ì¤€ë‹¤
 		Box->FindComponentByClass<UBoxComponent>()->SetCollisionProfileName(TEXT("NoCollision"));
 
-		// BoxÀÇ À§Ä¡¸¦ socket À§Ä¡·Î º¸Á¤ÇÑ´Ù
+		// Boxì˜ ìœ„ì¹˜ë¥¼ socket ìœ„ì¹˜ë¡œ ë³´ì •í•œë‹¤
 		FVector socketLocation = RightHand->GetSocketLocation(SocketAttachBox);
 		Box->SetActorLocation(socketLocation);
 
@@ -382,24 +395,24 @@ void ACPlayer::LiftBox()
 		{
 			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>> ATTACH BOX SUCCESS <<<<<<<<<<"));
 
-			// BoxÀÇ Á¤º¸¸¦ °¡Á®¿Â´Ù
+			// Boxì˜ ì •ë³´ë¥¼ ê°€ì ¸ì˜¨ë‹¤
 			BoxData = Box->GetBoxInfo();
 			ProductCurrentStock = BoxData->BoxStock;
 
-			UE_LOG(LogTemp, Warning, TEXT("[Product Info] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
+			//UE_LOG(LogTemp, Warning, TEXT("[Product Info] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
 		}
 	}
 }
 
 void ACPlayer::GrabBoxInputCompleted()
 {
-	// ¹°Ã¼¸¦ Àâ°í ÀÖÁö ¾Ê´Ù¸é ¾Æ¹« Ã³¸®ÇÏÁö ¾Ê´Â´Ù
+	// ë¬¼ì²´ë¥¼ ì¡ê³  ìˆì§€ ì•Šë‹¤ë©´ ì•„ë¬´ ì²˜ë¦¬í•˜ì§€ ì•ŠëŠ”ë‹¤
 	if(bIsGrabbingBox == false) return;
 
-	// GrabBox inputÀÌ ³¡³µ´Ù°í ¸í½ÃÇÑ´Ù
+	// GrabBox inputì´ ëë‚¬ë‹¤ê³  ëª…ì‹œí•œë‹¤
 	bIsGrabBoxInputEntered = false;
 
-	// Box¸¦ ¶³¾î¶ß¸°´Ù
+	// Boxë¥¼ ë–¨ì–´ëœ¨ë¦°ë‹¤
 	DropBox();
 }
 
@@ -407,22 +420,22 @@ void ACPlayer::DropBox()
 {
 	UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> Drop Box <<<<<<<<<<"));
 
-	// Box¸¦ Àâ°í ÀÖÁö ¾Ê´Ù°í ¸í½ÃÇÑ´Ù
+	// Boxë¥¼ ì¡ê³  ìˆì§€ ì•Šë‹¤ê³  ëª…ì‹œí•œë‹¤
 	bIsGrabbingBox = false;
 
-	// Box¸¦ AttachBox socketÀ¸·ÎºÎÅÍ DetachÇÑ´Ù
+	// Boxë¥¼ AttachBox socketìœ¼ë¡œë¶€í„° Detachí•œë‹¤
 	Box->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>> DETACH BOX SUCCESS <<<<<<<<<<"));
 
-	// Box ÀÇ Symulate Physics¸¦ ÄÑÁØ´Ù
+	// Box ì˜ Symulate Physicsë¥¼ ì¼œì¤€ë‹¤
 	Box->BoxPhysicsOnOff(true);
 
-	// BoxÀÇ Ãæµ¹ Ã³¸®¸¦ ÄÑÁØ´Ù
+	// Boxì˜ ì¶©ëŒ ì²˜ë¦¬ë¥¼ ì¼œì¤€ë‹¤
 	Box->FindComponentByClass<UBoxComponent>()->SetCollisionProfileName(TEXT("Box"));
 
-	UE_LOG(LogTemp, Warning, TEXT("[DROP BOX] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
+	//UE_LOG(LogTemp, Warning, TEXT("[DROP BOX] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
 
-	// Box¸¦ null·Î ¸¸µé¾îÁØ´Ù
+	// Boxë¥¼ nullë¡œ ë§Œë“¤ì–´ì¤€ë‹¤
 	Box = nullptr;
 }
 #pragma endregion
@@ -431,11 +444,11 @@ void ACPlayer::DropBox()
 #pragma region Display Product
 void ACPlayer::DPStart()
 {
-	// inputÀÌ µé¾î¿ÔÀ½À» ¸í½ÃÇÑ´Ù
+	// inputì´ ë“¤ì–´ì™”ìŒì„ ëª…ì‹œí•œë‹¤
 	bIsDPInputEntered = true;
 	UE_LOG(LogTemp, Error, TEXT(">>>>> DP Input Start"));
 
-	// ¼±¹İ¿¡ Line Trace°¡ µÇ¾ú´Ù¸é Display¸¦ ÁøÇàÇØ¶ó
+	// ì„ ë°˜ì— Line Traceê°€ ë˜ì—ˆë‹¤ë©´ Displayë¥¼ ì§„í–‰í•´ë¼
 	if (bIsLineTraceToStand) DisplayProduct();
 }
 
@@ -444,8 +457,8 @@ void ACPlayer::DisplayProduct()
 
 	UE_LOG(LogTemp, Error, TEXT("bIsGrabbingBox : %d / ProductCurrentStock : %d"), bIsGrabbingBox, ProductCurrentStock);
 
-	// ¹Ú½º¸¦ µé°í ÀÖÁö ¾Ê°Å³ª
-	// ¼±¹İ¿¡ ÃÖ´ë·Î ¹èÄ¡ÇÒ ¼ö ÀÖÀ» ¸¸Å­ ¹èÄ¡Çß´Ù¸é ³¡³½´Ù
+	// ë°•ìŠ¤ë¥¼ ë“¤ê³  ìˆì§€ ì•Šê±°ë‚˜
+	// ì„ ë°˜ì— ìµœëŒ€ë¡œ ë°°ì¹˜í•  ìˆ˜ ìˆì„ ë§Œí¼ ë°°ì¹˜í–ˆë‹¤ë©´ ëë‚¸ë‹¤
 	if( !bIsGrabbingBox || ProductCurrentStock == 0)
 	{
 		return;
@@ -464,7 +477,7 @@ void ACPlayer::DisplayProduct()
 	UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *ProductName);
 	if (!Stand->SetMeshesForProductNumber(BoxData))
 	{
-		 //ÇöÀç Box¿¡ µé¾î ÀÖ´Â ¹°Ç° ¼ö¸¦ 1 °¨¼Ò½ÃÅ²´Ù
+		 //í˜„ì¬ Boxì— ë“¤ì–´ ìˆëŠ” ë¬¼í’ˆ ìˆ˜ë¥¼ 1 ê°ì†Œì‹œí‚¨ë‹¤
 		Box->SetCurrentStock(ProductCurrentStock--);
 	}
 
@@ -472,7 +485,7 @@ void ACPlayer::DisplayProduct()
 
 void ACPlayer::DPCompleted()
 {
-	// inputÀÌ ³¡³µÀ½À» ¸í½ÃÇÑ´Ù
+	// inputì´ ëë‚¬ìŒì„ ëª…ì‹œí•œë‹¤
 	bIsDPInputEntered = false;
 
 	UE_LOG(LogTemp, Error, TEXT(">>>>> DP Input Complete"));
@@ -482,59 +495,82 @@ void ACPlayer::DPCompleted()
 
 #pragma region Calculate
 
-void ACPlayer::CalculateInputStarted()
+void ACPlayer::ScanBarcodeInputStarted()
 {
-	bIsCalculateInputEntered = true;
+	bIsScanBarcodeInputEntered = true;
 }
 
-void ACPlayer::CalculateInputCompleted()
+void ACPlayer::GrabCardInputEntered()
 {
-	bIsCalculateInputEntered = false;
+	bIsGrabCardInputEntered = true;
 }
 
-void ACPlayer::Calculate(UStaticMeshComponent* InProduct)
+void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 {
-	//// Counter¿¡ Customer°¡ ¾ø´Ù¸é Á¾·á
-	//if( !(Counter->GetIsCustomerArrived()) ) return;
+	// Counterì— Customerê°€ ì—†ë‹¤ë©´ ì¢…ë£Œ
+	if( !(Counter->GetIsCustomerArrived()) ) return;
 
-	//// Counter¿¡ °è»êÇÒ ¹°Ç°ÀÌ ¾ø´Ù¸é Á¾·á
-	//if( !(Counter->GetIsProductsOnCounter()) ) return;
+	// Counterì— ê³„ì‚°í•  ë¬¼í’ˆì´ ì—†ë‹¤ë©´ ì¢…ë£Œ
+	if( !(Counter->GetIsProductsOnCounter()) ) return;
 
-	//// Counter¿¡ ÀÖ´Â ¸ğµç ¹°Ç°À» ¸®´õ±â·Î ÀÎ½Ä½ÃÄ×´Ù¸é Á¾·á
-	//if(Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
-	//{
-	//	Counter->SetIsProductsOnCounter(false);
-	//	Counter->SetCanCalculate(false);
-	//	return;
-	//}
+	// Counterì— ìˆëŠ” ëª¨ë“  ë¬¼í’ˆì„ ë¦¬ë”ê¸°ë¡œ ì¸ì‹ì‹œì¼°ë‹¤ë©´ ì¢…ë£Œ
+	if(Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
+	{
+		Counter->SetIsProductsOnCounter(false);
+		Counter->SetCanCalculate(false);
+		return;
+	}
 
-	//// ¸®´õ±â·Î ¹ÙÄÚµå¸¦ ÂïÀº ¹°Ç°ÀÇ °³¼ö¸¦ 1 Áõ°¡½ÃÅ²´Ù
-	//Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
+	// ë¦¬ë”ê¸°ë¡œ ë°”ì½”ë“œë¥¼ ì°ì€ ë¬¼í’ˆì˜ Visibilityë¥¼ ëˆë‹¤
+	InProduct->SetVisibility(false);
+	
+	// ë¦¬ë”ê¸°ë¡œ ë°”ì½”ë“œë¥¼ ì°ì€ ë¬¼í’ˆì˜ ê°œìˆ˜ë¥¼ 1 ì¦ê°€ì‹œí‚¨ë‹¤
+	Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
 
-	//// ¹ÙÄÚµå¸¦ ÀÎ½ÄÇÑ »óÇ°ÀÇ °¡°İ°ú »óÇ°¸í Á¤º¸¸¦ °¡Á®¿Â´Ù
-	//FString name = InProduct->GetName();
-	//FString tmp, tmpIdx;
-	//name.Split(TEXT("CounterProduct_"), &tmp, &tmpIdx);
+	// ë°”ì½”ë“œë¥¼ ì¸ì‹í•œ ìƒí’ˆì˜ ê°€ê²©ê³¼ ìƒí’ˆëª… ì •ë³´ë¥¼ ê°€ì ¸ì˜¨ë‹¤
+	FString name = InProduct->GetName();
+	FString tmp, tmpIdx;
+	name.Split(TEXT("CounterProduct"), &tmp, &tmpIdx);
+	
+	int32 index = FCString::Atoi(*tmpIdx);
 
-	//int32 index = FCString::Atoi(*tmpIdx);
+	FString purchasedName;
+	switch (Counter->GetShoppingList()[index])
+	{
+		case EProductDivide::Snack1:
+			purchasedName = TEXT("Cereal");
+			break;
+		case EProductDivide::Snack2:
+			purchasedName = TEXT("Coke");
+			break;
+		case EProductDivide::Snack3:
+			purchasedName = TEXT("Tea");
+			break;
+	}
+	
+	FProductData* purchasedProduct = SuperGameMode->GetProductData(*purchasedName);
+	int32 productPrice = purchasedProduct->CostPrice;
 
-	//FString purchasedName;
-	//switch (Counter->GetShoppingList()[index])
-	//{
-	//	case EProductDivide::Snack1:
-	//		purchasedName = TEXT("Cereal");
-	//		break;
-	//	case EProductDivide::Snack2:
-	//		purchasedName = TEXT("Coke");
-	//		break;
-	//	case EProductDivide::Snack3:
-	//		purchasedName = TEXT("Tea");
-	//		break;
-	//}
+	// AIê°€ êµ¬ë§¤í•œ ë¬¼í’ˆë“¤ì˜ ì´ ì•¡ìˆ˜ë¥¼ ê°±ì‹ í•œë‹¤
+	Counter->SetTotalCost(Counter->GetTotalCost() + productPrice);
 
-	//FProductData* purchasedProduct = SuperGameMode->GetProductData(*purchasedName);
+	//// ì¹´ë“œë¥¼ ë°›ì•„ë“¤ì–´ì•¼ì§€
 
-	// AI°¡ ±¸¸ÅÇÑ ¹°Ç°µéÀÇ ÃÑ ¾×¼ö¸¦ °»½ÅÇÑ´Ù
+
+	//// í”Œë ˆì´ì–´ê°€ ì´ì•¡ ì…ë ¥í•´ì•¼ì§€
+
+
+	//// ê²°ì œ ê²°ê³¼ë¥¼ DTì— ë°˜ì˜í•œë‹¤
+	//(purchasedProduct->ShelfStock)--;
+	//SuperGameMode->SetTotalSales(SuperGameMode->GetTotalSales() - productPrice);
+
+	//// Calculate inputì´ ëë‚¬ìŒì„ ëª…ì‹œí•œë‹¤
+	//bIsScanBarcodeInputEntered = false;
+}
+
+void ACPlayer::CalculateTotalPrice()
+{
+
 
 }
 

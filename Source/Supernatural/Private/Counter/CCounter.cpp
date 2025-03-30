@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "ProductSalesStandDataAsset.h"
 #include "AiCharacter.h"
+#include "../../../../../../../Source/Runtime/Engine/Public/TimerManager.h"
 
 ACCounter::ACCounter()
 {
@@ -47,15 +48,15 @@ ACCounter::ACCounter()
 	CasherBody->SetStaticMesh(CasherMesh);
 
 	// Credit Card
-	CreditCard = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CreditCard"));
+	CreditCard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CreditCard"));
 	CreditCard->SetupAttachment(CounterBody);
+	CreditCard->SetRelativeLocation(FVector(-56.585265, 6.646232, 2.207688));
+	CreditCard->SetRelativeRotation(FRotator(0, -30, -90));
+	CreditCard->SetRelativeScale3D(FVector(0.32));
 
-	CreditCard->SetRelativeLocation(FVector(-73.868370, 15.510121, -11.439597));
-	CreditCard->SetRelativeRotation(FRotator(-5.447370, -1.778796, -66.400598));
-	CreditCard->SetRelativeScale3D(FVector(3.428577, 3.806632, 3.214357));
-
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> tmpCard(TEXT("/Script/Engine.SkeletalMesh'/Game/DYL/Assets/cc0-magnet-card/source/MagnetCard1.MagnetCard1'"));
-	if(tmpCard.Succeeded()) CreditCard->SetSkeletalMesh(tmpCard.Object);
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCard(TEXT("/Script/Engine.SkeletalMesh'/Game/DYL/Assets/cc0-magnet-card/source/MagnetCard1.MagnetCard1'"));
+	if(tmpCard.Succeeded()) CardMesh = tmpCard.Object;
+	CreditCard->SetStaticMesh(CardMesh);
 	CreditCard->SetVisibility(false);
 
 	// AI Spawn Point
@@ -83,20 +84,27 @@ ACCounter::ACCounter()
 	{
 		for (int j = 0; j < 2; j++)
 		{
-			FString name = FString::Printf(TEXT("CounterProduct_%d"), (i * 2 + j));
+			FString name = FString::Printf(TEXT("CounterProduct%d"), (i * 2 + j + 1));
 			UStaticMeshComponent* tmpMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName(*name));
-			tmpMesh->SetRelativeLocation(FVector(-143.762936, 17.369481, 8.924103) + FVector(0, 39.866659, 0) * i + FVector(37.594206, 0, 0) * j);
+
+			UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Name] : %s"), i * 2 + j, *(tmpMesh->GetName()));
 			tmpMesh->SetupAttachment(CounterBody);
+			tmpMesh->SetRelativeLocation(FVector(-143.762936, 17.369481, 1) + FVector(0, 39.866659, 0) * i + FVector(37.594206, 0, 0) * j);
+			UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Location] : %s"), i*2+j, *tmpMesh->GetRelativeLocation().ToString());
 			tmpMesh->SetVisibility(false);
 			Products.Add(tmpMesh);
 		}
 	}
+
+	for (auto p : Products)
+		UE_LOG(LogTemp, Warning, TEXT(">>> %s <<<"), *(p->GetName()))
 }
 
 void ACCounter::BeginPlay()
 {
 	Super::BeginPlay();
-
+  
+	CustomerArrived();
 }
 
 
@@ -104,41 +112,123 @@ void ACCounter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// ìƒí’ˆì„ ì¹´ìš´í„°ì— ì˜¬ë ¤ë‘ê¸°
+	PlaceProductsOnCounter(DeltaTime);
+
+	// ì¹´ë“œ ì§€ë¶ˆí•˜ê¸°
+	//PayWithCreditCard(DeltaTime);
 }
 
 
 
 void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//class AAiCharacter* customer = Cast<AAiCharacter>(OtherActor);
+	class AAiCharacter* customer = Cast<AAiCharacter>(OtherActor);
 
-	//if (customer)
-	//{
-	//	// customerÀÇ ±¸¸Å ¸ñ·ÏÀ» °¡Á®¿Â´Ù
-	//	ShoppingList = {EProductDivide::Snack1, EProductDivide::Snack2, EProductDivide::Snack1};
-
-	//	// customer°¡ ±¸¸ÅÇÑ ÃÑ ¹°Ç° °³¼ö¸¦ ÆÄ¾ÇÇÑ´Ù
-	//	NPurchasedItems = ShoppingList.Num();
-
-	//	// ±¸¸Å ¸ñ·Ï¿¡ ÀÖ´Â ¼ø¼­´ë·Î product¸¦ Ä«¿îÅÍ¿¡ ¿Ã·ÁµĞ´Ù
-	//	for (int32 i = 0; i < NPurchasedItems; i++)
-	//	{
-	//		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].Snack1);
-	//		Products[i]->ComponentTags.Add(FName("Product"));
-	//	}
-
-	//	// ±¸¸ÅÇÑ »óÇ°µéÀÌ Ä«¿îÅÍ¿¡ ´Ù Áø¿­µÇ¾úÀ½À» ¸í½ÃÇÑ´Ù
-	//	bIsProductsOnCounter = true;
-	//	bCanCalculate = true;
-
-	//	// °è»ê¿¡ »ç¿ëÇÒ µ¥ÀÌÅÍµéÀ» ÃÊ±âÈ­ÇØÁØ´Ù
-	//	NCountedItems = 0;
-	//	TotalCost = 0;
-	//	InputCost = 0;
-
-	//	// Player°¡ ¹°Ç° °è»êÀ» À§ÇØ Ä«¿îÅÍ À§¿¡ ÀÖ´Â Á¦Ç°µéÀ» Å¬¸¯ÇÑ´Ù
-	//}
+	if (customer)
+	{
+		CustomerArrived();
+	}
 }
+
+void ACCounter::CustomerArrived()
+{
+	// ê³„ì‚°ì— ì‚¬ìš©í•  ë°ì´í„°ë“¤ì„ ì´ˆê¸°í™”í•´ì¤€ë‹¤
+	NCountedItems = 0;
+	TotalCost = 0;
+	InputCost = 0;
+
+	// customerì˜ êµ¬ë§¤ ëª©ë¡ì„ ê°€ì ¸ì˜¨ë‹¤
+	// ì—¬ê¸° ìˆ˜ì •í•´ì¤˜ì•¼ í•¨
+	ShoppingList = { EProductDivide::Snack1, EProductDivide::Snack2, EProductDivide::Snack1 };
+
+	// customerê°€ êµ¬ë§¤í•œ ì´ ë¬¼í’ˆ ê°œìˆ˜ë¥¼ íŒŒì•…í•œë‹¤
+	NPurchasedItems = ShoppingList.Num();
+
+	// êµ¬ë§¤ ëª©ë¡ì— ìˆëŠ” ìˆœì„œëŒ€ë¡œ productë¥¼ ì¹´ìš´í„°ì— ì˜¬ë ¤ë‘”ë‹¤
+	for (int32 i = 0; i < NPurchasedItems; i++)
+	{
+		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].Snack1);
+		Products[i]->SetVisibility(false);
+		Products[i]->ComponentTags.Add(FName("Product"));
+	}
+
+	// Static Mesh Componentì˜ visibilityë¥¼ ì¼œì¤€ë‹¤
+	MaxVisibilityOn = NPurchasedItems;
+	bCanVisibilityOn = true;
+
+	// Player ìª½ì—ì„œ ëª¨ë“  ë¬¼í’ˆì˜ ë°”ì½”ë“œë¥¼ ì¸ì‹í•œë‹¤
+
+
+	//// ì œí’ˆì„ ì¹´ìš´í„°ì— ì „ë¶€ ì˜¬ë ¤ë‘ì—ˆë‹¤ë©´ ì¹´ë“œë¡œ ì§€ë¶ˆí•œë‹¤
+	//if (bAreProductsOnCounter)
+	//{
+	//	CreditCard->SetVisibility(true);
+	//	bDidCustomerGiveCard = true;
+	//}	
+}
+
+void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
+{
+	if (bCanVisibilityOn)
+		CurVisibilityTime += InDeltaTime;
+
+	// ì‹œê°„ì´ ë˜ë©´
+	if (CurVisibilityTime >= MaxVisibilityTime)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[CCounter] Current Time : %f / CurVisibilityOn : %d"), CurVisibilityTime, CurVisibilityOn);
+		Products[CurVisibilityOn]->SetVisibility(true);
+		CurVisibilityTime = 0;
+		CurVisibilityOn++;
+
+		// ìƒí’ˆì„ ì „ë¶€ ì§„ì—´í•˜ë©´
+		if (CurVisibilityOn == MaxVisibilityOn)
+		{
+			CurVisibilityOn = 0;
+			bCanVisibilityOn = false;
+
+			// êµ¬ë§¤í•œ ìƒí’ˆë“¤ì´ ì¹´ìš´í„°ì— ë‹¤ ì§„ì—´ë˜ì—ˆìŒì„ ëª…ì‹œí•œë‹¤
+			bAreProductsOnCounter = true;
+
+			// Playerê°€ ê³„ì‚°í•  ìˆ˜ ìˆìŒì„ ëª…ì‹œí•œë‹¤
+			bCanCalculate = true;
+
+			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bCanCalculate);
+		}
+	}
+}
+
+void ACCounter::PayWithCreditCard(float InDeltaTime)
+{
+	// êµ¬ë§¤í•œ ë¬¼í’ˆì„ ì¹´ìš´í„°ì— ì „ë¶€ ì˜¬ë ¸ê³  customerê°€ cardë¥¼ ì§€ë¶ˆí•˜ì§€ ì•Šì•˜ë‹¤ë©´
+	if (bAreProductsOnCounter && !bDidCustomerGiveCard)
+	{
+		CurPayTime += InDeltaTime;
+
+		if (CurPayTime >= MaxPayTime)
+		{
+			UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
+			// ì—¬ê¸° ì™œ ì—ëŸ¬...?
+			//CreditCard->SetVisibility(true);
+			CurPayTime = 0;
+
+			UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
+			bDidCustomerGiveCard = true;
+		}
+	}
+
+}
+
+void ACCounter::GrabCard()
+{
+	CreditCard->SetVisibility(false);
+}
+
+void ACCounter::CalculateStart()
+{
+}
+
+
 
 
 
