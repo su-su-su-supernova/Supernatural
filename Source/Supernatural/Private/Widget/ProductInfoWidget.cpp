@@ -22,7 +22,7 @@ void UProductInfoWidget::OnButtonClicked()
 	if (ProductName == nullptr) { return; }
 	if (ProductCount == nullptr) { return; }
 	if (CostPriceSum == nullptr) { return; }
-	MainBoardRef->SetVerticalBox(ProductName->GetText(), ProductCount->GetText(), CostPriceSum->GetText());
+	MainBoardRef->SetVerticalBox(widgetEnum,ProductName->GetText(), ProductCount->GetText(), CostPriceSum->GetText());
 }
 
 void UProductInfoWidget::SetMainBoardReference(UMainBoardWidget* InMainBoard)

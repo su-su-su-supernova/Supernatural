@@ -30,20 +30,31 @@ void UMainBoardWidget::NativeConstruct()
     FTransform SpawnTransform(SpawnLocation);
     productBox = GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform);
 }
+
+void UMainBoardWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
+{
+    Super::NativeTick(MyGeometry, DeltaTime);
+    FString MoneyText = FString::Printf(TEXT("보유 돈: %d원"), GameMode->GetTotalSales());
+    FText MoneyTextFText = FText::FromString(MoneyText);
+    Money->SetText(MoneyTextFText);
+}
+
 void UMainBoardWidget::OnButtonClicked()
 {
     if (selectArrayProduct.Num()<=0)return;
 
     for (auto product : selectArrayProduct) {
         if (selectArrayProduct.Num() <= 0)return;
+        FProductData* Data = GameMode->GetProductData(product);
 
+        GameMode->SetTotalSales(GameMode->GetTotalSales() - Data->CostPrice*Data->BoxStock);
         SpawnProductBox(product);
     }
     selectArrayProduct.Empty();
     ProductVerticalBox->ClearChildren();
 }
 
-void UMainBoardWidget::SetInfoWidget(TMap<FString, FProductData*> Product)
+void UMainBoardWidget::SetInfoWidget(TMap<EProductType, FProductData*> Product)
 {
     for (int i = 0; i < Product.Num(); i++) {
         ProductInfoWidget = CreateWidget<UProductInfoWidget>(this, ProductInfoWidgetTool);
@@ -59,32 +70,36 @@ void UMainBoardWidget::SetInfoWidget(TMap<FString, FProductData*> Product)
             ProductInfoWidget->CostPrice->SetText(FText::Format(NSLOCTEXT("UI", "CostPriceFormat", "개당가격: {0}원"), Data->CostPrice));
             ProductInfoWidget->CostPriceSum->SetText(FText::Format(NSLOCTEXT("UI", "CostPriceSum", "{0}원"), Data->CostPrice*Data->BoxStock));
             ProductInfoWidget->ProductCount->SetText(FText::Format(NSLOCTEXT("UI", "CostPriceFormat", "x{0}"), Data->BoxStock));
+            ProductInfoWidget->widgetEnum = Data->ProductEnum;
             WrapBox->AddChildToWrapBox(ProductInfoWidget);
         }
     }
 }
-void UMainBoardWidget::SpawnProductBox(FText product)
+void UMainBoardWidget::SpawnProductBox(EProductType product)
 {
     if (!GameMode)return;
-    if (product.IsEmpty())return;
 
     //FName name = FName(GameMode->Product[product.ToString()]->ProductName);
 
-    FProductData* Data = GameMode->GetProductData(product.ToString());
+    FProductData* Data = GameMode->GetProductData(product);
     if(Data&& GameMode){
         if (productBox) {
-            productBox->SpawnBoxHandler(FName(Data->ProductName), FName(Data->ImagePath), Data->CostPrice, Data->BoxStock);
-
+            productBox->SpawnBoxHandler(Data);
         }
     }
 }
 
-void UMainBoardWidget::SetVerticalBox(FText ProductName, FText ProductCount, FText CostPriceSum)
+void UMainBoardWidget::SetVerticalBox(EProductType Enum,FText ProductName, FText ProductCount, FText CostPriceSum)
 {
     ProductSellWidget = CreateWidget<UProductSellWidget>(this, SellWidgettool);
     ProductSellWidget->ProductName->SetText(ProductName);
     ProductSellWidget->ProductCount->SetText(ProductCount);
     ProductSellWidget->CostPriceSum->SetText(CostPriceSum);
-    selectArrayProduct.Add(ProductName);
+    selectArrayProduct.Add(Enum);
     ProductVerticalBox->AddChildToVerticalBox(ProductSellWidget);
+
+    FString TextString = CostPriceSum.ToString();
+    TextString = TextString.RightChop(1);
+    int32 ConvertedInt = FCString::Atoi(*TextString);
+    PurchaseCost += ConvertedInt;
 }

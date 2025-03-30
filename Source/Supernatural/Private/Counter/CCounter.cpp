@@ -73,7 +73,7 @@ ACCounter::ACCounter()
 
 	// Product Sales Stand Data Asset
 	ConstructorHelpers::FObjectFinder<UProductSalesStandDataAsset> tmpProductDA(TEXT("/Script/Supernatural.ProductSalesStandDataAsset'/Game/HWL/Data/NewDataAsset.NewDataAsset'"));
-	if(tmpProductDA.Succeeded()) 
+	if(tmpProductDA.Succeeded())
 	{
 		ProductSalesStandDataAsset = tmpProductDA.Object;
 		CachedProducts = ProductSalesStandDataAsset->ProdctSalesStandDataTable;
@@ -103,7 +103,7 @@ ACCounter::ACCounter()
 void ACCounter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+  
 	CustomerArrived();
 }
 
@@ -112,10 +112,10 @@ void ACCounter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// »óÇ°À» Ä«¿îÅÍ¿¡ ¿Ã·ÁµÎ±â
+	// ìƒí’ˆì„ ì¹´ìš´í„°ì— ì˜¬ë ¤ë‘ê¸°
 	PlaceProductsOnCounter(DeltaTime);
 
-	// Ä«µå ÁöºÒÇÏ±â
+	// ì¹´ë“œ ì§€ë¶ˆí•˜ê¸°
 	//PayWithCreditCard(DeltaTime);
 }
 
@@ -133,19 +133,19 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void ACCounter::CustomerArrived()
 {
-	// °è»ê¿¡ »ç¿ëÇÒ µ¥ÀÌÅÍµéÀ» ÃÊ±âÈ­ÇØÁØ´Ù
+	// ê³„ì‚°ì— ì‚¬ìš©í•  ë°ì´í„°ë“¤ì„ ì´ˆê¸°í™”í•´ì¤€ë‹¤
 	NCountedItems = 0;
 	TotalCost = 0;
 	InputCost = 0;
 
-	// customerÀÇ ±¸¸Å ¸ñ·ÏÀ» °¡Á®¿Â´Ù
-	// ¿©±â ¼öÁ¤ÇØÁà¾ß ÇÔ
+	// customerì˜ êµ¬ë§¤ ëª©ë¡ì„ ê°€ì ¸ì˜¨ë‹¤
+	// ì—¬ê¸° ìˆ˜ì •í•´ì¤˜ì•¼ í•¨
 	ShoppingList = { EProductDivide::Snack1, EProductDivide::Snack2, EProductDivide::Snack1 };
 
-	// customer°¡ ±¸¸ÅÇÑ ÃÑ ¹°Ç° °³¼ö¸¦ ÆÄ¾ÇÇÑ´Ù
+	// customerê°€ êµ¬ë§¤í•œ ì´ ë¬¼í’ˆ ê°œìˆ˜ë¥¼ íŒŒì•…í•œë‹¤
 	NPurchasedItems = ShoppingList.Num();
 
-	// ±¸¸Å ¸ñ·Ï¿¡ ÀÖ´Â ¼ø¼­´ë·Î product¸¦ Ä«¿îÅÍ¿¡ ¿Ã·ÁµĞ´Ù
+	// êµ¬ë§¤ ëª©ë¡ì— ìˆëŠ” ìˆœì„œëŒ€ë¡œ productë¥¼ ì¹´ìš´í„°ì— ì˜¬ë ¤ë‘”ë‹¤
 	for (int32 i = 0; i < NPurchasedItems; i++)
 	{
 		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].Snack1);
@@ -153,14 +153,14 @@ void ACCounter::CustomerArrived()
 		Products[i]->ComponentTags.Add(FName("Product"));
 	}
 
-	// Static Mesh ComponentÀÇ visibility¸¦ ÄÑÁØ´Ù
+	// Static Mesh Componentì˜ visibilityë¥¼ ì¼œì¤€ë‹¤
 	MaxVisibilityOn = NPurchasedItems;
 	bCanVisibilityOn = true;
 
-	// Player ÂÊ¿¡¼­ ¸ğµç ¹°Ç°ÀÇ ¹ÙÄÚµå¸¦ ÀÎ½ÄÇÑ´Ù
+	// Player ìª½ì—ì„œ ëª¨ë“  ë¬¼í’ˆì˜ ë°”ì½”ë“œë¥¼ ì¸ì‹í•œë‹¤
 
 
-	//// Á¦Ç°À» Ä«¿îÅÍ¿¡ ÀüºÎ ¿Ã·ÁµÎ¾ú´Ù¸é Ä«µå·Î ÁöºÒÇÑ´Ù
+	//// ì œí’ˆì„ ì¹´ìš´í„°ì— ì „ë¶€ ì˜¬ë ¤ë‘ì—ˆë‹¤ë©´ ì¹´ë“œë¡œ ì§€ë¶ˆí•œë‹¤
 	//if (bAreProductsOnCounter)
 	//{
 	//	CreditCard->SetVisibility(true);
@@ -173,7 +173,7 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 	if (bCanVisibilityOn)
 		CurVisibilityTime += InDeltaTime;
 
-	// ½Ã°£ÀÌ µÇ¸é
+	// ì‹œê°„ì´ ë˜ë©´
 	if (CurVisibilityTime >= MaxVisibilityTime)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[CCounter] Current Time : %f / CurVisibilityOn : %d"), CurVisibilityTime, CurVisibilityOn);
@@ -181,16 +181,16 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 		CurVisibilityTime = 0;
 		CurVisibilityOn++;
 
-		// »óÇ°À» ÀüºÎ Áø¿­ÇÏ¸é
+		// ìƒí’ˆì„ ì „ë¶€ ì§„ì—´í•˜ë©´
 		if (CurVisibilityOn == MaxVisibilityOn)
 		{
 			CurVisibilityOn = 0;
 			bCanVisibilityOn = false;
 
-			// ±¸¸ÅÇÑ »óÇ°µéÀÌ Ä«¿îÅÍ¿¡ ´Ù Áø¿­µÇ¾úÀ½À» ¸í½ÃÇÑ´Ù
+			// êµ¬ë§¤í•œ ìƒí’ˆë“¤ì´ ì¹´ìš´í„°ì— ë‹¤ ì§„ì—´ë˜ì—ˆìŒì„ ëª…ì‹œí•œë‹¤
 			bAreProductsOnCounter = true;
 
-			// Player°¡ °è»êÇÒ ¼ö ÀÖÀ½À» ¸í½ÃÇÑ´Ù
+			// Playerê°€ ê³„ì‚°í•  ìˆ˜ ìˆìŒì„ ëª…ì‹œí•œë‹¤
 			bCanCalculate = true;
 
 			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bCanCalculate);
@@ -200,7 +200,7 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 
 void ACCounter::PayWithCreditCard(float InDeltaTime)
 {
-	// ±¸¸ÅÇÑ ¹°Ç°À» Ä«¿îÅÍ¿¡ ÀüºÎ ¿Ã·È°í customer°¡ card¸¦ ÁöºÒÇÏÁö ¾Ê¾Ò´Ù¸é
+	// êµ¬ë§¤í•œ ë¬¼í’ˆì„ ì¹´ìš´í„°ì— ì „ë¶€ ì˜¬ë ¸ê³  customerê°€ cardë¥¼ ì§€ë¶ˆí•˜ì§€ ì•Šì•˜ë‹¤ë©´
 	if (bAreProductsOnCounter && !bDidCustomerGiveCard)
 	{
 		CurPayTime += InDeltaTime;
@@ -208,7 +208,7 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 		if (CurPayTime >= MaxPayTime)
 		{
 			UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
-			// ¿©±â ¿Ö ¿¡·¯...?
+			// ì—¬ê¸° ì™œ ì—ëŸ¬...?
 			//CreditCard->SetVisibility(true);
 			CurPayTime = 0;
 
@@ -216,6 +216,7 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 			bDidCustomerGiveCard = true;
 		}
 	}
+
 }
 
 void ACCounter::GrabCard()

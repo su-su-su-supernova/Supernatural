@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "EProductType.h"
 #include "ProductInfoWidget.generated.h"
 
 /**
@@ -48,5 +49,8 @@ public:
     void OnButtonClicked();
 
 	void SetMainBoardReference(UMainBoardWidget* InMainBoard);
+
+public:
+	EProductType widgetEnum;
 
 };

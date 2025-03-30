@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CProductDataTable.h"
 #include "ProductBoxActor.generated.h"
 
 UCLASS()
@@ -12,21 +13,23 @@ class SUPERNATURAL_API AProductBoxActor : public AActor
 	GENERATED_BODY()
 
 private:
-	FName ProductName;
-	FName ImagePath;
-	int32 CostPrice;
-	int32 BoxStock;
+	//FName ProductName;
+	//FName ImagePath;
+	//int32 CostPrice;
+	//int32 BoxStock;
 	int32 CurrentStock;	// 현재 Box안에 있는 재고 수
+private:
+	FProductData* Boxdata;
 
 	class UBoxComponent* BoxComponent;
 	class UStaticMeshComponent* StaticMeshComponent;
 	class UStaticMesh* Cube;
 
 public:
-	FName ProductNameGetter();
-	FName ImagePathGetter();
-	int32 CostPriceGetter();
-	int32 BoxStockGetter();
+	//FName ProductNameGetter();
+	//FName ImagePathGetter();
+	//int32 CostPriceGetter();
+	//int32 BoxStockGetter();
 	int32 CurrentStockGetter();
 
 public:
@@ -42,7 +45,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	void SetBoxInfo(FName ProductName, FName ImagePath, int32 CostPrice, int32 OrderStock);
+	void SetBoxInfo(FProductData* data);
 	void SetCurrentStock(int32 InValue);
 	void BoxPhysicsOnOff(bool InValue);
+	FProductData* GetBoxInfo();
 };

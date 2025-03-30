@@ -23,13 +23,15 @@ public:
 
 public:
 	virtual void NativeConstruct() override;
+protected:
+	virtual void NativeTick(const FGeometry& MyGeometry, float DeltaTime) override;
 
 public:
 	class UProductInfoWidget* ProductInfoWidget;
 
 	class UProductSellWidget* ProductSellWidget;
 
-	TArray<FText>selectArrayProduct;
+	TArray<EProductType>selectArrayProduct;
 
 	UPROPERTY(meta = (BindWidget))
 	class UWrapBox* WrapBox;
@@ -47,6 +49,9 @@ public:
 	TSubclassOf<class AProductBoxSpawner> ProductBoxSpawner;
 
 	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Money;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* purchaseButton;
 	UFUNCTION()
     void OnButtonClicked();
@@ -54,7 +59,11 @@ private:
 	class ASuperGameMode* GameMode;
 	class AProductBoxSpawner* productBox;
 public:
-	void SpawnProductBox(FText product);
-	void SetVerticalBox(FText ProductName, FText CostPrice, FText CostPriceSum);
-	void SetInfoWidget(TMap<FString, FProductData*> Product);
+
+	void SpawnProductBox(EProductType product);
+	void SetVerticalBox(EProductType Enum, FText ProductName, FText ProductCount, FText CostPriceSum);
+	void SetInfoWidget(TMap<EProductType, FProductData*> Product);
+
+private:
+	int32 PurchaseCost = 0;
 };

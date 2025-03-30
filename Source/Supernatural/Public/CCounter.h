@@ -9,14 +9,14 @@ UCLASS()
 class SUPERNATURAL_API ACCounter : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	ACCounter();
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
@@ -37,7 +37,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UMaterial* MonitorMat;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UWidgetComponent* WidgetComponent;
 
@@ -104,7 +104,7 @@ public:
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    TMap<EProductDivide, FProductSalesStandDataTable> CachedProducts;
+    TMap<EProductType, FProductSalesStandDataTable> CachedProducts;
 
 	UFUNCTION()
 	void OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

@@ -24,12 +24,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	EProductType Type;
 
-	TMap<FString, FProductData*> Product;
+	TMap<EProductType, FProductData*> Product;
 
 	void LoadProductDT(UScriptStruct* InStruct);
 
 
-    FProductData* GetProductData(const FString& ProductName) const;
+	FProductData* GetProductData(EProductType ProductType) const;
 
     FProductData* GetProductDataByIndex(int32 Index) const;
 

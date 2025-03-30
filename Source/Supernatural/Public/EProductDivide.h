@@ -8,9 +8,10 @@
  *
  */
 UENUM(BlueprintType)
-enum class  EProductDivide:uint8
+enum class  EProductDivide :uint8
 {
-	Snack1,
-	Snack2,
-	Snack3,
+	Shelf5,
+	Shelf10,
+	Shelf15,
+	MAX
 };
