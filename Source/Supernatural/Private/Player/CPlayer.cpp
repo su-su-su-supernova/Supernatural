@@ -459,12 +459,10 @@ void ACPlayer::DisplayProduct()
 
 	// 박스를 들고 있지 않거나
 	// 선반에 최대로 배치할 수 있을 만큼 배치했다면 끝낸다
-	if( !bIsGrabbingBox || ProductCurrentStock == 0)
-	{
-		return;
-	}
+	if( ProductCurrentStock == 0) return;
 
 	if( !bIsGrabbingBox ) return;
+
 	if (ProductCurrentStock == 0)
 	{
 		Box->SetCurrentStock(0);
@@ -473,8 +471,8 @@ void ACPlayer::DisplayProduct()
 
 	UE_LOG(LogTemp, Error, TEXT(">>>>> Display Product Start <<<<<"));
 
-	if (!Stand || ProductName.IsEmpty()) return;
-	UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *ProductName);
+	if (!Stand) return;
+	UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *(BoxData->ProductName));
 	if (!Stand->SetMeshesForProductNumber(BoxData))
 	{
 		 //현재 Box에 들어 있는 물품 수를 1 감소시킨다
@@ -533,22 +531,8 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	name.Split(TEXT("CounterProduct"), &tmp, &tmpIdx);
 	
 	int32 index = FCString::Atoi(*tmpIdx);
-
-	FString purchasedName;
-	switch (Counter->GetShoppingList()[index])
-	{
-		case EProductDivide::Snack1:
-			purchasedName = TEXT("Cereal");
-			break;
-		case EProductDivide::Snack2:
-			purchasedName = TEXT("Coke");
-			break;
-		case EProductDivide::Snack3:
-			purchasedName = TEXT("Tea");
-			break;
-	}
 	
-	FProductData* purchasedProduct = SuperGameMode->GetProductData(*purchasedName);
+	FProductData* purchasedProduct = SuperGameMode->GetProductData(Counter->GetShoppingList()[index]);
 	int32 productPrice = purchasedProduct->CostPrice;
 
 	// AI가 구매한 물품들의 총 액수를 갱신한다

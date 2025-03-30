@@ -4,7 +4,6 @@
 #include "Components/BoxComponent.h"
 #include "ProductSalesStandDataAsset.h"
 #include "AiCharacter.h"
-#include "../../../../../../../Source/Runtime/Engine/Public/TimerManager.h"
 
 ACCounter::ACCounter()
 {
@@ -72,11 +71,12 @@ ACCounter::ACCounter()
 
 
 	// Product Sales Stand Data Asset
-	ConstructorHelpers::FObjectFinder<UProductSalesStandDataAsset> tmpProductDA(TEXT("/Script/Supernatural.ProductSalesStandDataAsset'/Game/HWL/Data/NewDataAsset.NewDataAsset'"));
+	ConstructorHelpers::FObjectFinder<UProductSalesStandDataAsset> tmpProductDA(TEXT("/Script/Supernatural.ProductSalesStandDataAsset'/Game/HWL/Data/DA_Mesh.DA_Mesh'"));
 	if(tmpProductDA.Succeeded())
 	{
 		ProductSalesStandDataAsset = tmpProductDA.Object;
 		CachedProducts = ProductSalesStandDataAsset->ProdctSalesStandDataTable;
+		//UE_LOG(LogTemp, Error, TEXT(">>>>>>>>> Load Product DA SUCCESS <<<<<<<<<<"));
 	}
 
 	// Products
@@ -87,17 +87,17 @@ ACCounter::ACCounter()
 			FString name = FString::Printf(TEXT("CounterProduct%d"), (i * 2 + j + 1));
 			UStaticMeshComponent* tmpMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName(*name));
 
-			UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Name] : %s"), i * 2 + j, *(tmpMesh->GetName()));
+			//UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Name] : %s"), i * 2 + j, *(tmpMesh->GetName()));
 			tmpMesh->SetupAttachment(CounterBody);
 			tmpMesh->SetRelativeLocation(FVector(-143.762936, 17.369481, 1) + FVector(0, 39.866659, 0) * i + FVector(37.594206, 0, 0) * j);
-			UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Location] : %s"), i*2+j, *tmpMesh->GetRelativeLocation().ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Location] : %s"), i*2+j, *tmpMesh->GetRelativeLocation().ToString());
 			tmpMesh->SetVisibility(false);
 			Products.Add(tmpMesh);
 		}
 	}
 
-	for (auto p : Products)
-		UE_LOG(LogTemp, Warning, TEXT(">>> %s <<<"), *(p->GetName()))
+	//for (auto p : Products)
+	//	UE_LOG(LogTemp, Warning, TEXT(">>> %s <<<"), *(p->GetName()))
 }
 
 void ACCounter::BeginPlay()
@@ -140,7 +140,7 @@ void ACCounter::CustomerArrived()
 
 	// customer의 구매 목록을 가져온다
 	// 여기 수정해줘야 함
-	ShoppingList = { EProductDivide::Snack1, EProductDivide::Snack2, EProductDivide::Snack1 };
+	ShoppingList = { EProductType::CAKE, EProductType::COKE, EProductType::TEA };
 
 	// customer가 구매한 총 물품 개수를 파악한다
 	NPurchasedItems = ShoppingList.Num();
@@ -148,7 +148,18 @@ void ACCounter::CustomerArrived()
 	// 구매 목록에 있는 순서대로 product를 카운터에 올려둔다
 	for (int32 i = 0; i < NPurchasedItems; i++)
 	{
-		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].Snack1);
+		if (Products[i] == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("<<<<< Products[i] is EMPTY >>>>>"));
+			return;
+		}
+		if (CachedProducts.Num() == 0)
+		{
+			UE_LOG(LogTemp, Error, TEXT("<<<<< CachedProducts is EMPTY >>>>>"));
+			return;
+		}
+			
+		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].MeshData);
 		Products[i]->SetVisibility(false);
 		Products[i]->ComponentTags.Add(FName("Product"));
 	}

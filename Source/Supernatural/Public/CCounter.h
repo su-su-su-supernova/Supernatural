@@ -70,7 +70,7 @@ private:
 	int32 TotalCost;
 	int32 InputCost;
 
-	TArray<EProductDivide> ShoppingList;
+	TArray<EProductType> ShoppingList;
 
 
 public:
@@ -98,8 +98,8 @@ public:
 	int32 GetInputCost() const { return InputCost; }
 	void SetInputCost(int32 Cost) { InputCost = Cost; }
 
-	TArray<EProductDivide> GetShoppingList() const { return ShoppingList; }
-	void SetShoppingList(const TArray<EProductDivide>& InShoppingList) { ShoppingList = InShoppingList; }
+	TArray<EProductType> GetShoppingList() const { return ShoppingList; }
+	void SetShoppingList(const TArray<EProductType>& InShoppingList) { ShoppingList = InShoppingList; }
 
 
 public:
