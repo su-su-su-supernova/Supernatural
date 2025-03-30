@@ -77,7 +77,7 @@ private:
 	float CurVisibilityTime = 0;
 	float MaxVisibilityTime = 0.5;
 	float CurPayTime = 0;
-	float MaxPayTime = 0.7;
+	float MaxPayTime = 0.5;
 
 
 	TArray<EProductType> ShoppingList;

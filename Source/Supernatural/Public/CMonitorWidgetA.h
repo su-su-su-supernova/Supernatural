@@ -50,5 +50,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TextInputCost;
 
+	class ASuperGameMode* SuperGameMode;
+
 	void SetVerticalBox();
 };

@@ -311,8 +311,10 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		}
 
 		/* Grab Card */
-		if(bIsGrabCardInputEntered && hitResult.GetComponent()->ComponentHasTag(CARDTAG))
-			Counter->GrabCard();
+		/*if(bIsGrabCardInputEntered && hitResult.GetComponent()->ComponentHasTag(CARDTAG))
+			Counter->GrabCard();*/
+		if (hitResult.GetComponent()->ComponentHasTag(CARDTAG))
+			UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@ hit at CARD"));
 
 		/* Calculate */
 		

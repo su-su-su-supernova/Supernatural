@@ -34,6 +34,7 @@ ACCounter::ACCounter()
 	// Widget
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	WidgetComponent->SetupAttachment(CounterBody);
+	//WidgetComponent->GetWidget()
 
 	// Casher
 	CasherBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CasherBody"));
@@ -56,6 +57,7 @@ ACCounter::ACCounter()
 	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCard(TEXT("/Script/Engine.StaticMesh'/Game/DYL/Meshes/Bank_Card_3D_Model/uploads_files_2492273_Card.uploads_files_2492273_Card'"));
 	if(tmpCard.Succeeded()) MagneticCardMesh = tmpCard.Object;
 	MagneticCard->SetStaticMesh(MagneticCardMesh);
+	MagneticCard->ComponentTags.Add("Card");
 	MagneticCard->SetVisibility(false);
 
 	// AI Spawn Point
@@ -168,16 +170,6 @@ void ACCounter::CustomerArrived()
 	// Static Mesh Component의 visibility를 켜준다
 	MaxVisibilityOn = NPurchasedItems;
 	bCanVisibilityOn = true;
-
-	// Player 쪽에서 모든 물품의 바코드를 인식한다
-
-
-	//// 제품을 카운터에 전부 올려두었다면 카드로 지불한다
-	//if (bAreProductsOnCounter)
-	//{
-	//	CreditCard->SetVisibility(true);
-	//	bDidCustomerGiveCard = true;
-	//}	
 }
 
 void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
@@ -188,7 +180,7 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 	// 시간이 되면
 	if (CurVisibilityTime >= MaxVisibilityTime)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[CCounter] Current Time : %f / CurVisibilityOn : %d"), CurVisibilityTime, CurVisibilityOn);
+		// UE_LOG(LogTemp, Warning, TEXT("[CCounter] Current Time : %f / CurVisibilityOn : %d"), CurVisibilityTime, CurVisibilityOn);
 		Products[CurVisibilityOn]->SetVisibility(true);
 		CurVisibilityTime = 0;
 		CurVisibilityOn++;
@@ -205,7 +197,7 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 			// Player가 계산할 수 있음을 명시한다
 			bCanCalculate = true;
 
-			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bCanCalculate);
+			// UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bCanCalculate);
 		}
 	}
 }
@@ -219,8 +211,7 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 
 		if (CurPayTime >= MaxPayTime)
 		{
-			UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
-			// 여기 왜 에러...?
+			// UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
 			if (MagneticCard == nullptr)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("<<< Credit Card is EMPTY >>>"));
@@ -229,7 +220,7 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 			MagneticCard->SetVisibility(true);
 			CurPayTime = 0;
 
-			UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
+			// UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
 			bDidCustomerGiveCard = true;
 		}
 	}
@@ -238,7 +229,11 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 
 void ACCounter::GrabCard()
 {
+	// 카드의 Visibility를 켜준다
 	MagneticCard->SetVisibility(false);
+
+	// 계산할 수 있는 상태임을 명시해준다
+	bCanCalculate = true;
 }
 
 void ACCounter::CalculateStart()

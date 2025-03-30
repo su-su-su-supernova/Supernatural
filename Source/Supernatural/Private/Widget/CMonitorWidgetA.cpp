@@ -10,6 +10,7 @@
 #include "Styling/SlateColor.h" // FSlateColor 관련
 #include "Widgets/Input/SButton.h" // SButton 위젯 관련
 #include "../../../../../../../Source/Runtime/UMG/Public/Components/CanvasPanelSlot.h"
+#include "SuperGameMode.h"
 
 
 UCMonitorWidgetA::UCMonitorWidgetA(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) // 부모 클래스 초기화
@@ -23,6 +24,7 @@ void UCMonitorWidgetA::NativeConstruct()
 
 	SetVerticalBox();
 
+	SuperGameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
 }
 
 
@@ -52,6 +54,7 @@ void UCMonitorWidgetA::NumberEntered(int32 InType)
 		return;
 	}
 	InputCost += value;
+	UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
 }
 
 void UCMonitorWidgetA::DeleteLastInput()
@@ -60,17 +63,23 @@ void UCMonitorWidgetA::DeleteLastInput()
 	else if(InputCost.Len() == 1) InputCost = "0";
 	// 문자열의 맨 마지막 문자를 지움
 	else InputCost = InputCost.LeftChop(1);
+	UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
 }
 
 void UCMonitorWidgetA::ConvertInputToString()
 {
+	UE_LOG(LogTemp, Warning, TEXT(">>>> Before Update TotalSales : %d\\"), SuperGameMode->GetTotalSales());
 	// 입력받은 값을 정수로 변환
 	PlayerCalculated = FCString::Atoi(*InputCost);
 
-	// 입력받은 값을 DT에 반영
+	// 매출을 갱신한다
+	SuperGameMode->SetTotalSales( SuperGameMode->GetTotalSales() + PlayerCalculated );
+
+	UE_LOG(LogTemp, Warning, TEXT(">>>> After Update TotalSales : %d\\"), SuperGameMode->GetTotalSales());
 
 	// 사용자 입력값 초기화
 	InputCost = "0";
+	UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
 }
 
 void UCMonitorWidgetA::SetWrapBox()
