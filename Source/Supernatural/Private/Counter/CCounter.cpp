@@ -116,7 +116,7 @@ void ACCounter::Tick(float DeltaTime)
 	PlaceProductsOnCounter(DeltaTime);
 
 	// 카드 지불하기
-	//PayWithCreditCard(DeltaTime);
+	PayWithCreditCard(DeltaTime);
 }
 
 
@@ -134,6 +134,7 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 void ACCounter::CustomerArrived()
 {
 	// 계산에 사용할 데이터들을 초기화해준다
+	bIsCustomerArrived = true;
 	NCountedItems = 0;
 	TotalCost = 0;
 	InputCost = 0;
@@ -211,8 +212,8 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 
 void ACCounter::PayWithCreditCard(float InDeltaTime)
 {
-	// 구매한 물품을 카운터에 전부 올렸고 customer가 card를 지불하지 않았다면
-	if (bAreProductsOnCounter && !bDidCustomerGiveCard)
+	// customer가 card를 지불하지 않았다면
+	if (bIsScanningBarcodeComplete && !bDidCustomerGiveCard)
 	{
 		CurPayTime += InDeltaTime;
 
@@ -220,7 +221,7 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 		{
 			UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
 			// 여기 왜 에러...?
-			//CreditCard->SetVisibility(true);
+			CreditCard->SetVisibility(true);
 			CurPayTime = 0;
 
 			UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));

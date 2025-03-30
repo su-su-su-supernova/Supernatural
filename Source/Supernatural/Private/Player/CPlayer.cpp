@@ -444,6 +444,8 @@ void ACPlayer::DropBox()
 #pragma region Display Product
 void ACPlayer::DPStart()
 {
+	if (bIsHitByCounter) return;
+
 	// input이 들어왔음을 명시한다
 	bIsDPInputEntered = true;
 	UE_LOG(LogTemp, Error, TEXT(">>>>> DP Input Start"));
@@ -478,11 +480,12 @@ void ACPlayer::DisplayProduct()
 		 //현재 Box에 들어 있는 물품 수를 1 감소시킨다
 		Box->SetCurrentStock(ProductCurrentStock--);
 	}
-
 }
 
 void ACPlayer::DPCompleted()
 {
+	if (bIsHitByCounter) return;
+
 	// input이 끝났음을 명시한다
 	bIsDPInputEntered = false;
 
@@ -509,15 +512,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	if( !(Counter->GetIsCustomerArrived()) ) return;
 
 	// Counter에 계산할 물품이 없다면 종료
-	if( !(Counter->GetIsProductsOnCounter()) ) return;
-
-	// Counter에 있는 모든 물품을 리더기로 인식시켰다면 종료
-	if(Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
-	{
-		Counter->SetIsProductsOnCounter(false);
-		Counter->SetCanCalculate(false);
-		return;
-	}
+	if( !(Counter->GetAreProductsOnCounter()) ) return;
 
 	// 리더기로 바코드를 찍은 물품의 Visibility를 끈다
 	InProduct->SetVisibility(false);
@@ -525,18 +520,39 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
 	Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
 
+	UE_LOG(LogTemp, Warning, TEXT("NCounted : %d / NMax : %d"), Counter->GetNCountedItems(), Counter->GetNPurchasedItems());
+
 	// 바코드를 인식한 상품의 가격과 상품명 정보를 가져온다
 	FString name = InProduct->GetName();
 	FString tmp, tmpIdx;
 	name.Split(TEXT("CounterProduct"), &tmp, &tmpIdx);
 	
-	int32 index = FCString::Atoi(*tmpIdx);
+	int32 index = FCString::Atoi(*tmpIdx) - 1;
+	//UE_LOG(LogTemp, Warning, TEXT(">>>>> Shopping List Index : %d"), index);
 	
+	if (SuperGameMode->GetProductData(Counter->GetShoppingList()[index]) == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT(">>>>> Product Data is EMPTY <<<<<"));
+		return;
+	}
 	FProductData* purchasedProduct = SuperGameMode->GetProductData(Counter->GetShoppingList()[index]);
 	int32 productPrice = purchasedProduct->CostPrice;
 
 	// AI가 구매한 물품들의 총 액수를 갱신한다
 	Counter->SetTotalCost(Counter->GetTotalCost() + productPrice);
+
+	// 바코드 스캔이 끝났음을 명시한다
+	bIsScanBarcodeInputEntered = false;
+
+	// Counter에 있는 모든 물품을 리더기로 인식시켰다면 카드를 받는다
+	if (Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
+	{
+		Counter->SetAreProductsOnCounter(false);
+		Counter->SetCanCalculate(true);
+		Counter->SetIsScanningBarcodeComplete(true);
+
+		UE_LOG(LogTemp, Warning, TEXT(">>> SCAN BARCODE COMPLETE"));
+	}
 
 	//// 카드를 받아들어야지
 
@@ -547,9 +563,6 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	//// 결제 결과를 DT에 반영한다
 	//(purchasedProduct->ShelfStock)--;
 	//SuperGameMode->SetTotalSales(SuperGameMode->GetTotalSales() - productPrice);
-
-	//// Calculate input이 끝났음을 명시한다
-	//bIsScanBarcodeInputEntered = false;
 }
 
 void ACPlayer::CalculateTotalPrice()

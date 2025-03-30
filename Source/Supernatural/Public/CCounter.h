@@ -61,6 +61,7 @@ private:
 	bool bIsCustomerArrived = false;
 	bool bCanVisibilityOn = false;
 	bool bAreProductsOnCounter = false;
+	bool bIsScanningBarcodeComplete = false;
 	bool bDidCustomerGiveCard = false;
 	bool bCanCalculate = false;
 	bool bIsCalculatingCompleted = false;
@@ -70,18 +71,30 @@ private:
 	int32 TotalCost;
 	int32 InputCost;
 
+	int32 CurVisibilityOn = 0;
+	int32 MaxVisibilityOn;
+
+	float CurVisibilityTime = 0;
+	float MaxVisibilityTime = 0.5;
+	float CurPayTime = 0;
+	float MaxPayTime = 0.7;
+
+
 	TArray<EProductType> ShoppingList;
 
 
 public:
+	bool GetIsScanningBarcodeComplete() const { return bIsScanningBarcodeComplete; }
+	void SetIsScanningBarcodeComplete(bool bIsCompleted) { bIsScanningBarcodeComplete = bIsCompleted; }
+
 	bool GetDidCustomerGiveCard() const { return bDidCustomerGiveCard; }
 	void SetDidCustomerGiveCard(bool bIsGiven) { bDidCustomerGiveCard = bIsGiven; }
 
 	bool GetIsCustomerArrived() const { return bIsCustomerArrived; }
 	void SetIsCustomerArrived(bool bArrived) { bIsCustomerArrived = bArrived; }
 
-	bool GetIsProductsOnCounter() const { return bAreProductsOnCounter; }
-	void SetIsProductsOnCounter(bool bOnCounter) { bAreProductsOnCounter = bOnCounter; }
+	bool GetAreProductsOnCounter() const { return bAreProductsOnCounter; }
+	void SetAreProductsOnCounter(bool bOnCounter) { bAreProductsOnCounter = bOnCounter; }
 
 	bool GetCanCalculate() const { return bCanCalculate; }
 	void SetCanCalculate(bool canCalculate) { bCanCalculate = canCalculate; }
@@ -118,11 +131,4 @@ private:
 public:
 	void GrabCard();
 
-private:
-	int32 CurVisibilityOn = 0;
-	int32 MaxVisibilityOn;
-	float CurVisibilityTime = 0;
-	float MaxVisibilityTime = 0.5;
-	float CurPayTime = 0;
-	float MaxPayTime = 0.7;
 };
