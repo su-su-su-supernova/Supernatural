@@ -43,7 +43,7 @@ public:
 public:
 	bool SelectNextProduct();
 	void AddIndex();
-	void BFS(TArray<FString>ProductNames);
+	void BFS(TArray<EProductType> ProductNames);
 
 public:
 	FVector TargetLocation;

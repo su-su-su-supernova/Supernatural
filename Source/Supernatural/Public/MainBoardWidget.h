@@ -50,11 +50,16 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Money;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* SpawnerBtn;
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* purchaseButton;
 	UFUNCTION()
     void OnButtonClicked();
+
+	UFUNCTION()
+    void OnSpwnerButtonClicked();
 private:
 	class ASuperGameMode* GameMode;
 	class AProductBoxSpawner* productBox;

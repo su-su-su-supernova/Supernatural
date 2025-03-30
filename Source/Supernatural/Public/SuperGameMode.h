@@ -38,10 +38,16 @@ public:
 	int32 GenerateTicketNumber();
 
 	void IncrementTicketCount();
-	void IncrementGameModeTicketCount();
-	int32 GenerateGameModeTicketNumber();
-private:
 
+	void IncrementGameModeTicketCount();
+
+	int32 GenerateGameModeTicketNumber();
+
+	void SpawnAIHander();
+
+	bool getIsSpawnAi();
+private:
+	bool isSpawnAi = false;
 	int32 TicketNumber = 1;
 	int32 GameModeTicketNumber = 1;
 

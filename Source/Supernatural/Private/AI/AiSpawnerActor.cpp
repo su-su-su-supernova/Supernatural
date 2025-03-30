@@ -5,6 +5,7 @@
 #include "Components/ArrowComponent.h"
 #include "AiCharacter.h"
 #include "SuperAIController.h"
+#include "SuperGameMode.h"
 
 // Sets default values
 AAiSpawnerActor::AAiSpawnerActor()
@@ -37,6 +38,9 @@ void AAiSpawnerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	ASuperGameMode* GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+	if(!GameMode)return;
+	if(GameMode->getIsSpawnAi()){
 	if (CurrentTime >= 5) {
 		AAiCharacter* AiCharacter = GetWorld()->SpawnActorDeferred<AAiCharacter>(AiCharacterSample, ArrowComp->GetComponentTransform());
 		if (AiCharacter) {
@@ -55,6 +59,9 @@ void AAiSpawnerActor::Tick(float DeltaTime)
 		CurrentTime = 0.0f;
 	}
 	CurrentTime += DeltaTime;
-
+	}
+	else {
+		CurrentTime = 0;
+	}
 }
 

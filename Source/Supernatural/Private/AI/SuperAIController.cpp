@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "SuperAIController.h"
@@ -34,12 +34,14 @@ void ASuperAIController::BeginPlay()
         AvailableIndices.Add(i);
     }
 
-    // ¹è¿­ Å©±â°¡ 4·Î °íÁ¤µÇ¾î ÀÖÀ¸¹Ç·Î, ÃÖ´ë 4°³¸¸ ¼±ÅÃ
-    TArray<FString> ProductNames; // FStringÀ¸·Î Á¤ÀÇ
+    // ë°°ì—´ í¬ê¸°ê°€ 4ë¡œ ê³ ì •ë˜ì–´ ìˆìœ¼ë¯€ë¡œ, ìµœëŒ€ 4ê°œë§Œ ì„ íƒ
+    TArray<EProductType> ProductNames; // FStringìœ¼ë¡œ ì •ì˜
     for (int i = 0; i < 4 && AvailableIndices.Num() > 0; i++) {
-        int32 RandomIndex = FMath::RandRange(0, AvailableIndices.Num() - 1); // ³²Àº ÀÎµ¦½º Áß ÇÏ³ª ¼±ÅÃ
-        int32 SelectedIndex = AvailableIndices[RandomIndex]; // ¼±ÅÃµÈ ÀÎµ¦½º
-        ProductNames.Add(GameMode->GetProductDataByIndex(SelectedIndex)->ProductName); // Á¦Ç° ÀÌ¸§ ÇÒ´ç (FString °¡Á¤)
+        int32 RandomIndex = FMath::RandRange(0, AvailableIndices.Num() - 1);
+        int32 SelectedIndex = AvailableIndices[RandomIndex];
+        if (!GameMode) return;
+        EProductType ProductType = static_cast<EProductType>(i);
+        ProductNames.Add(GameMode->GetProductData(ProductType)->ProductEnum);
         AvailableIndices.RemoveAt(RandomIndex);
     }
     BFS(ProductNames);
@@ -57,7 +59,6 @@ bool ASuperAIController::SelectNextProduct()
         if (isSucceeded) return false;
         TicketNumber = GameMode->GenerateTicketNumber();
         GameMode->IncrementTicketCount();
-		UE_LOG(LogTemp, Log, TEXT("%d"), TicketNumber);
         isSucceeded = true;
         return false;
     }
@@ -76,31 +77,32 @@ void ASuperAIController::AddIndex()
 	index++;
 }
 
-void ASuperAIController::BFS(TArray<FString>ProductNames)
+void ASuperAIController::BFS(TArray<EProductType> ProductNames)
 {
-    // ÅÂ±× °Ë»ö: ProductName 4°³¿¡ ´ëÇØ °¢°¢ ÇÑ ¹ø¾¿¸¸ È®ÀÎ
-    TArray<FString> MatchedTags; // ÀÏÄ¡ÇÏ´Â ÅÂ±×¸¦ ÀúÀåÇÒ ¹è¿­
-    for (const FString& Name : ProductNames) {
-        // ¿ùµå¿¡¼­ ÇØ´ç ÀÌ¸§°ú ÀÏÄ¡ÇÏ´Â ÅÂ±×¸¦ °¡Áø ¾×ÅÍ¸¦ Ã£À½
-        for (TActorIterator<AActor> It(GetWorld()); It; ++It) {
+
+    TArray<FName> MatchedTags; // ì¼ì¹˜í•˜ëŠ” íƒœê·¸ ì €ì¥
+
+    for (const EProductType& ProductType : ProductNames)
+    {
+        // EProductType ê°’ì„ FNameìœ¼ë¡œ ë³€í™˜
+        FName ProductNameAsFName = FName(*UEnum::GetValueAsString(ProductType));
+
+        // ì›”ë“œì—ì„œ íƒœê·¸ ê²€ìƒ‰
+        for (TActorIterator<AActor> It(GetWorld()); It; ++It)
+        {
             AActor* Actor = *It;
-            for (const FName& Tag : Actor->Tags) {
-                if (Tag.ToString() == Name) { // FNameÀ» FStringÀ¸·Î º¯È¯ÇØ ºñ±³
-                    MatchedTags.Add(Name); // ÀÏÄ¡ÇÏ¸é Ãß°¡
-                    break; // ÇØ´ç ÀÌ¸§¿¡ ´ëÇØ ´õ ÀÌ»ó °Ë»öÇÒ ÇÊ¿ä ¾øÀ½
-                }
-            }
-            // ÀÌ¹Ì Ã£¾ÒÀ¸¸é ´ÙÀ½ ÀÌ¸§À¸·Î ³Ñ¾î°¨
-            if (MatchedTags.Contains(Name)) {
-                break;
+            if (Actor->Tags.Contains(ProductNameAsFName)) // íƒœê·¸ê°€ ìˆëŠ”ì§€ ë°”ë¡œ ì²´í¬
+            {
+                MatchedTags.Add(ProductNameAsFName);
+                break; // í•˜ë‚˜ë§Œ ì°¾ìœ¼ë©´ ë£¨í”„ íƒˆì¶œ
             }
         }
     }
 
-    // °á°ú È®ÀÎ (µğ¹ö±ë¿ë)
-    for (const FString& MatchedTag : MatchedTags) {
-        ProductName.Add(MatchedTag);
+    // ë””ë²„ê¹… ì¶œë ¥
+    for (const FName& MatchedTag : MatchedTags)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Matched Tag Found: %s"), *MatchedTag.ToString());
+        ProductName.Add(*MatchedTag.ToString());
     }
-
 }
-

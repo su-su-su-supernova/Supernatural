@@ -99,6 +99,16 @@ int32 ASuperGameMode::GenerateGameModeTicketNumber()
 
     return GameModeTicketNumber;
 }
+void ASuperGameMode::SpawnAIHander()
+{
+    isSpawnAi = !isSpawnAi;
+}
+
+
+bool ASuperGameMode::getIsSpawnAi()
+{
+    return isSpawnAi;
+}
 
 FProductData* ASuperGameMode::GetProductData(EProductType ProductType) const
 {

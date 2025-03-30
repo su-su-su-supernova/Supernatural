@@ -37,6 +37,7 @@ void UProductFindFailedTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uin
         return;
     }
     if (Gamemode->GenerateGameModeTicketNumber() == AiController->TicketNumber) {
+        AiController->TicketNumber = -1;
         FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
         return;
 

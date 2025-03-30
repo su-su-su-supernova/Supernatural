@@ -21,7 +21,7 @@ AsalesStandActor::AsalesStandActor()
 
 	TargetComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TargetComp"));
 	TargetComp->SetBoxExtent(FVector(95, 25, 25));
-	TargetComp->SetRelativeLocation(FVector(-54, 117, 29));
+	TargetComp->SetRelativeLocation(FVector(-250, 117, 29));
 	TargetComp->SetCollisionProfileName(TEXT("ProductTarget"));
 	TargetComp->SetupAttachment(RootComponent);
 
@@ -98,11 +98,10 @@ void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* T
 
 bool AsalesStandActor::SetMeshesForProductNumber(FProductData* ProductData)
 {
-	//Tags.Push(*ProductName);
-	//Tags.Add(TEXT("Cake"));
-	//for (auto a : Tags) {
-	//	Tags.RemoveAt(Tags.Find(TEXT("Cake")));
-	//}
+	if (ProductData == nullptr) return false;
+	if (!Tags.Contains(*UEnum::GetValueAsString(ProductData->ProductEnum))) {
+		Tags.Push(*UEnum::GetValueAsString(ProductData->ProductEnum));
+	}
 
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
 	EProductType ProductType= ProductData->ProductEnum;
@@ -160,4 +159,9 @@ void AsalesStandActor::AddProduct(TArray<UStaticMeshComponent*>* TargetArray)
 	CurrentProductCount++;
 
 	bIsFull = false;
+}
+
+void AsalesStandActor::RemoveProduct()
+{
+
 }
