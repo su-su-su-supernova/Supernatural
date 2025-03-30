@@ -48,7 +48,10 @@ private:
 	class UStaticMesh* CasherMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Calculate")
-	class USkeletalMeshComponent* CreditCard;
+	class UStaticMeshComponent* CreditCard;
+
+	UPROPERTY(EditAnywhere, Category = "Calculate")
+	class UStaticMesh* CardMesh;
 
 	class UProductSalesStandDataAsset* ProductSalesStandDataAsset;
 
@@ -56,7 +59,9 @@ private:
 	TArray<UStaticMeshComponent*> Products;
 
 	bool bIsCustomerArrived = false;
-	bool bIsProductsOnCounter = false;
+	bool bCanVisibilityOn = false;
+	bool bAreProductsOnCounter = false;
+	bool bDidCustomerGiveCard = false;
 	bool bCanCalculate = false;
 	bool bIsCalculatingCompleted = false;
 
@@ -69,11 +74,14 @@ private:
 
 
 public:
+	bool GetDidCustomerGiveCard() const { return bDidCustomerGiveCard; }
+	void SetDidCustomerGiveCard(bool bIsGiven) { bDidCustomerGiveCard = bIsGiven; }
+
 	bool GetIsCustomerArrived() const { return bIsCustomerArrived; }
 	void SetIsCustomerArrived(bool bArrived) { bIsCustomerArrived = bArrived; }
 
-	bool GetIsProductsOnCounter() const { return bIsProductsOnCounter; }
-	void SetIsProductsOnCounter(bool bOnCounter) { bIsProductsOnCounter = bOnCounter; }
+	bool GetIsProductsOnCounter() const { return bAreProductsOnCounter; }
+	void SetIsProductsOnCounter(bool bOnCounter) { bAreProductsOnCounter = bOnCounter; }
 
 	bool GetCanCalculate() const { return bCanCalculate; }
 	void SetCanCalculate(bool canCalculate) { bCanCalculate = canCalculate; }
@@ -102,6 +110,19 @@ public:
 	void OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 private:
-	void PlaceProductOnCounter();
-	void SetVisibilityOn(class UStaticMeshComponent* InComp);
+	void CustomerArrived();
+	void PlaceProductsOnCounter(float InDeltaTime);
+	void PayWithCreditCard(float InDeltaTime);
+	void CalculateStart();
+
+public:
+	void GrabCard();
+
+private:
+	int32 CurVisibilityOn = 0;
+	int32 MaxVisibilityOn;
+	float CurVisibilityTime = 0;
+	float MaxVisibilityTime = 0.5;
+	float CurPayTime = 0;
+	float MaxPayTime = 0.7;
 };

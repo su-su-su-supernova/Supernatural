@@ -48,15 +48,15 @@ ACCounter::ACCounter()
 	CasherBody->SetStaticMesh(CasherMesh);
 
 	// Credit Card
-	CreditCard = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CreditCard"));
+	CreditCard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CreditCard"));
 	CreditCard->SetupAttachment(CounterBody);
+	CreditCard->SetRelativeLocation(FVector(-56.585265, 6.646232, 2.207688));
+	CreditCard->SetRelativeRotation(FRotator(0, -30, -90));
+	CreditCard->SetRelativeScale3D(FVector(0.32));
 
-	CreditCard->SetRelativeLocation(FVector(-73.868370, 15.510121, -11.439597));
-	CreditCard->SetRelativeRotation(FRotator(-5.447370, -1.778796, -66.400598));
-	CreditCard->SetRelativeScale3D(FVector(3.428577, 3.806632, 3.214357));
-
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> tmpCard(TEXT("/Script/Engine.SkeletalMesh'/Game/DYL/Assets/cc0-magnet-card/source/MagnetCard1.MagnetCard1'"));
-	if(tmpCard.Succeeded()) CreditCard->SetSkeletalMesh(tmpCard.Object);
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCard(TEXT("/Script/Engine.SkeletalMesh'/Game/DYL/Assets/cc0-magnet-card/source/MagnetCard1.MagnetCard1'"));
+	if(tmpCard.Succeeded()) CardMesh = tmpCard.Object;
+	CreditCard->SetStaticMesh(CardMesh);
 	CreditCard->SetVisibility(false);
 
 	// AI Spawn Point
@@ -84,21 +84,27 @@ ACCounter::ACCounter()
 	{
 		for (int j = 0; j < 2; j++)
 		{
-			FString name = FString::Printf(TEXT("CounterProduct_%d"), (i * 2 + j));
+			FString name = FString::Printf(TEXT("CounterProduct%d"), (i * 2 + j + 1));
 			UStaticMeshComponent* tmpMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName(*name));
-			tmpMesh->SetRelativeLocation(FVector(-143.762936, 17.369481, 8.924103) + FVector(0, 39.866659, 0) * i + FVector(37.594206, 0, 0) * j);
+
+			UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Name] : %s"), i * 2 + j, *(tmpMesh->GetName()));
 			tmpMesh->SetupAttachment(CounterBody);
+			tmpMesh->SetRelativeLocation(FVector(-143.762936, 17.369481, 1) + FVector(0, 39.866659, 0) * i + FVector(37.594206, 0, 0) * j);
+			UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Location] : %s"), i*2+j, *tmpMesh->GetRelativeLocation().ToString());
 			tmpMesh->SetVisibility(false);
 			Products.Add(tmpMesh);
 		}
 	}
+
+	for (auto p : Products)
+		UE_LOG(LogTemp, Warning, TEXT(">>> %s <<<"), *(p->GetName()))
 }
 
 void ACCounter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	PlaceProductOnCounter();
+	CustomerArrived();
 }
 
 
@@ -106,6 +112,11 @@ void ACCounter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 상품을 카운터에 올려두기
+	PlaceProductsOnCounter(DeltaTime);
+
+	// 카드 지불하기
+	PayWithCreditCard(DeltaTime);
 }
 
 
@@ -116,11 +127,11 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 	if (customer)
 	{
-		PlaceProductOnCounter();
+		CustomerArrived();
 	}
 }
 
-void ACCounter::PlaceProductOnCounter()
+void ACCounter::CustomerArrived()
 {
 	// 계산에 사용할 데이터들을 초기화해준다
 	NCountedItems = 0;
@@ -138,32 +149,80 @@ void ACCounter::PlaceProductOnCounter()
 	for (int32 i = 0; i < NPurchasedItems; i++)
 	{
 		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].Snack1);
+		Products[i]->SetVisibility(false);
 		Products[i]->ComponentTags.Add(FName("Product"));
 	}
 
-	for (auto k : Products)
-	{
-		UE_LOG(LogTemp,  Warning, TEXT(">>>>> Product : %s"), *(k->GetName()));
-	}
-
 	// Static Mesh Component의 visibility를 켜준다
-	for (int i = 0; i < 4; i++)
-	{
-		FTimerHandle timerHandle; // 각 타이머마다 고유한 핸들을 사용
-		FTimerDelegate timerDelegate;
-		timerDelegate.BindUFunction(this, FName("SetVisibilityOn"), Products[i]); // 함수와 인자 바인딩
-		GetWorldTimerManager().SetTimer(timerHandle, timerDelegate, 1.f, false); // 타이머 설정
-	}
+	MaxVisibilityOn = NPurchasedItems;
+	bCanVisibilityOn = true;
 
-	// 구매한 상품들이 카운터에 다 진열되었음을 명시한다
-	bIsProductsOnCounter = true;
+	// 제품을 카운터에 전부 올려두었다면 카드로 지불한다
+	if (bAreProductsOnCounter)
+	{
+		CreditCard->SetVisibility(true);
+		bDidCustomerGiveCard = true;
+	}	
+}
+
+void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
+{
+	if (bCanVisibilityOn)
+		CurVisibilityTime += InDeltaTime;
+
+	// 시간이 되면
+	if (CurVisibilityTime >= MaxVisibilityTime)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[CCounter] Current Time : %f / CurVisibilityOn : %d"), CurVisibilityTime, CurVisibilityOn);
+		Products[CurVisibilityOn]->SetVisibility(true);
+		CurVisibilityTime = 0;
+		CurVisibilityOn++;
+
+		// 상품을 전부 진열하면
+		if (CurVisibilityOn == MaxVisibilityOn)
+		{
+			CurVisibilityOn = 0;
+			bCanVisibilityOn = false;
+
+			// 구매한 상품들이 카운터에 다 진열되었음을 명시한다
+			bAreProductsOnCounter = true;
+		
+
+			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bAreProductsOnCounter);
+		}
+	}
+}
+
+void ACCounter::PayWithCreditCard(float InDeltaTime)
+{
+	// 구매한 물품을 카운터에 전부 올렸고 customer가 card를 지불하지 않았다면
+	if (bAreProductsOnCounter && !bDidCustomerGiveCard)
+	{
+		CurPayTime += InDeltaTime;
+
+		if (CurPayTime >= MaxPayTime)
+		{
+			UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
+			// 여기 왜 에러...?
+			//CreditCard->SetVisibility(true);
+			CurPayTime = 0;
+
+			UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
+			bDidCustomerGiveCard = true;
+		}
+	}
+}
+
+void ACCounter::GrabCard()
+{
+	CreditCard->SetVisibility(false);
 	bCanCalculate = true;
 }
 
-void ACCounter::SetVisibilityOn(UStaticMeshComponent* InComp)
+void ACCounter::CalculateStart()
 {
-	InComp->SetVisibility(true);
 }
+
 
 
 

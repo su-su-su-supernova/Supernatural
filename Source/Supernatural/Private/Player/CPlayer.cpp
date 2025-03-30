@@ -56,6 +56,9 @@ ACPlayer::ACPlayer()
 	ConstructorHelpers::FObjectFinder<UInputAction> tmpIADP(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_DP.IA_DP'"));
 	if (tmpIAGrabBox.Succeeded()) IA_DP = tmpIADP.Object;
 
+	ConstructorHelpers::FObjectFinder<UInputAction> tmpIAGrabCard(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_GrabCard.IA_GrabCard'"));
+	if (tmpIAGrabBox.Succeeded()) IA_GrabCard = tmpIAGrabCard.Object;
+
 	ConstructorHelpers::FObjectFinder<UInputAction> tmpIACalculate(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_Calculate.IA_Calculate'"));
 	if (tmpIAGrabBox.Succeeded()) IA_Calculate = tmpIACalculate.Object;
 
@@ -109,7 +112,7 @@ void ACPlayer::BeginPlay()
 	auto pc = Cast<APlayerController>(GetController());
 	if(pc)
 	{
-        UE_LOG(LogTemp, Error, TEXT(">>>>>> Input Mode : GameAndUI"));
+        //UE_LOG(LogTemp, Error, TEXT(">>>>>> Input Mode : GameAndUI"));
 		pc->SetInputMode(FInputModeGameAndUI());
 	}
 }
@@ -130,7 +133,7 @@ void ACPlayer::Tick(float DeltaTime)
 	if (bIsHitByStand)
 		PerformLineTrace(InteractionDistanceStand);
 
-	// Counter에 들어왔으면 상품 바코드 찍기와 카운터 모니터 버튼 클릭을 위해 Custom Ray Trace 실행
+	// Counter에 들어왔으면 카드 받기, 상품 바코드 찍기, 모니터 버튼 클릭을 위해 Custom Ray Trace 실행
 	if (bIsHitByCounter)
 		PerformLineTrace(InteractionDistanceWidget);
 }
@@ -161,6 +164,7 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		inputSystem->BindAction(IA_GrabBox, ETriggerEvent::Completed, this, &ACPlayer::GrabBoxInputCompleted);
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Started, this, &ACPlayer::DPStart);
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Completed, this, &ACPlayer::DPCompleted);
+		inputSystem->BindAction(IA_GrabCard, ETriggerEvent::Started, this, &ACPlayer::GrabCardInputEntered);
 		inputSystem->BindAction(IA_Calculate, ETriggerEvent::Started, this, &ACPlayer::CalculateInputStarted);
 	}
 }
@@ -203,7 +207,7 @@ void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	{
 		if (OtherActor->ActorHasTag(STANDTAG))
 		{
-			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Stand >>>>>>>>>>>>>>>>>>>"));
+			//UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Stand >>>>>>>>>>>>>>>>>>>"));
 			bIsHitByStand = false;
 		}
 		else if (OtherActor->ActorHasTag(COUNTERTAG))
@@ -213,7 +217,7 @@ void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		}
 		else 
 		{
-			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Computer >>>>>>>>>>>>>>>>>>>"));
+			//UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Computer >>>>>>>>>>>>>>>>>>>"));
 			bIsHitByMainBoard = false;
 		}
 	}
@@ -298,6 +302,10 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 			WidgetInteraction->SetCustomHitResult(hitResult);
 		}
 
+		/* Grab Card */
+		if(bIsGrabCardInputEntered && hitResult.GetComponent()->ComponentHasTag(CARDTAG))
+			Counter->GrabCard();
+
 		/* Calculate */
 		if (hitResult.GetComponent()->ComponentHasTag(PRODUCTTAG) && bIsCalculateInputEntered)
 		{
@@ -326,15 +334,15 @@ void ACPlayer::ClickUIStart()
 
 	if (bIsClickUIInputEntered && WidgetInteraction)
 	{
-		UE_LOG(LogTemp, Error, TEXT(">>> WidgetInteraction Success!!!"));
-		UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>>>> IsOverInteractableWidget : %d"), WidgetInteraction->IsOverInteractableWidget());
+		//UE_LOG(LogTemp, Error, TEXT(">>> WidgetInteraction Success!!!"));
+		//UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>>>> IsOverInteractableWidget : %d"), WidgetInteraction->IsOverInteractableWidget());
 
 		if (WidgetInteraction->IsOverInteractableWidget())
 		{
-			UE_LOG(LogTemp, Error, TEXT(">>> Widget Interactable widget SUCCESS !!!!!!!!!!!"));
+			//UE_LOG(LogTemp, Error, TEXT(">>> Widget Interactable widget SUCCESS !!!!!!!!!!!"));
 			WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
 			bIsClickingUI = true;
-			UE_LOG(LogTemp, Warning, TEXT(">>> Activate Click A - bIsClickingUI : %d"), bIsClickingUI);
+			//UE_LOG(LogTemp, Warning, TEXT(">>> Activate Click A - bIsClickingUI : %d"), bIsClickingUI);
 		}
 	}
 }
@@ -345,7 +353,7 @@ void ACPlayer::ClickUICompleted()
 
 	WidgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
 	bIsClickingUI = false;
-	UE_LOG(LogTemp, Warning, TEXT(">>> Deactivate Click A - bIsClickingUI : %d"), bIsClickingUI);
+	//UE_LOG(LogTemp, Warning, TEXT(">>> Deactivate Click A - bIsClickingUI : %d"), bIsClickingUI);
 }
 
 #pragma endregion
@@ -387,7 +395,7 @@ void ACPlayer::LiftBox()
 			ProductName = Box->ProductNameGetter().ToString();
 			ProductCurrentStock = Box->CurrentStockGetter();
 
-			UE_LOG(LogTemp, Warning, TEXT("[Product Info] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
+			//UE_LOG(LogTemp, Warning, TEXT("[Product Info] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
 		}
 	}
 }
@@ -421,7 +429,7 @@ void ACPlayer::DropBox()
 	// Box의 충돌 처리를 켜준다
 	Box->FindComponentByClass<UBoxComponent>()->SetCollisionProfileName(TEXT("Box"));
 
-	UE_LOG(LogTemp, Warning, TEXT("[DROP BOX] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
+	//UE_LOG(LogTemp, Warning, TEXT("[DROP BOX] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
 
 	// Box를 null로 만들어준다
 	Box = nullptr;
@@ -487,6 +495,11 @@ void ACPlayer::CalculateInputStarted()
 	bIsCalculateInputEntered = true;
 }
 
+void ACPlayer::GrabCardInputEntered()
+{
+	bIsGrabCardInputEntered = true;
+}
+
 void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 {
 	// Counter에 Customer가 없다면 종료
@@ -494,6 +507,9 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 
 	// Counter에 계산할 물품이 없다면 종료
 	if( !(Counter->GetIsProductsOnCounter()) ) return;
+
+	// Card를 받지 않았다면 종료
+	if( !(Counter->GetDidCustomerGiveCard()) ) return;
 
 	// Counter에 있는 모든 물품을 리더기로 인식시켰다면 종료
 	if(Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
@@ -503,13 +519,15 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 		return;
 	}
 
+	// 리더기로 바코드를 찍은 물품의 Visibility를 끈다
+	
 	// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
 	Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
 
 	// 바코드를 인식한 상품의 가격과 상품명 정보를 가져온다
 	FString name = InProduct->GetName();
 	FString tmp, tmpIdx;
-	name.Split(TEXT("CounterProduct_"), &tmp, &tmpIdx);
+	name.Split(TEXT("CounterProduct"), &tmp, &tmpIdx);
 	
 	int32 index = FCString::Atoi(*tmpIdx);
 

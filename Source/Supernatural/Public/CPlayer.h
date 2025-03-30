@@ -198,6 +198,9 @@ private:
 
 
 #pragma region Calculate
+	UPROPERTY(EditDefaultsOnly, Category = "Calculate")
+    class UInputAction* IA_GrabCard;
+
     UPROPERTY(EditDefaultsOnly, Category = "Calculate")
     class UInputAction* IA_Calculate;
 
@@ -211,10 +214,12 @@ private:
 	const FName PRODUCTTAG = FName("Product");
 
 	bool bIsHitByCounter = false;
+	bool bIsGrabCardInputEntered = false;
 	bool bIsCalculateInputEntered = false;
 	//bool bIsCalculating = false;
 
 	void CalculateInputStarted();
+	void GrabCardInputEntered();
 	void ScanProductBarcode(UStaticMeshComponent* InProduct);
 	void CalculateTotalPrice();
 
