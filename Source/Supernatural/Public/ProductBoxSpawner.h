@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CProductDataTable.h"
 #include "ProductBoxSpawner.generated.h"
 
 UCLASS()
@@ -22,7 +23,7 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void SpawnBoxHandler(FName a, FName ImagePath, int32 CostPrice, int32 OrderStock);
+	void SpawnBoxHandler(FProductData* data);
 
 private:
 	UPROPERTY()

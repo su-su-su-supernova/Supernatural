@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ProductSalesStandDataTable.h"
+#include "CProductDataTable.h"
 #include "salesStandActor.generated.h"
 
 UCLASS()
@@ -50,7 +51,7 @@ public:
 	TArray<UStaticMeshComponent*> ProductMeshes15;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    TMap<EProductDivide, FProductSalesStandDataTable> CachedProducts;
+    TMap<EProductType, FProductSalesStandDataTable> CachedProducts;
 
 private:
 	void settingProductMesh(int32 v);
@@ -59,16 +60,16 @@ private:
 	//UFUNCTION(BlueprintCallable, Category = "SalesStand")
 
 	void AddProduct(TArray<UStaticMeshComponent*>* TargetArray);
-
+	void RemoveProduct();
 private:
 	int32 ProductCountMax = 0;
 	int32 CurrentProductCount = 0;
-	EProductDivide CurrentProductType = EProductDivide::Snack1; // 기본값 설정
-	int32 CurrentProductNumber = 0; // 기본값 설정
+	EProductType CurrentProductType;
+	int32 CurrentProductNumber = 0;
 	bool bIsFull = false;
 
 public:
-	bool SetMeshesForProductNumber(FString ProductType);
+	bool SetMeshesForProductNumber(FProductData* ProductData);
 
 
 

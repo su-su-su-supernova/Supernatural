@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "ProductSalesStandDataTable.h"
-#include "EProductDivide.h"
+#include "EProductType.h"
 #include "ProductSalesStandDataAsset.generated.h"
 
 /**
@@ -17,5 +17,5 @@ class SUPERNATURAL_API UProductSalesStandDataAsset : public UDataAsset
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<EProductDivide, FProductSalesStandDataTable>ProdctSalesStandDataTable;
+	TMap<EProductType, FProductSalesStandDataTable>ProdctSalesStandDataTable;
 };

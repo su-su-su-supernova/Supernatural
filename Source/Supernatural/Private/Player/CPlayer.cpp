@@ -178,7 +178,6 @@ void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 			if (!bIsHitByStand)
 			{
 				bIsHitByStand = true;
-				//UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Stand >>>>>>>>>>>>>>>>>>>"));
 			}
 		}
 		else if (OtherActor->ActorHasTag(COUNTERTAG))
@@ -191,8 +190,7 @@ void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 			if (!bIsHitByMainBoard)
             {
                 bIsHitByMainBoard = true;
-                //UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Computer >>>>>>>>>>>>>>>>>>>"));
-				
+
             }
 		}
 	}
@@ -212,7 +210,7 @@ void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Counter >>>>>>>>>>>>>>>>>>>"));
 			bIsHitByCounter = false;
 		}
-		else 
+		else
 		{
 			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Computer >>>>>>>>>>>>>>>>>>>"));
 			bIsHitByMainBoard = false;
@@ -267,7 +265,7 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 	{
 		FString hitActor = hitResult.GetActor()->GetActorNameOrLabel();
 		//UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
-		
+
 
 		/* Display Product */
 		if (hitResult.GetActor()->ActorHasTag(STANDTAG) && bIsGrabbingBox)
@@ -385,8 +383,8 @@ void ACPlayer::LiftBox()
 			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>> ATTACH BOX SUCCESS <<<<<<<<<<"));
 
 			// Box의 정보를 가져온다
-			ProductName = Box->ProductNameGetter().ToString();
-			ProductCurrentStock = Box->CurrentStockGetter();
+			BoxData = Box->GetBoxInfo();
+			ProductCurrentStock = BoxData->BoxStock;
 
 			UE_LOG(LogTemp, Warning, TEXT("[Product Info] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
 		}
@@ -443,14 +441,15 @@ void ACPlayer::DPStart()
 
 void ACPlayer::DisplayProduct()
 {
-	//UE_LOG(LogTemp, Error, TEXT("bIsGrabbingBox : %d / ProductCurrentStock : %d"), bIsGrabbingBox, ProductCurrentStock);
-	
+
+	UE_LOG(LogTemp, Error, TEXT("bIsGrabbingBox : %d / ProductCurrentStock : %d"), bIsGrabbingBox, ProductCurrentStock);
+
 	// 박스를 들고 있지 않거나
 	// 선반에 최대로 배치할 수 있을 만큼 배치했다면 끝낸다
-	/*if( !bIsGrabbingBox || ProductCurrentStock == 0)
+	if( !bIsGrabbingBox || ProductCurrentStock == 0)
 	{
 		return;
-	}*/
+	}
 
 	if( !bIsGrabbingBox ) return;
 	if (ProductCurrentStock == 0)
@@ -463,9 +462,9 @@ void ACPlayer::DisplayProduct()
 
 	if (!Stand || ProductName.IsEmpty()) return;
 	UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *ProductName);
-	if (!Stand->SetMeshesForProductNumber("Tea"))
+	if (!Stand->SetMeshesForProductNumber(BoxData))
 	{
-		// 현재 Box에 들어 있는 물품 수를 1 감소시킨다
+		 //현재 Box에 들어 있는 물품 수를 1 감소시킨다
 		Box->SetCurrentStock(ProductCurrentStock--);
 	}
 
@@ -495,48 +494,48 @@ void ACPlayer::CalculateInputCompleted()
 
 void ACPlayer::Calculate(UStaticMeshComponent* InProduct)
 {
-	// Counter에 Customer가 없다면 종료
-	if( !(Counter->GetIsCustomerArrived()) ) return;
+	//// Counter에 Customer가 없다면 종료
+	//if( !(Counter->GetIsCustomerArrived()) ) return;
 
-	// Counter에 계산할 물품이 없다면 종료
-	if( !(Counter->GetIsProductsOnCounter()) ) return;
+	//// Counter에 계산할 물품이 없다면 종료
+	//if( !(Counter->GetIsProductsOnCounter()) ) return;
 
-	// Counter에 있는 모든 물품을 리더기로 인식시켰다면 종료
-	if(Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
-	{
-		Counter->SetIsProductsOnCounter(false);
-		Counter->SetCanCalculate(false);
-		return;
-	}
+	//// Counter에 있는 모든 물품을 리더기로 인식시켰다면 종료
+	//if(Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
+	//{
+	//	Counter->SetIsProductsOnCounter(false);
+	//	Counter->SetCanCalculate(false);
+	//	return;
+	//}
 
-	// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
-	Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
+	//// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
+	//Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
 
-	// 바코드를 인식한 상품의 가격과 상품명 정보를 가져온다
-	FString name = InProduct->GetName();
-	FString tmp, tmpIdx;
-	name.Split(TEXT("CounterProduct_"), &tmp, &tmpIdx);
-	
-	int32 index = FCString::Atoi(*tmpIdx);
+	//// 바코드를 인식한 상품의 가격과 상품명 정보를 가져온다
+	//FString name = InProduct->GetName();
+	//FString tmp, tmpIdx;
+	//name.Split(TEXT("CounterProduct_"), &tmp, &tmpIdx);
 
-	FString purchasedName;
-	switch (Counter->GetShoppingList()[index])
-	{
-		case EProductDivide::Snack1:
-			purchasedName = TEXT("Cereal");
-			break;
-		case EProductDivide::Snack2:
-			purchasedName = TEXT("Coke");
-			break;
-		case EProductDivide::Snack3:
-			purchasedName = TEXT("Tea");
-			break;
-	}
-	
-	FProductData* purchasedProduct = SuperGameMode->GetProductData(*purchasedName);
+	//int32 index = FCString::Atoi(*tmpIdx);
+
+	//FString purchasedName;
+	//switch (Counter->GetShoppingList()[index])
+	//{
+	//	case EProductDivide::Snack1:
+	//		purchasedName = TEXT("Cereal");
+	//		break;
+	//	case EProductDivide::Snack2:
+	//		purchasedName = TEXT("Coke");
+	//		break;
+	//	case EProductDivide::Snack3:
+	//		purchasedName = TEXT("Tea");
+	//		break;
+	//}
+
+	//FProductData* purchasedProduct = SuperGameMode->GetProductData(*purchasedName);
 
 	// AI가 구매한 물품들의 총 액수를 갱신한다
-	
+
 }
 
 #pragma endregion
