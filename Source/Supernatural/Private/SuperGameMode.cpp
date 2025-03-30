@@ -69,17 +69,13 @@ void ASuperGameMode::LoadProductData()
         FProductData* rowData = DTProduct->FindRow<FProductData>(rowName, contextString);
 
         // 데이터가 있으면 Product TMap에 추가
-        if (rowData) Product.Add(rowData->ProductName, rowData);
+        if (rowData) Product.Add(rowData->ProductEnum, rowData);
         // 없으면 로그 출력
         else UE_LOG(LogTemp, Warning, TEXT(">> Failed to find row : %s"), *rowName.ToString());
     }
 
     UE_LOG(LogTemp, Error, TEXT(">> Product Data Success. Total items : %d"), Product.Num());
 
-    for (auto p : Product)
-    {
-        UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>> Product : %s / Price : %d"), *p.Key, p.Value->SellingPrice);
-    }
 }
 
 int32 ASuperGameMode::GenerateTicketNumber()
@@ -104,41 +100,35 @@ int32 ASuperGameMode::GenerateGameModeTicketNumber()
     return GameModeTicketNumber;
 }
 
-FProductData* ASuperGameMode::GetProductData(const FString& ProductName) const
+FProductData* ASuperGameMode::GetProductData(EProductType ProductType) const
 {
-    FProductData* const* FoundData = Product.Find(ProductName);
-    if (FoundData)
-    {
-        return *FoundData; // 포인터 직접 반환
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT(">> Product '%s' not found in Product map"), *ProductName);
-        return nullptr;
-    }
+    FProductData*  FoundData = Product[ProductType];
+
+    return FoundData;
 }
+
 FProductData* ASuperGameMode::GetProductDataByIndex(int32 Index) const
 {
-    if (Product.Num() == 0)
-    {
-        UE_LOG(LogTemp, Warning, TEXT(">> Product map is empty"));
-        return nullptr;
-    }
+	if (Product.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT(">> Product map is empty"));
+		return nullptr;
+	}
 
-    if (Index < 0 || Index >= Product.Num())
-    {
-        UE_LOG(LogTemp, Warning, TEXT(">> Index %d is out of range. Product map size: %d"), Index, Product.Num());
-        return nullptr;
-    }
+	if (Index < 0 || Index >= Product.Num())
+	{
+		UE_LOG(LogTemp, Warning, TEXT(">> Index %d is out of range. Product map size: %d"), Index, Product.Num());
+		return nullptr;
+	}
 
-    int32 CurrentIndex = 0;
-    for (const auto& Pair : Product)
-    {
-        if (CurrentIndex == Index)
-        {
-            return Pair.Value; // 포인터 직접 반환
-        }
-        CurrentIndex++;
-    }
-    return nullptr;
+	int32 CurrentIndex = 0;
+	for (const auto& Pair : Product)
+	{
+		if (CurrentIndex == Index)
+		{
+			return Pair.Value;
+		}
+		CurrentIndex++;
+	}
+	return nullptr;
 }

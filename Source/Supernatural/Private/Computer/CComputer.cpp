@@ -26,7 +26,7 @@ void ACComputer::BeginPlay()
 
 	auto GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
 	if (!GameMode)return;
-	UE_LOG(LogTemp, Log, TEXT("%d"), GameMode->Product["Coke"]->CostPrice);
+	//UE_LOG(LogTemp, Log, TEXT("%d"), GameMode->Product["Coke"]->CostPrice);
 }
 
 void ACComputer::Tick(float DeltaTime)

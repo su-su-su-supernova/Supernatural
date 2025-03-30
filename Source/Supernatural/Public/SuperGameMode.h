@@ -24,12 +24,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	EProductType Type;
 
-	TMap<FString, FProductData*> Product;
+	TMap<EProductType, FProductData*> Product;
 
 	void LoadProductDT(UScriptStruct* InStruct);
 
 
-    FProductData* GetProductData(const FString& ProductName) const;
+	FProductData* GetProductData(EProductType ProductType) const;
 
     FProductData* GetProductDataByIndex(int32 Index) const;
 
@@ -44,4 +44,10 @@ private:
 
 	int32 TicketNumber = 1;
 	int32 GameModeTicketNumber = 1;
+
+	int32 TotalSales = 100000000;
+
+public:
+	int32 GetTotalSales() const { return TotalSales; }
+	void SetTotalSales(int32 InTotalSales) { TotalSales = InTotalSales; }
 };

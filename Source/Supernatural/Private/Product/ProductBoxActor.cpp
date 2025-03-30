@@ -40,13 +40,10 @@ void AProductBoxActor::Tick(float DeltaTime)
 
 }
 
-void AProductBoxActor::SetBoxInfo(FName PdName, FName ImgPath, int32 CtPrice, int32 BxStock)
+void AProductBoxActor::SetBoxInfo(FProductData* data)
 {
-	this->ProductName = PdName;
-	this->ImagePath = ImgPath;
-	this->CostPrice = CtPrice;
-	this->BoxStock = BxStock;
-	this->CurrentStock = BxStock;
+	Boxdata = data;
+	CurrentStock = data->BoxStock;
 }
 
 void AProductBoxActor::SetCurrentStock(int32 InValue)
@@ -59,24 +56,9 @@ void AProductBoxActor::BoxPhysicsOnOff(bool InValue)
     InValue ? BoxComponent->SetSimulatePhysics(true) : BoxComponent->SetSimulatePhysics(false);
 }
 
-FName AProductBoxActor::ProductNameGetter()
+FProductData* AProductBoxActor::GetBoxInfo()
 {
-	return ProductName;
-}
-
-FName AProductBoxActor::ImagePathGetter()
-{
-	return ImagePath;
-}
-
-int32 AProductBoxActor::CostPriceGetter()
-{
-	return CostPrice;
-}
-
-int32 AProductBoxActor::BoxStockGetter()
-{
-	return BoxStock;
+	return Boxdata;
 }
 
 int32 AProductBoxActor::CurrentStockGetter()

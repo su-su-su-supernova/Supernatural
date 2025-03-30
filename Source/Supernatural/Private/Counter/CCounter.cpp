@@ -72,7 +72,7 @@ ACCounter::ACCounter()
 
 	// Product Sales Stand Data Asset
 	ConstructorHelpers::FObjectFinder<UProductSalesStandDataAsset> tmpProductDA(TEXT("/Script/Supernatural.ProductSalesStandDataAsset'/Game/HWL/Data/NewDataAsset.NewDataAsset'"));
-	if(tmpProductDA.Succeeded()) 
+	if(tmpProductDA.Succeeded())
 	{
 		ProductSalesStandDataAsset = tmpProductDA.Object;
 		CachedProducts = ProductSalesStandDataAsset->ProdctSalesStandDataTable;
@@ -96,7 +96,7 @@ ACCounter::ACCounter()
 void ACCounter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 
@@ -110,34 +110,34 @@ void ACCounter::Tick(float DeltaTime)
 
 void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	class AAiCharacter* customer = Cast<AAiCharacter>(OtherActor);
+	//class AAiCharacter* customer = Cast<AAiCharacter>(OtherActor);
 
-	if (customer)
-	{
-		// customer의 구매 목록을 가져온다
-		ShoppingList = {EProductDivide::Snack1, EProductDivide::Snack2, EProductDivide::Snack1};
+	//if (customer)
+	//{
+	//	// customer의 구매 목록을 가져온다
+	//	ShoppingList = {EProductDivide::Snack1, EProductDivide::Snack2, EProductDivide::Snack1};
 
-		// customer가 구매한 총 물품 개수를 파악한다
-		NPurchasedItems = ShoppingList.Num();
+	//	// customer가 구매한 총 물품 개수를 파악한다
+	//	NPurchasedItems = ShoppingList.Num();
 
-		// 구매 목록에 있는 순서대로 product를 카운터에 올려둔다
-		for (int32 i = 0; i < NPurchasedItems; i++)
-		{
-			Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].Snack1);
-			Products[i]->ComponentTags.Add(FName("Product"));
-		}
+	//	// 구매 목록에 있는 순서대로 product를 카운터에 올려둔다
+	//	for (int32 i = 0; i < NPurchasedItems; i++)
+	//	{
+	//		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].Snack1);
+	//		Products[i]->ComponentTags.Add(FName("Product"));
+	//	}
 
-		// 구매한 상품들이 카운터에 다 진열되었음을 명시한다
-		bIsProductsOnCounter = true;
-		bCanCalculate = true;
+	//	// 구매한 상품들이 카운터에 다 진열되었음을 명시한다
+	//	bIsProductsOnCounter = true;
+	//	bCanCalculate = true;
 
-		// 계산에 사용할 데이터들을 초기화해준다
-		NCountedItems = 0;
-		TotalCost = 0;
-		InputCost = 0;
+	//	// 계산에 사용할 데이터들을 초기화해준다
+	//	NCountedItems = 0;
+	//	TotalCost = 0;
+	//	InputCost = 0;
 
-		// Player가 물품 계산을 위해 카운터 위에 있는 제품들을 클릭한다
-	}
+	//	// Player가 물품 계산을 위해 카운터 위에 있는 제품들을 클릭한다
+	//}
 }
 
 

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "CProductDataTable.h"
 #include "CPlayer.generated.h"
 
 UCLASS()
@@ -141,6 +142,8 @@ private:
 	// 박스 안 물품의 정보
 	FString ProductName;		
 	int32 ProductCurrentStock; // 현재 박스 안에 있는 재고수
+
+	FProductData* BoxData;
 
     // GrabBox input이 들어왔을 때 실행
     void GrabBoxInputStart();

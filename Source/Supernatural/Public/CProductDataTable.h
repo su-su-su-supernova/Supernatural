@@ -11,6 +11,9 @@ struct FProductData : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, Category = "ProductData")
+	EProductType ProductEnum;
+
+	UPROPERTY(EditAnywhere, Category = "ProductData")
 	FString ProductName;
 
 	UPROPERTY(EditAnywhere, Category = "ProductData")
