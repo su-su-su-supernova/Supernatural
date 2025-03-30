@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "ProductSalesStandDataAsset.h"
 #include "AiCharacter.h"
+#include "SuperGameMode.h"
 
 ACCounter::ACCounter()
 {
@@ -57,8 +58,8 @@ ACCounter::ACCounter()
 	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCard(TEXT("/Script/Engine.StaticMesh'/Game/DYL/Meshes/Bank_Card_3D_Model/uploads_files_2492273_Card.uploads_files_2492273_Card'"));
 	if(tmpCard.Succeeded()) MagneticCardMesh = tmpCard.Object;
 	MagneticCard->SetStaticMesh(MagneticCardMesh);
-	MagneticCard->ComponentTags.Add("Card");
 	MagneticCard->SetVisibility(false);
+
 
 	// AI Spawn Point
 	AISpawnPoint = CreateDefaultSubobject<UBoxComponent>(TEXT("AISpawnPoint"));
@@ -94,6 +95,7 @@ ACCounter::ACCounter()
 			tmpMesh->SetRelativeLocation(FVector(-143.762936, 17.369481, 1) + FVector(0, 39.866659, 0) * i + FVector(37.594206, 0, 0) * j);
 			//UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Location] : %s"), i*2+j, *tmpMesh->GetRelativeLocation().ToString());
 			tmpMesh->SetVisibility(false);
+			tmpMesh->SetCollisionProfileName(FName("NoCollision"));
 			Products.Add(tmpMesh);
 		}
 	}
@@ -106,6 +108,9 @@ void ACCounter::BeginPlay()
 {
 	Super::BeginPlay();
   
+	SuperGameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+
+	// 이 부분 AI와 연동 후 빼줘야 함
 	CustomerArrived();
 }
 
@@ -135,8 +140,14 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void ACCounter::CustomerArrived()
 {
-	// 계산에 사용할 데이터들을 초기화해준다
+	// 계산대에 이미 손님이 있으면 종료한다
+	if(bIsCustomerArrived) return;
+
+	// 계산이 시작되었다고 Game Mode에 알려준다
 	bIsCustomerArrived = true;
+	SuperGameMode->SetIsCalculating(bIsCustomerArrived);
+
+	// 계산에 사용할 데이터들을 초기화해준다
 	NCountedItems = 0;
 	TotalCost = 0;
 	InputCost = 0;
@@ -182,25 +193,32 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 	{
 		// UE_LOG(LogTemp, Warning, TEXT("[CCounter] Current Time : %f / CurVisibilityOn : %d"), CurVisibilityTime, CurVisibilityOn);
 		Products[CurVisibilityOn]->SetVisibility(true);
+		Products[CurVisibilityOn]->SetCollisionProfileName(FName("BlockAllDynamic"));
 		CurVisibilityTime = 0;
 		CurVisibilityOn++;
 
-		// 상품을 전부 진열하면
+		// 상품을 전부 올려두면
 		if (CurVisibilityOn == MaxVisibilityOn)
 		{
 			CurVisibilityOn = 0;
 			bCanVisibilityOn = false;
 
-			// 구매한 상품들이 카운터에 다 진열되었음을 명시한다
+			// 구매한 상품들이 카운터에 다 놓였음을 명시한다
 			bAreProductsOnCounter = true;
 
 			// Player가 계산할 수 있음을 명시한다
-			bCanCalculate = true;
+			// bCanCalculate = true;
 
 			// UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bCanCalculate);
 		}
 	}
 }
+
+void ACCounter::UpdateCurrentCheckoutTotal()
+{
+	SuperGameMode->SetCurrentCheckoutTotal(TotalCost);
+}
+
 
 void ACCounter::PayWithCreditCard(float InDeltaTime)
 {
@@ -211,16 +229,20 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 
 		if (CurPayTime >= MaxPayTime)
 		{
-			// UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
+			UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
 			if (MagneticCard == nullptr)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("<<< Credit Card is EMPTY >>>"));
 				return;
 			}
 			MagneticCard->SetVisibility(true);
+			MagneticCard->ComponentTags.Add("Card");
 			CurPayTime = 0;
 
-			// UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
+			FString compTag = MagneticCard->ComponentTags.GetData()->ToString();
+			UE_LOG(LogTemp, Warning, TEXT(">>>>> Component Tag:  %s"), *compTag);
+
+			UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
 			bDidCustomerGiveCard = true;
 		}
 	}
@@ -236,8 +258,25 @@ void ACCounter::GrabCard()
 	bCanCalculate = true;
 }
 
-void ACCounter::CalculateStart()
+// 다음 손님을 받을 준비를 하기 위해 전부 초기화
+void ACCounter::ReadyToNextCustomer()
 {
+	bCanVisibilityOn = false;
+	bAreProductsOnCounter = false;
+	bIsScanningBarcodeComplete = false;
+	bDidCustomerGiveCard = false;
+	bCanCalculate = false;
+
+	NPurchasedItems = 0;
+	NCountedItems = 0;
+	TotalCost = 0;
+	InputCost = 0;
+
+	CurVisibilityOn = 0;
+	MaxVisibilityOn = 0;
+	
+	bIsCustomerArrived = false;
+	SuperGameMode->SetIsCalculating(bIsCustomerArrived);
 }
 
 

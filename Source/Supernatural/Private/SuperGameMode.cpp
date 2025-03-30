@@ -13,7 +13,9 @@ ASuperGameMode::ASuperGameMode()
 void ASuperGameMode::BeginPlay()
 {
     Super::BeginPlay();
-    //UE_LOG(LogTemp, Log, TEXT(">> SuperBeginPlay"));
+    
+    ///// 여기서부터 다시 /////
+   // Counter = Cast<ACCounter>(GetWorld()->)
 }
 
 void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)

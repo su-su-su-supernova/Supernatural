@@ -40,14 +40,36 @@ public:
 	void IncrementTicketCount();
 	void IncrementGameModeTicketCount();
 	int32 GenerateGameModeTicketNumber();
-private:
 
+private:
 	int32 TicketNumber = 1;
 	int32 GameModeTicketNumber = 1;
 
 	int32 TotalSales = 100000000;
+	int32 CurrentCheckoutTotal = 0;
+	int32 CurrentInputTotal = 0;
+
+	bool bIsCalculating = false;
+
+	class ACCounter* Counter;
 
 public:
 	int32 GetTotalSales() const { return TotalSales; }
 	void SetTotalSales(int32 InTotalSales) { TotalSales = InTotalSales; }
+
+	int32 GetCurrentCheckoutTotal() const { return CurrentCheckoutTotal; }
+	void SetCurrentCheckoutTotal(int32 InCurrentCheckoutTotal) { CurrentCheckoutTotal = InCurrentCheckoutTotal; }
+
+	int32 GetCurrentInputTotal() const { return CurrentInputTotal; }
+	void SetCurrentInputTotal(int32 InCurrentInputTotal) { CurrentInputTotal = InCurrentInputTotal; }
+
+	bool GetIsCalculating() const 
+	{	
+		if(bIsCalculating)
+			UE_LOG(LogTemp, Log, TEXT(">>>>> CALCULATE PRODUCT BEGIN <<<<<"))
+		else
+			UE_LOG(LogTemp, Log, TEXT(">>>>> CALCULATE PRODUCT END <<<<<"))
+		return bIsCalculating; 
+	}
+	void SetIsCalculating(bool InIsCalculating) { bIsCalculating = InIsCalculating; }
 };

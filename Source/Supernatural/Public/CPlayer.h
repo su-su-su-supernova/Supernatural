@@ -219,7 +219,7 @@ private:
 	bool bIsHitByCounter = false;
 	bool bIsScanBarcodeInputEntered = false;
 	bool bIsGrabCardInputEntered = false;
-	//bool bIsCalculating = false;
+	bool bCanCalculate = false;
 
 	void ScanBarcodeInputStarted();
 	void GrabCardInputEntered();

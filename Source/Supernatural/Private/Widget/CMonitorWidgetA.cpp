@@ -51,6 +51,7 @@ void UCMonitorWidgetA::NumberEntered(int32 InType)
 	{
 		if (InType == 11) return;
 		InputCost = value;
+		UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
 		return;
 	}
 	InputCost += value;
@@ -68,18 +69,32 @@ void UCMonitorWidgetA::DeleteLastInput()
 
 void UCMonitorWidgetA::ConvertInputToString()
 {
-	UE_LOG(LogTemp, Warning, TEXT(">>>> Before Update TotalSales : %d\\"), SuperGameMode->GetTotalSales());
+	UE_LOG(LogTemp, Warning, TEXT(">>>> Before Update TotalSales : %d"), SuperGameMode->GetTotalSales());
 	// 입력받은 값을 정수로 변환
 	PlayerCalculated = FCString::Atoi(*InputCost);
 
+	// 현재 사용자가 입력한 물품들의 총액이 얼마인지 Game Mode에 Update한다
+	SuperGameMode->SetCurrentInputTotal(PlayerCalculated);
+	
+	// Player가 입력한 값이 총 계산해야 할 금액과 다르면 Input Cost를 0으로 초기화하여 
+	// 사용자로 하여금 다시 값을 입력하도록 한다
+	if(SuperGameMode->GetCurrentInputTotal() != SuperGameMode->GetCurrentCheckoutTotal())
+	{
+		InputCost = "0";
+		return;
+	}
+
 	// 매출을 갱신한다
 	SuperGameMode->SetTotalSales( SuperGameMode->GetTotalSales() + PlayerCalculated );
-
-	UE_LOG(LogTemp, Warning, TEXT(">>>> After Update TotalSales : %d\\"), SuperGameMode->GetTotalSales());
+	UE_LOG(LogTemp, Warning, TEXT(">>> After Update TotalSales : %d"), SuperGameMode->GetTotalSales());
 
 	// 사용자 입력값 초기화
 	InputCost = "0";
+	SuperGameMode->SetCurrentCheckoutTotal(0);
+	SuperGameMode->SetCurrentInputTotal(0);
+
 	UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
+    UE_LOG(LogTemp, Log, TEXT("[Reset] CurCheckoutTotal : %d / CurInputTotal : %d"), SuperGameMode->GetCurrentCheckoutTotal(), SuperGameMode->GetCurrentInputTotal());
 }
 
 void UCMonitorWidgetA::SetWrapBox()

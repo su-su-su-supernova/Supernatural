@@ -64,7 +64,6 @@ private:
 	bool bIsScanningBarcodeComplete = false;
 	bool bDidCustomerGiveCard = false;
 	bool bCanCalculate = false;
-	bool bIsCalculatingCompleted = false;
 
 	int32 NPurchasedItems;
 	int32 NCountedItems;
@@ -79,8 +78,9 @@ private:
 	float CurPayTime = 0;
 	float MaxPayTime = 0.5;
 
-
 	TArray<EProductType> ShoppingList;
+
+	class ASuperGameMode* SuperGameMode;
 
 
 public:
@@ -126,9 +126,9 @@ private:
 	void CustomerArrived();
 	void PlaceProductsOnCounter(float InDeltaTime);
 	void PayWithCreditCard(float InDeltaTime);
-	void CalculateStart();
 
 public:
 	void GrabCard();
-
+	void UpdateCurrentCheckoutTotal();
+	void ReadyToNextCustomer();
 };
