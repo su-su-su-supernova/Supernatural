@@ -202,7 +202,7 @@ private:
     class UInputAction* IA_GrabCard;
 
     UPROPERTY(EditDefaultsOnly, Category = "Calculate")
-    class UInputAction* IA_Calculate;
+    class UInputAction* IA_ScanBarcode;
 
 	// 카운터 구별용 tag
 	const FName COUNTERTAG = FName("Counter");
@@ -214,11 +214,11 @@ private:
 	const FName PRODUCTTAG = FName("Product");
 
 	bool bIsHitByCounter = false;
+	bool bIsScanBarcodeInputEntered = false;
 	bool bIsGrabCardInputEntered = false;
-	bool bIsCalculateInputEntered = false;
 	//bool bIsCalculating = false;
 
-	void CalculateInputStarted();
+	void ScanBarcodeInputStarted();
 	void GrabCardInputEntered();
 	void ScanProductBarcode(UStaticMeshComponent* InProduct);
 	void CalculateTotalPrice();

@@ -116,7 +116,7 @@ void ACCounter::Tick(float DeltaTime)
 	PlaceProductsOnCounter(DeltaTime);
 
 	// 카드 지불하기
-	PayWithCreditCard(DeltaTime);
+	//PayWithCreditCard(DeltaTime);
 }
 
 
@@ -157,12 +157,15 @@ void ACCounter::CustomerArrived()
 	MaxVisibilityOn = NPurchasedItems;
 	bCanVisibilityOn = true;
 
-	// 제품을 카운터에 전부 올려두었다면 카드로 지불한다
-	if (bAreProductsOnCounter)
-	{
-		CreditCard->SetVisibility(true);
-		bDidCustomerGiveCard = true;
-	}	
+	// Player 쪽에서 모든 물품의 바코드를 인식한다
+
+
+	//// 제품을 카운터에 전부 올려두었다면 카드로 지불한다
+	//if (bAreProductsOnCounter)
+	//{
+	//	CreditCard->SetVisibility(true);
+	//	bDidCustomerGiveCard = true;
+	//}	
 }
 
 void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
@@ -186,9 +189,11 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 
 			// 구매한 상품들이 카운터에 다 진열되었음을 명시한다
 			bAreProductsOnCounter = true;
-		
 
-			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bAreProductsOnCounter);
+			// Player가 계산할 수 있음을 명시한다
+			bCanCalculate = true;
+
+			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bCanCalculate);
 		}
 	}
 }
@@ -216,7 +221,6 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 void ACCounter::GrabCard()
 {
 	CreditCard->SetVisibility(false);
-	bCanCalculate = true;
 }
 
 void ACCounter::CalculateStart()

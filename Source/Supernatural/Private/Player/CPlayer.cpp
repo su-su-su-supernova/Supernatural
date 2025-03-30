@@ -59,8 +59,8 @@ ACPlayer::ACPlayer()
 	ConstructorHelpers::FObjectFinder<UInputAction> tmpIAGrabCard(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_GrabCard.IA_GrabCard'"));
 	if (tmpIAGrabBox.Succeeded()) IA_GrabCard = tmpIAGrabCard.Object;
 
-	ConstructorHelpers::FObjectFinder<UInputAction> tmpIACalculate(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_Calculate.IA_Calculate'"));
-	if (tmpIAGrabBox.Succeeded()) IA_Calculate = tmpIACalculate.Object;
+	ConstructorHelpers::FObjectFinder<UInputAction> tmpIAScanBarcode(TEXT("/Script/EnhancedInput.InputAction'/Game/DYL/Inputs/IA_ScanBarcode.IA_ScanBarcode'"));
+	if (tmpIAGrabBox.Succeeded()) IA_ScanBarcode = tmpIAScanBarcode.Object;
 
 
 	/* Motion Controller - Left Hand */
@@ -101,8 +101,10 @@ ACPlayer::ACPlayer()
 	WidgetInteraction->InteractionSource = EWidgetInteractionSource::World;
 	WidgetInteraction->TraceChannel = ECollisionChannel::ECC_Visibility;
 
+
 	/* GameMode */
 	SuperGameMode = CreateDefaultSubobject<ASuperGameMode>(TEXT("SuperGameMode"));
+
 }
 
 void ACPlayer::BeginPlay()
@@ -165,7 +167,7 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Started, this, &ACPlayer::DPStart);
 		inputSystem->BindAction(IA_DP, ETriggerEvent::Completed, this, &ACPlayer::DPCompleted);
 		inputSystem->BindAction(IA_GrabCard, ETriggerEvent::Started, this, &ACPlayer::GrabCardInputEntered);
-		inputSystem->BindAction(IA_Calculate, ETriggerEvent::Started, this, &ACPlayer::CalculateInputStarted);
+		inputSystem->BindAction(IA_ScanBarcode, ETriggerEvent::Started, this, &ACPlayer::ScanBarcodeInputStarted);
 	}
 }
 
@@ -302,16 +304,20 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 			WidgetInteraction->SetCustomHitResult(hitResult);
 		}
 
+		/* Scan Barcode */
+		if (bIsScanBarcodeInputEntered && hitResult.GetComponent()->ComponentHasTag(PRODUCTTAG))
+		{
+			Counter = Cast<ACCounter>(hitResult.GetActor());
+			UStaticMeshComponent* hitComp = Cast<UStaticMeshComponent>(hitResult.GetComponent());
+			ScanProductBarcode(hitComp);
+		}
+
 		/* Grab Card */
 		if(bIsGrabCardInputEntered && hitResult.GetComponent()->ComponentHasTag(CARDTAG))
 			Counter->GrabCard();
 
 		/* Calculate */
-		if (hitResult.GetComponent()->ComponentHasTag(PRODUCTTAG) && bIsCalculateInputEntered)
-		{
-			UStaticMeshComponent* product = Cast<UStaticMeshComponent>(hitResult.GetComponent());
-			ScanProductBarcode(product);
-		}
+		
 	}
 }
 
@@ -490,9 +496,9 @@ void ACPlayer::DPCompleted()
 
 #pragma region Calculate
 
-void ACPlayer::CalculateInputStarted()
+void ACPlayer::ScanBarcodeInputStarted()
 {
-	bIsCalculateInputEntered = true;
+	bIsScanBarcodeInputEntered = true;
 }
 
 void ACPlayer::GrabCardInputEntered()
@@ -508,9 +514,6 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	// Counter에 계산할 물품이 없다면 종료
 	if( !(Counter->GetIsProductsOnCounter()) ) return;
 
-	// Card를 받지 않았다면 종료
-	if( !(Counter->GetDidCustomerGiveCard()) ) return;
-
 	// Counter에 있는 모든 물품을 리더기로 인식시켰다면 종료
 	if(Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
 	{
@@ -520,6 +523,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	}
 
 	// 리더기로 바코드를 찍은 물품의 Visibility를 끈다
+	InProduct->SetVisibility(false);
 	
 	// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
 	Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
@@ -551,18 +555,18 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	// AI가 구매한 물품들의 총 액수를 갱신한다
 	Counter->SetTotalCost(Counter->GetTotalCost() + productPrice);
 
-	// 카드를 받아들어야지
+	//// 카드를 받아들어야지
 
 
-	// 플레이어가 총액 입력해야지
+	//// 플레이어가 총액 입력해야지
 
 
-	// 결제 결과를 DT에 반영한다
-	(purchasedProduct->ShelfStock)--;
-	SuperGameMode->SetTotalSales(SuperGameMode->GetTotalSales() - productPrice);
+	//// 결제 결과를 DT에 반영한다
+	//(purchasedProduct->ShelfStock)--;
+	//SuperGameMode->SetTotalSales(SuperGameMode->GetTotalSales() - productPrice);
 
-	// Calculate input이 끝났음을 명시한다
-	bIsCalculateInputEntered = false;
+	//// Calculate input이 끝났음을 명시한다
+	//bIsScanBarcodeInputEntered = false;
 }
 
 void ACPlayer::CalculateTotalPrice()
