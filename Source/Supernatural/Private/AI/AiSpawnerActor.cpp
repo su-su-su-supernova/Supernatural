@@ -10,7 +10,7 @@
 // Sets default values
 AAiSpawnerActor::AAiSpawnerActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	ArrowComp = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComp"));
 	ArrowComp->SetRelativeRotation(FRotator(-90, 180, 0));
@@ -39,29 +39,25 @@ void AAiSpawnerActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	ASuperGameMode* GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
-	if(!GameMode)return;
-	if(GameMode->getIsSpawnAi()){
-	if (CurrentTime >= 5) {
-		AAiCharacter* AiCharacter = GetWorld()->SpawnActorDeferred<AAiCharacter>(AiCharacterSample, ArrowComp->GetComponentTransform());
-		if (AiCharacter) {
-			FTransform SpawnTransform;
-			SpawnTransform.SetLocation(ArrowComp->GetComponentLocation()); // 위치만 가져옴
-			SpawnTransform.SetRotation(FQuat::Identity); // 회전을 기본값(0, 0, 0)으로 설정
-			SpawnTransform.SetScale3D(FVector(1.0f, 1.0f, 1.0f));
-			AiCharacter->FinishSpawning(SpawnTransform);
+	if (!GameMode)return;
+		if (CurrentTime >= 5) {
+			AAiCharacter* AiCharacter = GetWorld()->SpawnActorDeferred<AAiCharacter>(AiCharacterSample, ArrowComp->GetComponentTransform());
+			if (AiCharacter) {
+				FTransform SpawnTransform;
+				SpawnTransform.SetLocation(ArrowComp->GetComponentLocation()); // 위치만 가져옴
+				SpawnTransform.SetRotation(FQuat::Identity); // 회전을 기본값(0, 0, 0)으로 설정
+				SpawnTransform.SetScale3D(FVector(1.0f, 1.0f, 1.0f));
+				AiCharacter->FinishSpawning(SpawnTransform);
+				AiCharacter->SetActorRelativeRotation(FRotator(0, -90,0));
 
-			ASuperAIController* AIController = GetWorld()->SpawnActor<ASuperAIController>(ASuperAIController::StaticClass(), SpawnTransform);
-			if (AIController)
-			{
-				AIController->Possess(AiCharacter);
+				ASuperAIController* AIController = GetWorld()->SpawnActor<ASuperAIController>(ASuperAIController::StaticClass(), SpawnTransform);
+				if (AIController)
+				{
+					AIController->Possess(AiCharacter);
+				}
 			}
+			CurrentTime = 0.0f;
 		}
-		CurrentTime = 0.0f;
-	}
-	CurrentTime += DeltaTime;
-	}
-	else {
-		CurrentTime = 0;
-	}
+		CurrentTime += DeltaTime;
 }
 

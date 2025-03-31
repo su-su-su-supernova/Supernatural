@@ -20,7 +20,7 @@ void UAIMoveToCounterTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-	UE_LOG(LogTemp, Warning, TEXT("%d"), BlackboardComp->GetValueAsBool(TEXT("IsPurchase")));
+	//UE_LOG(LogTemp, Warning, TEXT("%d"), BlackboardComp->GetValueAsBool(TEXT("IsPurchase")));
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 
 	//if (BlackboardComp->GetValueAsBool(TEXT("IsPurchase"))) {

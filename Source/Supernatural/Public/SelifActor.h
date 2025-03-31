@@ -39,6 +39,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UStaticMeshComponent* MeshComp;
 
-	TArray<float> z_loacation = {45,95,150};
+	TArray<float> z_loacation = {52,104,156};
+	TArray<FVector> Target_z_loacation = {
+		FVector((-100.000000,57.000000,-26.000000)),
+		FVector((0.000000,57.000000, -78.000000)) ,
+		FVector((100.000000, 57.000000, -129.000000))};
 
 };

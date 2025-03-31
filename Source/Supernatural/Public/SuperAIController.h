@@ -44,12 +44,15 @@ public:
 	bool SelectNextProduct();
 	void AddIndex();
 	void BFS(TArray<EProductType> ProductNames);
+	bool FindActor();
 
 public:
 	FVector TargetLocation;
 	EAIState AIState = EAIState::FindProduct;
 	TArray<AActor*> FoundActors;
+	UPROPERTY(EditDefaultsOnly)
 	int32 TicketNumber = 0;
+	class FName FindAct;
 
 	bool isSucceeded = false;
 

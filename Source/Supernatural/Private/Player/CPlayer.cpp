@@ -315,7 +315,7 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 			Counter->GrabCard();
 
 		/* Calculate */
-		
+
 	}
 }
 
@@ -472,11 +472,9 @@ void ACPlayer::DisplayProduct()
 	UE_LOG(LogTemp, Error, TEXT(">>>>> Display Product Start <<<<<"));
 
 	if (!Stand) return;
-	UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *(BoxData->ProductName));
+	if (BoxData == nullptr)return;
 	if (!Stand->SetMeshesForProductNumber(BoxData))
-	{
-		 //현재 Box에 들어 있는 물품 수를 1 감소시킨다
-		Box->SetCurrentStock(ProductCurrentStock--);
+	{Box->SetCurrentStock(ProductCurrentStock--);
 	}
 
 }
@@ -521,7 +519,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 
 	// 리더기로 바코드를 찍은 물품의 Visibility를 끈다
 	InProduct->SetVisibility(false);
-	
+
 	// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
 	Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
 
@@ -529,9 +527,9 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	FString name = InProduct->GetName();
 	FString tmp, tmpIdx;
 	name.Split(TEXT("CounterProduct"), &tmp, &tmpIdx);
-	
+
 	int32 index = FCString::Atoi(*tmpIdx);
-	
+
 	FProductData* purchasedProduct = SuperGameMode->GetProductData(Counter->GetShoppingList()[index]);
 	int32 productPrice = purchasedProduct->CostPrice;
 

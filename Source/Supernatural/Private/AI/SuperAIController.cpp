@@ -1,7 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "SuperAIController.h"
+﻿#include "SuperAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "AiCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -11,18 +8,18 @@
 #include "CPlayer.h"
 #include "EAIState.h"
 #include "EngineUtils.h"
+#include "salesStandActor.h" // AsalesStandActor 포함
+#include "Components/BoxComponent.h"
 
 ASuperAIController::ASuperAIController()
 {
-
-	ConstructorHelpers::FObjectFinder<UBehaviorTree> AIBehavior(TEXT("/Game/HWL/AI/BT_AI.BT_AI"));
-	if (AIBehavior.Succeeded())AIBehaviorTree = AIBehavior.Object;
+    ConstructorHelpers::FObjectFinder<UBehaviorTree> AIBehavior(TEXT("/Game/HWL/AI/BT_AI.BT_AI"));
+    if (AIBehavior.Succeeded()) AIBehaviorTree = AIBehavior.Object;
 }
 
 void ASuperAIController::BeginPlay()
 {
     Super::BeginPlay();
-
     RunBehaviorTree(AIBehaviorTree);
 
     GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
@@ -34,75 +31,113 @@ void ASuperAIController::BeginPlay()
         AvailableIndices.Add(i);
     }
 
-    // 배열 크기가 4로 고정되어 있으므로, 최대 4개만 선택
-    TArray<EProductType> ProductNames; // FString으로 정의
+    TArray<EProductType> ProductNames;
     for (int i = 0; i < 4 && AvailableIndices.Num() > 0; i++) {
         int32 RandomIndex = FMath::RandRange(0, AvailableIndices.Num() - 1);
         int32 SelectedIndex = AvailableIndices[RandomIndex];
-        if (!GameMode) return;
         EProductType ProductType = static_cast<EProductType>(i);
         ProductNames.Add(GameMode->GetProductData(ProductType)->ProductEnum);
         AvailableIndices.RemoveAt(RandomIndex);
     }
     BFS(ProductNames);
-
 }
 
 void ASuperAIController::Tick(float DeltaSeconds)
 {
-	Super::Tick(DeltaSeconds);
+    Super::Tick(DeltaSeconds);
 }
 
 bool ASuperAIController::SelectNextProduct()
 {
+    if (ProductName.Num() == 0) {
+        TicketNumber = -1;
+        return false;
+    }
     if (index >= ProductName.Num()) {
         if (isSucceeded) return false;
-        TicketNumber = GameMode->GenerateTicketNumber();
+        //TicketNumber = GameMode->GenerateTicketNumber();
+        //GameMode->IncrementTicketCount();
+        GameMode->WaitingAIs.Add(this);
+        UE_LOG(LogTemp, Warning, TEXT("TicketNumber: %d"), TicketNumber);
         GameMode->IncrementTicketCount();
         isSucceeded = true;
         return false;
     }
-	FName TargetTag = FName(*ProductName[index]);
-	CurrentName = ProductName[index];
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
-	if (FoundActors.Num() > 0) {
-		GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
-		GetBlackboardComponent()->SetValueAsBool(TEXT("IsSelling"), isBuyProduct[index]);
-	}
-	return true;
+    FName TargetTag = FName(*ProductName[index]);
+    CurrentName = ProductName[index];
+
+    // 컴포넌트 검색
+    TArray<USceneComponent*> FoundComponents;
+    for (TActorIterator<AsalesStandActor> It(GetWorld()); It; ++It)
+    {
+        AsalesStandActor* SalesStandActor = *It;
+        if (!SalesStandActor || !SalesStandActor->TargetComp) continue;
+        if (SalesStandActor->TargetComp->ComponentHasTag(TargetTag))
+        {
+            FoundComponents.Add(SalesStandActor->TargetComp);
+            break;
+        }
+    }
+
+    if (FoundComponents.Num() > 0) {
+        // 컴포넌트의 월드 위치를 가져와서 블랙보드에 저장
+        FVector ComponentLocation = FoundComponents[0]->GetComponentLocation();
+        GetBlackboardComponent()->SetValueAsVector(TEXT("ProductClass"), ComponentLocation);
+        //UE_LOG(LogTemp, Log, TEXT("Set ProductClass location: %s"), *ComponentLocation.ToString());
+        return true;
+    }
+    return false;
 }
 
 void ASuperAIController::AddIndex()
 {
-	index++;
+    index++;
 }
 
 void ASuperAIController::BFS(TArray<EProductType> ProductNames)
 {
+    TArray<USceneComponent*> MatchedComponents;
 
-    TArray<FName> MatchedTags; // 일치하는 태그 저장
-
-    for (const EProductType& ProductType : ProductNames)
+    for (TActorIterator<AsalesStandActor> It(GetWorld()); It; ++It)
     {
-        // EProductType 값을 FName으로 변환
-        FName ProductNameAsFName = FName(*UEnum::GetValueAsString(ProductType));
+        AsalesStandActor* SalesStandActor = *It;
+        if (!SalesStandActor) continue;
 
-        // 월드에서 태그 검색
-        for (TActorIterator<AActor> It(GetWorld()); It; ++It)
+        UBoxComponent* TargetComp = SalesStandActor->TargetComp;
+        if (!TargetComp) continue;
+
+        for (const EProductType& ProductType : ProductNames)
         {
-            AActor* Actor = *It;
-            if (Actor->Tags.Contains(ProductNameAsFName)) // 태그가 있는지 바로 체크
-            {
-                MatchedTags.Add(ProductNameAsFName);
-                break; // 하나만 찾으면 루프 탈출
-            }
+            FName ProductNameAsFName = FName(*UEnum::GetValueAsString(ProductType));
+			if (TargetComp->ComponentHasTag(ProductNameAsFName))
+			{
+                if (MatchedComponents.Contains(TargetComp)) return;
+                if (ProductName.Contains(*ProductNameAsFName.ToString())) return;
+				MatchedComponents.Add(TargetComp);
+				ProductName.Add(*ProductNameAsFName.ToString());
+				break;
+			}
         }
     }
 
-    // 디버깅 출력
-    for (const FName& MatchedTag : MatchedTags)
+    if (MatchedComponents.Num() == 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Matched Tag Found: %s"), *MatchedTag.ToString());
-        ProductName.Add(*MatchedTag.ToString());
+        //UE_LOG(LogTemp, Warning, TEXT("No components with matching tags found"));
     }
+}
+
+bool ASuperAIController::FindActor()
+{
+    for (TActorIterator<AsalesStandActor> It(GetWorld()); It; ++It)
+    {
+        AsalesStandActor* SalesStandActor = *It;
+        if (!SalesStandActor || !SalesStandActor->TargetComp) continue;
+        if (SalesStandActor->TargetComp->ComponentHasTag(*CurrentName))
+        {
+            return true;
+        }
+    }
+    return false;
+
+
 }

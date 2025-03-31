@@ -78,27 +78,6 @@ void ASuperGameMode::LoadProductData()
 
 }
 
-int32 ASuperGameMode::GenerateTicketNumber()
-{
-    return TicketNumber;
-}
-
-void ASuperGameMode::IncrementTicketCount()
-{
-    TicketNumber++;
-}
-
-void ASuperGameMode::IncrementGameModeTicketCount()
-{
-    GameModeTicketNumber++;
-}
-
-int32 ASuperGameMode::GenerateGameModeTicketNumber()
-{
-    UE_LOG(LogTemp, Log, TEXT("TICK%d"), GameModeTicketNumber);
-
-    return GameModeTicketNumber;
-}
 void ASuperGameMode::SpawnAIHander()
 {
     isSpawnAi = !isSpawnAi;

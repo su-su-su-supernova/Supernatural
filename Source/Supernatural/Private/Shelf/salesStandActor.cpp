@@ -15,15 +15,17 @@ AsalesStandActor::AsalesStandActor()
 		ProductSalesStandDataAsset = DataAssetFind.Object;
 		CachedProducts = ProductSalesStandDataAsset->ProdctSalesStandDataTable;
 	}
+	MainSceneComp= CreateDefaultSubobject<USceneComponent>(TEXT("MainSceneComp"));
+	MainSceneComp->SetupAttachment(RootComponent);
+
 	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	BoxComp->SetBoxExtent(FVector(95, 25, 25));
-	BoxComp->SetupAttachment(RootComponent);
+	BoxComp->SetupAttachment(MainSceneComp);
 
 	TargetComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TargetComp"));
-	TargetComp->SetBoxExtent(FVector(95, 25, 25));
-	TargetComp->SetRelativeLocation(FVector(-250, 117, 29));
+	TargetComp->SetBoxExtent(FVector(25));
 	TargetComp->SetCollisionProfileName(TEXT("ProductTarget"));
-	TargetComp->SetupAttachment(RootComponent);
+	TargetComp->SetupAttachment(BoxComp);
 
 	SceneComp5 = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp5"));
 	SceneComp5->SetupAttachment(BoxComp);
@@ -69,16 +71,13 @@ void AsalesStandActor::settingProductMesh(int32 v)
 
 void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* TargetSceneComp, EProductDivide ProductType, float ProductDistance)
 {
-	// ??? ????
 	static int32 j = 0;
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
 
-	// ProductNumber?? ???? ?????? ?迭 ????
 	if (ProductNumber == 5) TargetArray = &ProductMeshes5;
 	else if (ProductNumber == 10) TargetArray = &ProductMeshes10;
 	else if (ProductNumber == 15) TargetArray = &ProductMeshes15;
 
-	// ??? ???? ?? ?迭?? ???
 	for (int i = 0; i < ProductNumber; i++) {
 		FString ComponentName = FString::Printf(TEXT("Product%d"), j++);
 		UStaticMeshComponent* NewMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName(*ComponentName));
@@ -88,7 +87,7 @@ void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* T
 			continue;
 		}
 		NewMesh->SetupAttachment(TargetSceneComp);
-		NewMesh->SetRelativeLocation(FVector(-85 + i * ProductDistance, 0, -20));
+		NewMesh->SetRelativeLocation(FVector(-85 + i * ProductDistance, 0, -25));
 		NewMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		if (ProductType == EProductDivide::Shelf5)
 			NewMesh->SetRelativeScale3D(FVector(0.7));
@@ -99,8 +98,9 @@ void AsalesStandActor::decideProductType(int32 ProductNumber, USceneComponent* T
 bool AsalesStandActor::SetMeshesForProductNumber(FProductData* ProductData)
 {
 	if (ProductData == nullptr) return false;
-	if (!Tags.Contains(*UEnum::GetValueAsString(ProductData->ProductEnum))) {
-		Tags.Push(*UEnum::GetValueAsString(ProductData->ProductEnum));
+	SProductData = ProductData;
+	if (TargetComp->ComponentTags.Num()==0) {
+		TargetComp->ComponentTags.Push(*UEnum::GetValueAsString(ProductData->ProductEnum));
 	}
 
 	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
@@ -116,14 +116,16 @@ bool AsalesStandActor::SetMeshesForProductNumber(FProductData* ProductData)
 	else if (ProductData->MaxShelfStock == 15) {
 		TargetArray = &ProductMeshes15;
 	}
-
+	else {
+		return false;
+	}
 
 	if (CurrentProductCount == 0)
 	{
 		CurrentProductNumber = ProductNumber;
 		CurrentProductType = ProductType;
 		ProductCountMax = ProductNumber;
-
+		if (TargetArray==nullptr)return false;
 		for (int i = 0; i < TargetArray->Num(); i++) {
 			if ((*TargetArray)[i] && CachedProducts.Contains(ProductType) && CachedProducts[ProductType].MeshData)
 			{
@@ -133,7 +135,7 @@ bool AsalesStandActor::SetMeshesForProductNumber(FProductData* ProductData)
 		}
 		AddProduct(TargetArray);
 	}
-	else if (CurrentProductType == ProductType) // ProductNumber ?? ????
+	else if (CurrentProductType == ProductType)
 	{
 		AddProduct(TargetArray);
 	}
@@ -161,7 +163,44 @@ void AsalesStandActor::AddProduct(TArray<UStaticMeshComponent*>* TargetArray)
 	bIsFull = false;
 }
 
-void AsalesStandActor::RemoveProduct()
+FProductData* AsalesStandActor::RemoveProduct()
 {
 
+	// 적절한 TargetArray 선택
+	TArray<UStaticMeshComponent*>* TargetArray = nullptr;
+	if (CurrentProductNumber == 5) TargetArray = &ProductMeshes5;
+	else if (CurrentProductNumber == 10) TargetArray = &ProductMeshes10;
+	else if (CurrentProductNumber == 15) TargetArray = &ProductMeshes15;
+
+	// 제품 제거 (마지막 제품 숨기기)
+	CurrentProductCount--;
+	ProductMesh = (*TargetArray)[CurrentProductCount];
+	if (ProductMesh)
+	{
+		ProductMesh->SetVisibility(false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[HW] ProductMesh at index %d is null"), CurrentProductCount);
+	}
+
+	// 상태 업데이트
+	bIsFull = false;
+
+	// 모든 제품이 제거된 경우 초기화
+	if (CurrentProductCount == 0)
+	{
+		// 현재 제품 타입을 문자열로 변환
+		FString ProductTypeString = UEnum::GetValueAsString(CurrentProductType);
+
+		// Tags에서 해당 제품 타입 제거
+		TargetComp->ComponentTags.RemoveSingle(*ProductTypeString);
+
+		// 상태 초기화
+		CurrentProductNumber = 0;
+		CurrentProductType = EProductType::MAX; // 열거형의 기본값으로 가정
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[HW] Product removed. CurrentProductCount: %d"), CurrentProductCount);
+	return SProductData;
 }

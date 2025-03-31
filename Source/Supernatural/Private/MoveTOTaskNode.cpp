@@ -30,6 +30,9 @@ void UMoveTOTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 
 	ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
 	AAiCharacter* AI = Cast<AAiCharacter>(AiController->GetCharacter());
+	if (AiController->TicketNumber == -1) {
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+	}
 	if (AI->isBegin) {
 		AI->isBegin = false;
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

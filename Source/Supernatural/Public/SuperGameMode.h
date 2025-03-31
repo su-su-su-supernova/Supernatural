@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "CProductDataTable.h"
+#include "SuperAIController.h"
 #include "SuperGameMode.generated.h"
 
 class CProductDataTable;
@@ -35,18 +36,21 @@ public:
 
 	void LoadProductData();
 
-	int32 GenerateTicketNumber();
+	UFUNCTION(BlueprintCallable)
+    int32 GenerateTicketNumber() { return CurrentTicketNumber; }
 
-	void IncrementTicketCount();
-
-	void IncrementGameModeTicketCount();
-
-	int32 GenerateGameModeTicketNumber();
+    void IncrementTicketCount() { CurrentTicketNumber++; }
 
 	void SpawnAIHander();
 
 	bool getIsSpawnAi();
+    UPROPERTY(VisibleAnywhere)
+    TArray<ASuperAIController*> WaitingAIs; // 대기 중인 AI 목록
 private:
+
+	UPROPERTY(VisibleAnywhere)
+    int32 CurrentTicketNumber = 1; // 현재 발급할 티켓 번호
+
 	bool isSpawnAi = false;
 	int32 TicketNumber = 1;
 	int32 GameModeTicketNumber = 1;

@@ -49,6 +49,8 @@ void UMainBoardWidget::OnButtonClicked()
         FProductData* Data = GameMode->GetProductData(product);
 
         GameMode->SetTotalSales(GameMode->GetTotalSales() - Data->CostPrice*Data->BoxStock);
+        UE_LOG(LogTemp, Error, TEXT("asdasdasdsa"));
+
         SpawnProductBox(product);
     }
     selectArrayProduct.Empty();
@@ -58,6 +60,7 @@ void UMainBoardWidget::OnButtonClicked()
 void UMainBoardWidget::OnSpwnerButtonClicked()
 {
     if (!GameMode) return;
+    UE_LOG(LogTemp, Error, TEXT("Start"));
     GameMode->SpawnAIHander();
 }
 

@@ -21,6 +21,7 @@ EBTNodeResult::Type UProductFindFailedTaskNode::ExecuteTask(UBehaviorTreeCompone
 {
     Super::ExecuteTask(OwnerComp, NodeMemory);
 
+
     ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
         AiController->TargetLocation = getRandomLocation();
         return EBTNodeResult::InProgress;
@@ -31,20 +32,21 @@ void UProductFindFailedTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uin
     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
     ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
+
+    if (AiController->TicketNumber == -1) {
+        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+        return;
+    }
+
     ASuperGameMode* Gamemode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
     if (!AiController) {
         FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
         return;
     }
-    if (Gamemode->GenerateGameModeTicketNumber() == AiController->TicketNumber) {
-        AiController->TicketNumber = -1;
+    if (Gamemode->WaitingAIs.Top() == AiController) {
         FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
         return;
-
     }
-
-
-
 
     float AcceptableRadius = 100.0f;
 

@@ -5,6 +5,7 @@
 #include "salesStandActor.h"
 #include "CLineTraceZone.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ASelifActor::ASelifActor()
@@ -25,8 +26,11 @@ void ASelifActor::BeginPlay()
 	// 2. 스폰된 엑터를 this의 자식으로 붙이기
 	if (salesStandActor)
 	{
-		salesStandActor->SetActorRelativeLocation(FVector(0,0, z_loacation[i]));
-		salesStandActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+		//salesStandActor->SetActorRelativeLocation(FVector(0,0, z_loacation[i]));
+		salesStandActor->BoxComp->SetRelativeLocation(FVector(0, 0, z_loacation[i]));
+		salesStandActor->TargetComp->SetRelativeLocation(FVector(-100+100*i,57,-26+-52*i));
+		salesStandActor->AttachToComponent(MeshComp, FAttachmentTransformRules::KeepRelativeTransform);
+
 	}
 
 	}

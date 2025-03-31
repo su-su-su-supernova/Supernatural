@@ -32,7 +32,7 @@ private:
     void FindActor();
 
     class APawn* PlayerPawn;
-    class AActor* ProductActor;
+    FVector ProductVector;
     class ASuperAIController* AiController;
 
 };

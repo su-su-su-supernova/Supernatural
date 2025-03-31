@@ -36,6 +36,8 @@ public:
 
 	class UStaticMeshComponent* ProductMesh;
 	class USelif_BaseComponent* SelifBaseComp;
+	class USceneComponent* MainSceneComp;
+
 	class USceneComponent* SceneComp5;
 	class USceneComponent* SceneComp10;
 	class USceneComponent* SceneComp15;
@@ -60,16 +62,17 @@ private:
 	//UFUNCTION(BlueprintCallable, Category = "SalesStand")
 
 	void AddProduct(TArray<UStaticMeshComponent*>* TargetArray);
-	void RemoveProduct();
 private:
 	int32 ProductCountMax = 0;
 	int32 CurrentProductCount = 0;
 	EProductType CurrentProductType;
 	int32 CurrentProductNumber = 0;
 	bool bIsFull = false;
+	FProductData* SProductData;
 
 public:
 	bool SetMeshesForProductNumber(FProductData* ProductData);
+	FProductData* RemoveProduct();
 
 
 
