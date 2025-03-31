@@ -10,12 +10,20 @@
 #include "SuperGameMode.h"
 #include "ProductSellWidget.h"
 #include "Components/VerticalBox.h"
+#include "Sound/SoundCue.h"
+#include "CPlayer.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/AudioComponent.h"
 
 
 UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer) // 부모 클래스 초기화
 {
+    ConstructorHelpers::FObjectFinder<USoundCue>SoundCueTool(TEXT("/Script/Engine.SoundCue'/Game/HWL/Sound/Sound_Homeplus_Cue.Sound_Homeplus_Cue'"));
+    if (SoundCueTool.Succeeded()) MainBoardSound = SoundCueTool.Object;
 
+    ConstructorHelpers::FObjectFinder<USoundCue>SoundCueTool2(TEXT("/Script/Engine.SoundWave'/Game/DYL/Sounds/Sound_Pay.Sound_Pay'"));
+    if (SoundCueTool.Succeeded()) MainBoardSound2 = SoundCueTool2.Object;
 }
 
 void UMainBoardWidget::NativeConstruct()
@@ -49,10 +57,11 @@ void UMainBoardWidget::OnButtonClicked()
         FProductData* Data = GameMode->GetProductData(product);
 
         GameMode->SetTotalSales(GameMode->GetTotalSales() - Data->CostPrice*Data->BoxStock);
-        UE_LOG(LogTemp, Error, TEXT("asdasdasdsa"));
 
         SpawnProductBox(product);
     }
+    ACPlayer* player = Cast<ACPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    UGameplayStatics::PlaySoundAtLocation(this, MainBoardSound2, player->GetActorLocation());
     selectArrayProduct.Empty();
     ProductVerticalBox->ClearChildren();
 }
@@ -60,8 +69,15 @@ void UMainBoardWidget::OnButtonClicked()
 void UMainBoardWidget::OnSpwnerButtonClicked()
 {
     if (!GameMode) return;
-    UE_LOG(LogTemp, Error, TEXT("Start"));
-    GameMode->SpawnAIHander();
+    ACPlayer* player = Cast<ACPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    UAudioComponent* AudioComponent = UGameplayStatics::SpawnSoundAtLocation(this, MainBoardSound, player->GetActorLocation());
+    if (GameMode->SpawnAIHander()) {
+        if (AudioComponent->IsPlaying()) return;
+        AudioComponent->Play();
+    }
+    else {
+        AudioComponent->Stop();
+    }
 }
 
 void UMainBoardWidget::SetInfoWidget(TMap<EProductType, FProductData*> Product)

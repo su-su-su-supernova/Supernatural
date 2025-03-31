@@ -123,7 +123,7 @@ public:
 	UFUNCTION()
 	void OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	void CustomerArrived(TQueue<FProductData*>&ProductData);
+	void CustomerArrived(TArray<EProductType>ProductData);
 private:
 	void PlaceProductsOnCounter(float InDeltaTime);
 	void PayWithCreditCard(float InDeltaTime);

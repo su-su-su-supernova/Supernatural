@@ -65,7 +65,7 @@ void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	if (AsalesStandActor* salesStand = Cast<AsalesStandActor>(OtherActor)) {
 		for (auto salesStandTag : salesStand->TargetComp->ComponentTags) {
 			if (salesStandTag == (*pc->CurrentName)) {
-				QProductData.Enqueue(salesStand->RemoveProduct());
+				QProductData.Add(salesStand->RemoveProduct()->ProductEnum);
 				isBeginProduct = true;
 				break;
 			}

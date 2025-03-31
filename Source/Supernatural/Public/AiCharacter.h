@@ -35,6 +35,6 @@ private:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 public:
-	TQueue<FProductData*> QProductData;
+	TArray<EProductType> QProductData;
 
 };
