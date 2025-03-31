@@ -14,6 +14,8 @@ protected:
 
 	virtual void NativeConstruct() override;
 
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
+
 public:
     UFUNCTION(BlueprintCallable, Category = "Monitor")
     void OnMonitorButtonClicked(int32 InButtonValue);

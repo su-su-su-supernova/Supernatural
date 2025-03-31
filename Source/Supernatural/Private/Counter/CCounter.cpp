@@ -112,7 +112,8 @@ void ACCounter::BeginPlay()
 	SuperGameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
 
 	// 이 부분 AI와 연동 후 빼줘야 함
-	//CustomerArrived();
+	TArray<EProductType>ProductData = { EProductType::CAKE };
+	CustomerArrived(ProductData);
 }
 
 
@@ -139,7 +140,7 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	//}
 }
 
-void ACCounter::CustomerArrived(TQueue<FProductData*>&ProductData)
+void ACCounter::CustomerArrived(TArray<EProductType>ProductData)
 {
 	// 계산대에 이미 손님이 있으면 종료한다
 	//if(bIsCustomerArrived) return;
@@ -155,17 +156,8 @@ void ACCounter::CustomerArrived(TQueue<FProductData*>&ProductData)
 
 	// customer의 구매 목록을 가져온다
 	// 여기 수정해줘야 함
-	while (!ProductData.IsEmpty())
-	{
-		FProductData* DT = nullptr;
-		if (ProductData.Dequeue(DT) && DT) // Dequeue 성공 여부 및 포인터 유효성 체크
-		{
-			ShoppingList.Add(DT->ProductEnum); // FProductData의 ProductEnum을 ShoppingList에 추가
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Invalid ProductData pointer in queue"));
-		}
+	for (auto& Data : ProductData) {
+		ShoppingList.Add(Data);
 	}
 
 	// customer가 구매한 총 물품 개수를 파악한다

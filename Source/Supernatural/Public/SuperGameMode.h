@@ -44,7 +44,7 @@ public:
 
     void IncrementTicketCount() { CurrentTicketNumber++; }
 
-	void SpawnAIHander();
+	bool SpawnAIHander();
 
 	bool getIsSpawnAi();
 	void CastCounterAndMonitorWidget();

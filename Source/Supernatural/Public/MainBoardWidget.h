@@ -71,4 +71,7 @@ public:
 
 private:
 	int32 PurchaseCost = 0;
+
+	class USoundCue* MainBoardSound;
+	class USoundCue* MainBoardSound2;
 };
