@@ -5,6 +5,7 @@
 #include "CProductDataTable.h"
 #include "SuperAIController.h"
 #include "Containers/Queue.h"
+#include "CMonitorWidgetA.h"
 #include "SuperGameMode.generated.h"
 
 class CProductDataTable;
@@ -65,6 +66,9 @@ private:
 	bool bIsCalculating = false;
 
 	class ACCounter* Counter;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UCMonitorWidgetA> MonitorWidgetFactory;
 	class UCMonitorWidgetA* MonitorWidget;
 
 public:

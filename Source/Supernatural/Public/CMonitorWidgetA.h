@@ -54,6 +54,8 @@ public:
 
 	void SetVerticalBox();
 
+	int32 GetTotalCost() { return TotalCost; }
+	void SetTotalCost(int32 InTotalCost);
 	void SetTextTotalCost();
 	void SetTextInputCost();
 };

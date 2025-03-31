@@ -183,11 +183,16 @@ void UCMonitorWidgetA::SetVerticalBox()
 	VerticalBox->AddChildToVerticalBox(TextInputCost);
 }
 
+void UCMonitorWidgetA::SetTotalCost(int32 InTotalCost)
+{
+	TotalCost = InTotalCost;
+}
+
 void UCMonitorWidgetA::SetTextTotalCost()
 {
-	UE_LOG(LogTemp, Error, TEXT("[MonitorWidget] TextTotalSetting"));
+	UE_LOG(LogTemp, Error, TEXT("[MonitorWidgetFactory] TextTotalSetting"));
 
-	UE_LOG(LogTemp, Error, TEXT("[MonitorWidget] TextTotalSetting : %d"),TotalCost);
+	UE_LOG(LogTemp, Error, TEXT("[MonitorWidgetFactory] TextTotalSetting : %d"),TotalCost);
 
 	TextTotalCost->SetText(FText::Format(FText::FromString(TEXT("합계 : {0}")), TotalCost));
 }

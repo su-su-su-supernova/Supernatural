@@ -551,13 +551,12 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	int32 productPrice = purchasedProduct->CostPrice;
 
 	// AI가 구매한 물품들의 총 액수를 갱신한다
-	Counter->SetTotalCost(Counter->GetTotalCost() + productPrice);
+	//Counter->SetTotalCost(Counter->GetTotalCost() + productPrice);
 
-	int32 TotalCost=Counter->GetTotalCost();
-	UE_LOG(LogTemp, Warning, TEXT(">>>> %d"), TotalCost);
+	//int32 TotalCost=Counter->GetTotalCost();
+	//UE_LOG(LogTemp, Warning, TEXT(">>>> %d"), TotalCost);
 
-
-	SuperGameMode->SetCurrentTotalCost(TotalCost);
+	SuperGameMode->SetCurrentTotalCost(SuperGameMode->GetCurrentTotalCost() + productPrice);
 
     UE_LOG(LogTemp, Warning, TEXT(">>>>>>>> Current Product Price : %d / Total Price : %d"), productPrice, Counter->GetTotalCost());
 
