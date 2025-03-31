@@ -22,7 +22,7 @@ AAiCharacter::AAiCharacter()
 void AAiCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	GetCharacterMovement()->MaxWalkSpeed = 600;
+	GetCharacterMovement()->MaxWalkSpeed = 300;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
 

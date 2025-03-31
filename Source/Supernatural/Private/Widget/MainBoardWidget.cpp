@@ -27,7 +27,7 @@ void UMainBoardWidget::NativeConstruct()
     SetInfoWidget(GameMode->Product);
     purchaseButton->OnClicked.AddDynamic(this, &UMainBoardWidget::OnButtonClicked);
     SpawnerBtn->OnClicked.AddDynamic(this, &UMainBoardWidget::OnSpwnerButtonClicked);
-    FVector SpawnLocation(20.0f, 400.0f, 60.0f);
+    FVector SpawnLocation(774.547301f, -1708.812250f, 79.15f);
     FTransform SpawnTransform(SpawnLocation);
     productBox = GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform);
 }
