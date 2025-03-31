@@ -481,9 +481,9 @@ void ACPlayer::DisplayProduct()
 	if (BoxData == nullptr)return;
 
 	// UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *(BoxData->ProductName));
-	if (!Stand->SetMeshesForProductNumber(BoxData))
-	{
-		Box->SetCurrentStock(--ProductCurrentStock);
+
+	if ( !(Stand->SetMeshesForProductNumber(BoxData)) )
+	{Box->SetCurrentStock(ProductCurrentStock--);
 	}
 }
 
@@ -537,7 +537,8 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	FString name = InProduct->GetName();
 	FString tmp, tmpIdx;
 	name.Split(TEXT("CounterProduct"), &tmp, &tmpIdx);
-
+	
+	// 여기가 이상한거다!!!!!!!!!!
 	int32 index = FCString::Atoi(*tmpIdx) - 1;
 	//UE_LOG(LogTemp, Warning, TEXT(">>>>> Shopping List Index : %d"), index);
 

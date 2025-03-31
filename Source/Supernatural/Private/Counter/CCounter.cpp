@@ -72,6 +72,7 @@ ACCounter::ACCounter()
 
 	AISpawnPoint->SetCollisionProfileName(FName("Counter"));
 	AISpawnPoint->OnComponentBeginOverlap.AddDynamic(this, &ACCounter::OnAIBeginOverlap);
+	AISpawnPoint->OnComponentEndOverlap.AddDynamic(this, &ACCounter::OnAIEndOverlap);
 
 
 	// Product Sales Stand Data Asset
@@ -140,7 +141,17 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	//}
 }
 
-void ACCounter::CustomerArrived(TArray<EProductType>ProductData)
+
+void ACCounter::OnAIEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	bIsCustomerArrived = false;
+	SuperGameMode->SetIsCalculating(bIsCustomerArrived);
+}
+
+void ACCounter::CustomerArrived(TQueue<FProductData*>&ProductData)
+
+// void ACCounter::CustomerArrived(TArray<EProductType>ProductData)
+
 {
 	// 계산대에 이미 손님이 있으면 종료한다
 	//if(bIsCustomerArrived) return;
