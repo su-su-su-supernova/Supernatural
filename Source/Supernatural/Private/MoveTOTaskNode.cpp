@@ -31,7 +31,6 @@ EBTNodeResult::Type UMoveTOTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 			break;
 		}
 	}
-	UE_LOG(LogTemp, Log, TEXT("%f"), FoundComponents[0]->GetComponentLocation().Size());
 
 	if (FoundComponents.Num() > 0) {
 		ComponentVector = FoundComponents[0]->GetComponentLocation();

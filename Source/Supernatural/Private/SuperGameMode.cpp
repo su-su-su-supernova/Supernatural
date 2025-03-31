@@ -23,7 +23,7 @@ ASuperGameMode::ASuperGameMode()
 void ASuperGameMode::BeginPlay()
 {
     Super::BeginPlay();
-    
+
     CastCounterAndMonitorWidget();
 }
 
@@ -88,9 +88,10 @@ void ASuperGameMode::LoadProductData()
     // UE_LOG(LogTemp, Error, TEXT(">> Product Data Success. Total items : %d"), Product.Num());
 }
 
-void ASuperGameMode::SpawnAIHander()
+bool ASuperGameMode::SpawnAIHander()
 {
-    isSpawnAi = !isSpawnAi;
+	UE_LOG(LogTemp, Log, TEXT("%d"), isSpawnAi);
+    return isSpawnAi = !isSpawnAi;
 }
 
 
@@ -111,13 +112,13 @@ void ASuperGameMode::CastCounterAndMonitorWidget()
     {
         Counter = Cast<ACCounter>(foundActor);
 
-        if (Counter) 
-        { 
-            UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Success <<")); 
+        if (Counter)
+        {
+            UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Success <<"));
             MonitorWidget = Cast<UCMonitorWidgetA>(MonitorWidgetFactory);
             if (MonitorWidget)
             {
-                
+
                 UE_LOG(LogTemp, Warning, TEXT(">> Monitor Casting Success <<"));
             }
             else { UE_LOG(LogTemp, Warning, TEXT(">> Monitor Casting Fail <<")); }
@@ -129,7 +130,7 @@ void ASuperGameMode::CastCounterAndMonitorWidget()
 }
 
 void ASuperGameMode::SetCurrentTotalCost(int32 InCurrentTotalCost)
-{ 
+{
     CurrentTotalCost = InCurrentTotalCost;
     UE_LOG(LogTemp, Error, TEXT("[GameMode] CurrentTotalCost : %d"), CurrentTotalCost);
 

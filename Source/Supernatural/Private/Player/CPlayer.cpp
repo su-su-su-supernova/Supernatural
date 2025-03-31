@@ -19,6 +19,8 @@
 #include "CCounter.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h"
 #include "SuperGameMode.h"
+#include "Components/WidgetComponent.h"
+#include "CMonitorWidget.h"
 
 ACPlayer::ACPlayer()
 {
@@ -270,7 +272,7 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 	{
 		FString hitActor = hitResult.GetActor()->GetActorNameOrLabel();
 		//UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
-		
+
 		/*FString lineTraceComp = hitResult.GetComponent()->GetName();
 		UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit Component :  %s"), *lineTraceComp);
 
@@ -351,10 +353,8 @@ void ACPlayer::ClickUIStart()
 	{
 		if (WidgetInteraction->IsOverInteractableWidget())
 		{
-			//UE_LOG(LogTemp, Error, TEXT(">>> Widget Interactable widget SUCCESS !!!!!!!!!!!"));
 			WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
 			bIsClickingUI = true;
-			//UE_LOG(LogTemp, Warning, TEXT(">>> Activate Click A - bIsClickingUI : %d"), bIsClickingUI);
 		}
 	}
 }
@@ -365,7 +365,6 @@ void ACPlayer::ClickUICompleted()
 
 	WidgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
 	bIsClickingUI = false;
-	//UE_LOG(LogTemp, Warning, TEXT(">>> Deactivate Click A - bIsClickingUI : %d"), bIsClickingUI);
 }
 
 #pragma endregion
@@ -405,7 +404,7 @@ void ACPlayer::LiftBox()
 
 			// Box의 정보를 가져온다
 			BoxData = Box->GetBoxInfo();
-			ProductCurrentStock = BoxData->BoxStock;
+			ProductCurrentStock = Box->CurrentStockGetter();
 		}
 	}
 }
@@ -482,6 +481,7 @@ void ACPlayer::DisplayProduct()
 	if (BoxData == nullptr)return;
 
 	// UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *(BoxData->ProductName));
+
 	if ( !(Stand->SetMeshesForProductNumber(BoxData)) )
 	{Box->SetCurrentStock(ProductCurrentStock--);
 	}
@@ -527,7 +527,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	InProduct->SetVisibility(false);
 
 	InProduct->SetCollisionProfileName(FName("NoCollision"));
-	
+
 	// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
 	Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
 
@@ -541,7 +541,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	// 여기가 이상한거다!!!!!!!!!!
 	int32 index = FCString::Atoi(*tmpIdx) - 1;
 	//UE_LOG(LogTemp, Warning, TEXT(">>>>> Shopping List Index : %d"), index);
-	
+
 	if (SuperGameMode->GetProductData(Counter->GetShoppingList()[index]) == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT(">>>>> Product Data is EMPTY <<<<<"));
@@ -553,9 +553,12 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 
 	// AI가 구매한 물품들의 총 액수를 갱신한다
 	//Counter->SetTotalCost(Counter->GetTotalCost() + productPrice);
+	UCMonitorWidgetA* widget = Cast<UCMonitorWidgetA>(Counter->WidgetComponent->GetWidget());
+	widget->SetTotalCost(Counter->GetTotalCost() + productPrice);
+	widget->SetTextTotalCost();
 
-	//int32 TotalCost=Counter->GetTotalCost();
-	//UE_LOG(LogTemp, Warning, TEXT(">>>> %d"), TotalCost);
+	int32 TotalCost=Counter->GetTotalCost();
+	UE_LOG(LogTemp, Warning, TEXT(">>>> %d"), TotalCost);
 
 	SuperGameMode->SetCurrentTotalCost(SuperGameMode->GetCurrentTotalCost() + productPrice);
 
@@ -580,7 +583,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 
 void ACPlayer::CalculateTotalPrice()
 {
-	
+
 }
 
 #pragma endregion
