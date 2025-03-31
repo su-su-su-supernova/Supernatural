@@ -46,11 +46,12 @@ public:
 	void SpawnAIHander();
 
 	bool getIsSpawnAi();
+	void CastCounterAndMonitorWidget();
     TQueue<int32> WaitingAIs;
 private:
 
 	UPROPERTY(VisibleAnywhere)
-    int32 CurrentTicketNumber = 1; // ���� �߱��� Ƽ�� ��ȣ
+    int32 CurrentTicketNumber = 1;
 
 	bool isSpawnAi = false;
 

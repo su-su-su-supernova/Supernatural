@@ -113,7 +113,6 @@ void ASuperGameMode::CastCounterAndMonitorWidget()
 
             if (foundWidget)
             {
-                UE_LOG(LogTemp, Warning, TEXT(">> @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ <<"));
                 MonitorWidget = Cast<UCMonitorWidgetA>(Counter->WidgetComponent->GetWidget());
             }
             else { UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Fail <<")); }
