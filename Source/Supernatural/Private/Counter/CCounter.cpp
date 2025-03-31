@@ -205,11 +205,6 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 
 			// 구매한 상품들이 카운터에 다 놓였음을 명시한다
 			bAreProductsOnCounter = true;
-
-			// Player가 계산할 수 있음을 명시한다
-			// bCanCalculate = true;
-
-			// UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bCanCalculate);
 		}
 	}
 }
@@ -229,7 +224,7 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 
 		if (CurPayTime >= MaxPayTime)
 		{
-			UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
+			//UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
 			if (MagneticCard == nullptr)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("<<< Credit Card is EMPTY >>>"));
@@ -240,9 +235,9 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 			CurPayTime = 0;
 
 			FString compTag = MagneticCard->ComponentTags.GetData()->ToString();
-			UE_LOG(LogTemp, Warning, TEXT(">>>>> Component Tag:  %s"), *compTag);
+			//UE_LOG(LogTemp, Warning, TEXT(">>>>> Component Tag:  %s"), *compTag);
 
-			UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
+			//UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
 			bDidCustomerGiveCard = true;
 		}
 	}

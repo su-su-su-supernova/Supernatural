@@ -11,6 +11,7 @@
 #include "Widgets/Input/SButton.h" // SButton 위젯 관련
 #include "../../../../../../../Source/Runtime/UMG/Public/Components/CanvasPanelSlot.h"
 #include "SuperGameMode.h"
+#include "CCounter.h"
 
 
 UCMonitorWidgetA::UCMonitorWidgetA(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) // 부모 클래스 초기화
@@ -95,6 +96,8 @@ void UCMonitorWidgetA::ConvertInputToString()
 
 	UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
     UE_LOG(LogTemp, Log, TEXT("[Reset] CurCheckoutTotal : %d / CurInputTotal : %d"), SuperGameMode->GetCurrentCheckoutTotal(), SuperGameMode->GetCurrentInputTotal());
+
+	SuperGameMode->GetCounter()->ReadyToNextCustomer();
 }
 
 void UCMonitorWidgetA::SetWrapBox()

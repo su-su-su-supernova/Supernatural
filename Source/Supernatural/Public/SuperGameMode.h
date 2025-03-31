@@ -40,6 +40,7 @@ public:
 	void IncrementTicketCount();
 	void IncrementGameModeTicketCount();
 	int32 GenerateGameModeTicketNumber();
+	void CastCounter();
 
 private:
 	int32 TicketNumber = 1;
@@ -63,13 +64,15 @@ public:
 	int32 GetCurrentInputTotal() const { return CurrentInputTotal; }
 	void SetCurrentInputTotal(int32 InCurrentInputTotal) { CurrentInputTotal = InCurrentInputTotal; }
 
-	bool GetIsCalculating() const 
-	{	
-		if(bIsCalculating)
-			UE_LOG(LogTemp, Log, TEXT(">>>>> CALCULATE PRODUCT BEGIN <<<<<"))
+	void SetIsCalculating(bool InIsCalculating) 
+	{ 
+		bIsCalculating = InIsCalculating; 
+
+		if (bIsCalculating)
+			UE_LOG(LogTemp, Error, TEXT(">>>>>>>> CALCULATE PRODUCT BEGIN <<<<<<<<"))
 		else
-			UE_LOG(LogTemp, Log, TEXT(">>>>> CALCULATE PRODUCT END <<<<<"))
-		return bIsCalculating; 
+			UE_LOG(LogTemp, Error, TEXT(">>>>>>>> CALCULATE PRODUCT END <<<<<<<<"))
 	}
-	void SetIsCalculating(bool InIsCalculating) { bIsCalculating = InIsCalculating; }
+
+	class ACCounter* GetCounter() const {return Counter;}
 };

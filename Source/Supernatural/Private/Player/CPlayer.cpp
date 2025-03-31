@@ -188,7 +188,7 @@ void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 		else if (OtherActor->ActorHasTag(COUNTERTAG))
 		{
 			bIsHitByCounter = true;
-			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Counter >>>>>>>>>>>>>>>>>>>"));
+			// UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Counter >>>>>>>>>>>>>>>>>>>"));
 		}
 		else
 		{
@@ -212,7 +212,7 @@ void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		}
 		else if (OtherActor->ActorHasTag(COUNTERTAG))
 		{
-			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Counter >>>>>>>>>>>>>>>>>>>"));
+			// UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Counter >>>>>>>>>>>>>>>>>>>"));
 			bIsHitByCounter = false;
 		}
 		else
@@ -475,10 +475,10 @@ void ACPlayer::DisplayProduct()
 		return;
 	}
 
-	UE_LOG(LogTemp, Error, TEXT(">>>>> Display Product Start <<<<<"));
+	// UE_LOG(LogTemp, Error, TEXT(">>>>> Display Product Start <<<<<"));
 
 	if (!Stand) return;
-	UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *(BoxData->ProductName));
+	// UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *(BoxData->ProductName));
 	if (!Stand->SetMeshesForProductNumber(BoxData))
 	{
 		 //현재 Box에 들어 있는 물품 수를 1 감소시킨다
