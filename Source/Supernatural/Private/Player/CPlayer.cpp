@@ -1,3 +1,4 @@
+
 #include "CPlayer.h"
 #include "../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Engine/LocalPlayer.h"
@@ -104,7 +105,6 @@ ACPlayer::ACPlayer()
 
 	/* GameMode */
 	SuperGameMode = CreateDefaultSubobject<ASuperGameMode>(TEXT("SuperGameMode"));
-
 }
 
 void ACPlayer::BeginPlay()
@@ -188,7 +188,7 @@ void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 		else if (OtherActor->ActorHasTag(COUNTERTAG))
 		{
 			bIsHitByCounter = true;
-			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Counter >>>>>>>>>>>>>>>>>>>"));
+			// UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide with Counter >>>>>>>>>>>>>>>>>>>"));
 		}
 		else
 		{
@@ -212,7 +212,7 @@ void ACPlayer::OnOtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		}
 		else if (OtherActor->ActorHasTag(COUNTERTAG))
 		{
-			UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Counter >>>>>>>>>>>>>>>>>>>"));
+			// UE_LOG(LogTemp, Warning, TEXT(">>>>>>>>>>>>>>>>>>> Collide End with Counter >>>>>>>>>>>>>>>>>>>"));
 			bIsHitByCounter = false;
 		}
 		else
@@ -270,7 +270,15 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 	{
 		FString hitActor = hitResult.GetActor()->GetActorNameOrLabel();
 		//UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit at %s"), *hitActor);
+		
+		/*FString lineTraceComp = hitResult.GetComponent()->GetName();
+		UE_LOG(LogTemp, Warning, TEXT(">>>>> Hit Component :  %s"), *lineTraceComp);
 
+		if (hitResult.GetComponent()->ComponentTags.Num() != 0)
+		{
+			FString compTag = hitResult.GetComponent()->ComponentTags.GetData()->ToString();
+			UE_LOG(LogTemp, Warning, TEXT(">>>>> Component Tag:  %s"), *compTag);
+		}*/
 
 		/* Display Product */
 		if (hitResult.GetActor()->ActorHasTag(STANDTAG) && bIsGrabbingBox)
@@ -299,7 +307,7 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		if (bIsClickUIInputEntered && bIsHitByMainBoard && !bIsGrabbingBox)
 		{
 			// Widget Interaction에 Custom ray tracing 결과 전달
-			WidgetInteraction->SetCustomHitResult(hitResult);
+			//WidgetInteraction->SetCustomHitResult(hitResult);
 		}
 
 		/* Scan Barcode */
@@ -311,8 +319,11 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		}
 
 		/* Grab Card */
-		if(bIsGrabCardInputEntered && hitResult.GetComponent()->ComponentHasTag(CARDTAG))
-			Counter->GrabCard();
+		if (Cast<ACCounter>(hitResult.GetActor()))
+		{
+			if(bIsGrabCardInputEntered && hitResult.GetComponent()->ComponentHasTag(CARDTAG))
+				Counter->GrabCard();
+		}
 
 		/* Calculate */
 		
@@ -338,9 +349,6 @@ void ACPlayer::ClickUIStart()
 
 	if (bIsClickUIInputEntered && WidgetInteraction)
 	{
-		//UE_LOG(LogTemp, Error, TEXT(">>> WidgetInteraction Success!!!"));
-		//UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>>>>>>>>>>>>> IsOverInteractableWidget : %d"), WidgetInteraction->IsOverInteractableWidget());
-
 		if (WidgetInteraction->IsOverInteractableWidget())
 		{
 			//UE_LOG(LogTemp, Error, TEXT(">>> Widget Interactable widget SUCCESS !!!!!!!!!!!"));
@@ -398,8 +406,6 @@ void ACPlayer::LiftBox()
 			// Box의 정보를 가져온다
 			BoxData = Box->GetBoxInfo();
 			ProductCurrentStock = BoxData->BoxStock;
-
-			//UE_LOG(LogTemp, Warning, TEXT("[Product Info] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
 		}
 	}
 }
@@ -433,8 +439,6 @@ void ACPlayer::DropBox()
 	// Box의 충돌 처리를 켜준다
 	Box->FindComponentByClass<UBoxComponent>()->SetCollisionProfileName(TEXT("Box"));
 
-	//UE_LOG(LogTemp, Warning, TEXT("[DROP BOX] Product Location : %s / Product Name : %s / Product Current Stock : %d"), *(Box->GetActorLocation().ToString()), *ProductName, ProductCurrentStock);
-
 	// Box를 null로 만들어준다
 	Box = nullptr;
 }
@@ -444,6 +448,8 @@ void ACPlayer::DropBox()
 #pragma region Display Product
 void ACPlayer::DPStart()
 {
+	if (bIsHitByCounter) return;
+
 	// input이 들어왔음을 명시한다
 	bIsDPInputEntered = true;
 	UE_LOG(LogTemp, Error, TEXT(">>>>> DP Input Start"));
@@ -459,32 +465,31 @@ void ACPlayer::DisplayProduct()
 
 	// 박스를 들고 있지 않거나
 	// 선반에 최대로 배치할 수 있을 만큼 배치했다면 끝낸다
-	if( !bIsGrabbingBox || ProductCurrentStock == 0)
-	{
-		return;
-	}
+	if( ProductCurrentStock == 0) return;
 
 	if( !bIsGrabbingBox ) return;
+
 	if (ProductCurrentStock == 0)
 	{
 		Box->SetCurrentStock(0);
 		return;
 	}
 
-	UE_LOG(LogTemp, Error, TEXT(">>>>> Display Product Start <<<<<"));
+	// UE_LOG(LogTemp, Error, TEXT(">>>>> Display Product Start <<<<<"));
 
-	if (!Stand || ProductName.IsEmpty()) return;
-	UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *ProductName);
+	if (!Stand) return;
+	// UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *(BoxData->ProductName));
 	if (!Stand->SetMeshesForProductNumber(BoxData))
 	{
 		 //현재 Box에 들어 있는 물품 수를 1 감소시킨다
 		Box->SetCurrentStock(ProductCurrentStock--);
 	}
-
 }
 
 void ACPlayer::DPCompleted()
 {
+	if (bIsHitByCounter) return;
+
 	// input이 끝났음을 명시한다
 	bIsDPInputEntered = false;
 
@@ -502,7 +507,11 @@ void ACPlayer::ScanBarcodeInputStarted()
 
 void ACPlayer::GrabCardInputEntered()
 {
-	bIsGrabCardInputEntered = true;
+	if (bIsHitByCounter)
+	{
+		bIsGrabCardInputEntered = true;
+		UE_LOG(LogTemp, Warning, TEXT(">>>> Grab Card Input Entered"));
+	}
 }
 
 void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
@@ -511,67 +520,64 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	if( !(Counter->GetIsCustomerArrived()) ) return;
 
 	// Counter에 계산할 물품이 없다면 종료
-	if( !(Counter->GetIsProductsOnCounter()) ) return;
-
-	// Counter에 있는 모든 물품을 리더기로 인식시켰다면 종료
-	if(Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
-	{
-		Counter->SetIsProductsOnCounter(false);
-		Counter->SetCanCalculate(false);
-		return;
-	}
+	if( !(Counter->GetAreProductsOnCounter()) ) return;
 
 	// 리더기로 바코드를 찍은 물품의 Visibility를 끈다
 	InProduct->SetVisibility(false);
+	InProduct->SetCollisionProfileName(FName("NoCollision"));
 	
 	// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
 	Counter->SetNCountedItems( Counter->GetNCountedItems() + 1);
+
+	UE_LOG(LogTemp, Warning, TEXT("NCounted : %d / NMax : %d"), Counter->GetNCountedItems(), Counter->GetNPurchasedItems());
 
 	// 바코드를 인식한 상품의 가격과 상품명 정보를 가져온다
 	FString name = InProduct->GetName();
 	FString tmp, tmpIdx;
 	name.Split(TEXT("CounterProduct"), &tmp, &tmpIdx);
 	
-	int32 index = FCString::Atoi(*tmpIdx);
-
-	FString purchasedName;
-	switch (Counter->GetShoppingList()[index])
-	{
-		case EProductDivide::Snack1:
-			purchasedName = TEXT("Cereal");
-			break;
-		case EProductDivide::Snack2:
-			purchasedName = TEXT("Coke");
-			break;
-		case EProductDivide::Snack3:
-			purchasedName = TEXT("Tea");
-			break;
-	}
+	int32 index = FCString::Atoi(*tmpIdx) - 1;
+	//UE_LOG(LogTemp, Warning, TEXT(">>>>> Shopping List Index : %d"), index);
 	
-	FProductData* purchasedProduct = SuperGameMode->GetProductData(*purchasedName);
+	if (SuperGameMode->GetProductData(Counter->GetShoppingList()[index]) == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT(">>>>> Product Data is EMPTY <<<<<"));
+		return;
+	}
+	FProductData* purchasedProduct = SuperGameMode->GetProductData(Counter->GetShoppingList()[index]);
 	int32 productPrice = purchasedProduct->CostPrice;
 
 	// AI가 구매한 물품들의 총 액수를 갱신한다
 	Counter->SetTotalCost(Counter->GetTotalCost() + productPrice);
 
-	//// 카드를 받아들어야지
+	int32 TotalCost=Counter->GetTotalCost();
+	UE_LOG(LogTemp, Warning, TEXT(">>>> %d"), TotalCost);
 
 
-	//// 플레이어가 총액 입력해야지
+	SuperGameMode->SetCurrentTotalCost(TotalCost);
 
+    UE_LOG(LogTemp, Warning, TEXT(">>>>>>>> Current Product Price : %d / Total Price : %d"), productPrice, Counter->GetTotalCost());
 
-	//// 결제 결과를 DT에 반영한다
-	//(purchasedProduct->ShelfStock)--;
-	//SuperGameMode->SetTotalSales(SuperGameMode->GetTotalSales() - productPrice);
+	// 바코드 스캔이 끝났음을 명시한다
+	bIsScanBarcodeInputEntered = false;
 
-	//// Calculate input이 끝났음을 명시한다
-	//bIsScanBarcodeInputEntered = false;
+	// 현재 계산해야 할 물품들의 총액이 얼마인지 Game Mode에 Update한다
+	Counter->UpdateCurrentCheckoutTotal();
+
+	// Counter에 있는 모든 물품을 리더기로 인식시켰다면 카드를 받는다
+	if (Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
+	{
+		Counter->SetAreProductsOnCounter(false);
+		Counter->SetCanCalculate(true);
+		Counter->SetIsScanningBarcodeComplete(true);
+
+		UE_LOG(LogTemp, Warning, TEXT(">>> SCAN BARCODE COMPLETE"));
+	}
 }
 
 void ACPlayer::CalculateTotalPrice()
 {
-
-
+	
 }
 
 #pragma endregion

@@ -4,7 +4,8 @@
 #include "Components/BoxComponent.h"
 #include "ProductSalesStandDataAsset.h"
 #include "AiCharacter.h"
-#include "../../../../../../../Source/Runtime/Engine/Public/TimerManager.h"
+#include "SuperGameMode.h"
+#include "CMonitorWidgetA.h"
 
 ACCounter::ACCounter()
 {
@@ -35,6 +36,7 @@ ACCounter::ACCounter()
 	// Widget
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	WidgetComponent->SetupAttachment(CounterBody);
+	//WidgetComponent->GetWidget()
 
 	// Casher
 	CasherBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CasherBody"));
@@ -47,17 +49,18 @@ ACCounter::ACCounter()
 	if (tmpCasher.Succeeded()) CasherMesh = tmpCasher.Object;
 	CasherBody->SetStaticMesh(CasherMesh);
 
-	// Credit Card
-	CreditCard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CreditCard"));
-	CreditCard->SetupAttachment(CounterBody);
-	CreditCard->SetRelativeLocation(FVector(-56.585265, 6.646232, 2.207688));
-	CreditCard->SetRelativeRotation(FRotator(0, -30, -90));
-	CreditCard->SetRelativeScale3D(FVector(0.32));
+	// Magnetic Card
+	MagneticCard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MagneticCard"));
+	MagneticCard->SetupAttachment(CounterBody);
+	MagneticCard->SetRelativeLocation(FVector(-56.585265, 6.646232, 2.207688));
+	MagneticCard->SetRelativeRotation(FRotator(0, -30, -90));
+	MagneticCard->SetRelativeScale3D(FVector(0.32));
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCard(TEXT("/Script/Engine.SkeletalMesh'/Game/DYL/Assets/cc0-magnet-card/source/MagnetCard1.MagnetCard1'"));
-	if(tmpCard.Succeeded()) CardMesh = tmpCard.Object;
-	CreditCard->SetStaticMesh(CardMesh);
-	CreditCard->SetVisibility(false);
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tmpCard(TEXT("/Script/Engine.StaticMesh'/Game/DYL/Meshes/Bank_Card_3D_Model/uploads_files_2492273_Card.uploads_files_2492273_Card'"));
+	if(tmpCard.Succeeded()) MagneticCardMesh = tmpCard.Object;
+	MagneticCard->SetStaticMesh(MagneticCardMesh);
+	MagneticCard->SetVisibility(false);
+
 
 	// AI Spawn Point
 	AISpawnPoint = CreateDefaultSubobject<UBoxComponent>(TEXT("AISpawnPoint"));
@@ -72,11 +75,12 @@ ACCounter::ACCounter()
 
 
 	// Product Sales Stand Data Asset
-	ConstructorHelpers::FObjectFinder<UProductSalesStandDataAsset> tmpProductDA(TEXT("/Script/Supernatural.ProductSalesStandDataAsset'/Game/HWL/Data/NewDataAsset.NewDataAsset'"));
+	ConstructorHelpers::FObjectFinder<UProductSalesStandDataAsset> tmpProductDA(TEXT("/Script/Supernatural.ProductSalesStandDataAsset'/Game/HWL/Data/DA_Mesh.DA_Mesh'"));
 	if(tmpProductDA.Succeeded())
 	{
 		ProductSalesStandDataAsset = tmpProductDA.Object;
 		CachedProducts = ProductSalesStandDataAsset->ProdctSalesStandDataTable;
+		//UE_LOG(LogTemp, Error, TEXT(">>>>>>>>> Load Product DA SUCCESS <<<<<<<<<<"));
 	}
 
 	// Products
@@ -87,23 +91,27 @@ ACCounter::ACCounter()
 			FString name = FString::Printf(TEXT("CounterProduct%d"), (i * 2 + j + 1));
 			UStaticMeshComponent* tmpMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName(*name));
 
-			UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Name] : %s"), i * 2 + j, *(tmpMesh->GetName()));
+			//UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Name] : %s"), i * 2 + j, *(tmpMesh->GetName()));
 			tmpMesh->SetupAttachment(CounterBody);
 			tmpMesh->SetRelativeLocation(FVector(-143.762936, 17.369481, 1) + FVector(0, 39.866659, 0) * i + FVector(37.594206, 0, 0) * j);
-			UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Location] : %s"), i*2+j, *tmpMesh->GetRelativeLocation().ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("[tmpMesh %d Location] : %s"), i*2+j, *tmpMesh->GetRelativeLocation().ToString());
 			tmpMesh->SetVisibility(false);
+			tmpMesh->SetCollisionProfileName(FName("NoCollision"));
 			Products.Add(tmpMesh);
 		}
 	}
 
-	for (auto p : Products)
-		UE_LOG(LogTemp, Warning, TEXT(">>> %s <<<"), *(p->GetName()))
+	//for (auto p : Products)
+	//	UE_LOG(LogTemp, Warning, TEXT(">>> %s <<<"), *(p->GetName()))
 }
 
 void ACCounter::BeginPlay()
 {
 	Super::BeginPlay();
   
+	SuperGameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+
+	// 이 부분 AI와 연동 후 빼줘야 함
 	CustomerArrived();
 }
 
@@ -116,7 +124,7 @@ void ACCounter::Tick(float DeltaTime)
 	PlaceProductsOnCounter(DeltaTime);
 
 	// 카드 지불하기
-	//PayWithCreditCard(DeltaTime);
+	PayWithCreditCard(DeltaTime);
 }
 
 
@@ -133,6 +141,13 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void ACCounter::CustomerArrived()
 {
+	// 계산대에 이미 손님이 있으면 종료한다
+	if(bIsCustomerArrived) return;
+
+	// 계산이 시작되었다고 Game Mode에 알려준다
+	bIsCustomerArrived = true;
+	SuperGameMode->SetIsCalculating(bIsCustomerArrived);
+
 	// 계산에 사용할 데이터들을 초기화해준다
 	NCountedItems = 0;
 	TotalCost = 0;
@@ -140,7 +155,7 @@ void ACCounter::CustomerArrived()
 
 	// customer의 구매 목록을 가져온다
 	// 여기 수정해줘야 함
-	ShoppingList = { EProductDivide::Snack1, EProductDivide::Snack2, EProductDivide::Snack1 };
+	ShoppingList = { EProductType::CAKE, EProductType::COKE, EProductType::TEA };
 
 	// customer가 구매한 총 물품 개수를 파악한다
 	NPurchasedItems = ShoppingList.Num();
@@ -148,7 +163,18 @@ void ACCounter::CustomerArrived()
 	// 구매 목록에 있는 순서대로 product를 카운터에 올려둔다
 	for (int32 i = 0; i < NPurchasedItems; i++)
 	{
-		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].Snack1);
+		if (Products[i] == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("<<<<< Products[i] is EMPTY >>>>>"));
+			return;
+		}
+		if (CachedProducts.Num() == 0)
+		{
+			UE_LOG(LogTemp, Error, TEXT("<<<<< CachedProducts is EMPTY >>>>>"));
+			return;
+		}
+			
+		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].MeshData);
 		Products[i]->SetVisibility(false);
 		Products[i]->ComponentTags.Add(FName("Product"));
 	}
@@ -156,16 +182,6 @@ void ACCounter::CustomerArrived()
 	// Static Mesh Component의 visibility를 켜준다
 	MaxVisibilityOn = NPurchasedItems;
 	bCanVisibilityOn = true;
-
-	// Player 쪽에서 모든 물품의 바코드를 인식한다
-
-
-	//// 제품을 카운터에 전부 올려두었다면 카드로 지불한다
-	//if (bAreProductsOnCounter)
-	//{
-	//	CreditCard->SetVisibility(true);
-	//	bDidCustomerGiveCard = true;
-	//}	
 }
 
 void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
@@ -176,43 +192,53 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 	// 시간이 되면
 	if (CurVisibilityTime >= MaxVisibilityTime)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[CCounter] Current Time : %f / CurVisibilityOn : %d"), CurVisibilityTime, CurVisibilityOn);
+		// UE_LOG(LogTemp, Warning, TEXT("[CCounter] Current Time : %f / CurVisibilityOn : %d"), CurVisibilityTime, CurVisibilityOn);
 		Products[CurVisibilityOn]->SetVisibility(true);
+		Products[CurVisibilityOn]->SetCollisionProfileName(FName("BlockAllDynamic"));
 		CurVisibilityTime = 0;
 		CurVisibilityOn++;
 
-		// 상품을 전부 진열하면
+		// 상품을 전부 올려두면
 		if (CurVisibilityOn == MaxVisibilityOn)
 		{
 			CurVisibilityOn = 0;
 			bCanVisibilityOn = false;
 
-			// 구매한 상품들이 카운터에 다 진열되었음을 명시한다
+			// 구매한 상품들이 카운터에 다 놓였음을 명시한다
 			bAreProductsOnCounter = true;
-
-			// Player가 계산할 수 있음을 명시한다
-			bCanCalculate = true;
-
-			UE_LOG(LogTemp, Error, TEXT(">>>>>>>>>> All Products On COUNTER / %d"), bCanCalculate);
 		}
 	}
 }
 
+void ACCounter::UpdateCurrentCheckoutTotal()
+{
+	SuperGameMode->SetCurrentTotalCost(TotalCost);
+}
+
+
 void ACCounter::PayWithCreditCard(float InDeltaTime)
 {
-	// 구매한 물품을 카운터에 전부 올렸고 customer가 card를 지불하지 않았다면
-	if (bAreProductsOnCounter && !bDidCustomerGiveCard)
+	// customer가 card를 지불하지 않았다면
+	if (bIsScanningBarcodeComplete && !bDidCustomerGiveCard)
 	{
 		CurPayTime += InDeltaTime;
 
 		if (CurPayTime >= MaxPayTime)
 		{
-			UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
-			// 여기 왜 에러...?
-			//CreditCard->SetVisibility(true);
+			//UE_LOG(LogTemp, Warning, TEXT(">>> Pay With Credit Card Please"));
+			if (MagneticCard == nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("<<< Credit Card is EMPTY >>>"));
+				return;
+			}
+			MagneticCard->SetVisibility(true);
+			MagneticCard->ComponentTags.Add("Card");
 			CurPayTime = 0;
 
-			UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
+			FString compTag = MagneticCard->ComponentTags.GetData()->ToString();
+			//UE_LOG(LogTemp, Warning, TEXT(">>>>> Component Tag:  %s"), *compTag);
+
+			//UE_LOG(LogTemp, Warning, TEXT(">>> Get Credit Card from Customer"));
 			bDidCustomerGiveCard = true;
 		}
 	}
@@ -221,11 +247,32 @@ void ACCounter::PayWithCreditCard(float InDeltaTime)
 
 void ACCounter::GrabCard()
 {
-	CreditCard->SetVisibility(false);
+	// 카드의 Visibility를 켜준다
+	MagneticCard->SetVisibility(false);
+
+	// 계산할 수 있는 상태임을 명시해준다
+	bCanCalculate = true;
 }
 
-void ACCounter::CalculateStart()
+// 다음 손님을 받을 준비를 하기 위해 전부 초기화
+void ACCounter::ReadyToNextCustomer()
 {
+	bCanVisibilityOn = false;
+	bAreProductsOnCounter = false;
+	bIsScanningBarcodeComplete = false;
+	bDidCustomerGiveCard = false;
+	bCanCalculate = false;
+
+	NPurchasedItems = 0;
+	NCountedItems = 0;
+	TotalCost = 0;
+	InputCost = 0;
+
+	CurVisibilityOn = 0;
+	MaxVisibilityOn = 0;
+	
+	bIsCustomerArrived = false;
+	SuperGameMode->SetIsCalculating(bIsCustomerArrived);
 }
 
 

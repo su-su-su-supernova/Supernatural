@@ -1,5 +1,9 @@
 #include "SuperGameMode.h"
 #include "EProductType.h"
+#include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "CCounter.h"
+#include "Components/WidgetComponent.h"
+#include "CMonitorWidgetA.h"
 
 ASuperGameMode::ASuperGameMode()
 {
@@ -13,7 +17,8 @@ ASuperGameMode::ASuperGameMode()
 void ASuperGameMode::BeginPlay()
 {
     Super::BeginPlay();
-    //UE_LOG(LogTemp, Log, TEXT(">> SuperBeginPlay"));
+    
+    CastCounterAndMonitorWidget();
 }
 
 void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
@@ -41,7 +46,7 @@ void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
         // Data Table 생성에 성공하면
         else
         {
-            UE_LOG(LogTemp, Warning, TEXT(">> Success to load Data Table"));
+            //UE_LOG(LogTemp, Warning, TEXT(">> Success to load Data Table"));
 
             // Product Data Table에서 각 행을 꺼내와서 TMap에 저장한다
             LoadProductData();
@@ -50,8 +55,8 @@ void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
     // CSV 파일 데이터를 불러오는 데 실패했다면
     else
         UE_LOG(LogTemp, Error, TEXT(">> Failed to load CSV file from path: %s"), *csvFilePath);
-
 }
+
 void ASuperGameMode::LoadProductData()
 {
     if (!DTProduct)
@@ -74,8 +79,7 @@ void ASuperGameMode::LoadProductData()
         else UE_LOG(LogTemp, Warning, TEXT(">> Failed to find row : %s"), *rowName.ToString());
     }
 
-    UE_LOG(LogTemp, Error, TEXT(">> Product Data Success. Total items : %d"), Product.Num());
-
+    // UE_LOG(LogTemp, Error, TEXT(">> Product Data Success. Total items : %d"), Product.Num());
 }
 
 int32 ASuperGameMode::GenerateTicketNumber()
@@ -100,6 +104,52 @@ int32 ASuperGameMode::GenerateGameModeTicketNumber()
     return GameModeTicketNumber;
 }
 
+void ASuperGameMode::CastCounterAndMonitorWidget()
+{
+    // Counter
+    UWorld* world = GetWorld();
+    if (!world) return;
+
+    AActor* foundActor = UGameplayStatics::GetActorOfClass(world, ACCounter::StaticClass());
+
+    if (foundActor == Cast<ACCounter>(foundActor))
+    {
+        Counter = Cast<ACCounter>(foundActor);
+
+        if (Counter) 
+        { 
+            UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Success <<")); 
+
+            UCMonitorWidgetA* foundWidget = Cast<UCMonitorWidgetA>(Counter->WidgetComponent->GetWidget());
+
+            if (foundWidget)
+            {
+                UE_LOG(LogTemp, Warning, TEXT(">> @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ <<"));
+                MonitorWidget = Cast<UCMonitorWidgetA>(Counter->WidgetComponent->GetWidget());
+            }
+            else { UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Fail <<")); }
+        }
+        else { UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Success <<")); }
+    }
+    else
+        UE_LOG(LogTemp, Warning, TEXT(">> Couldn't find Actor in the World <<"));
+}
+
+void ASuperGameMode::SetCurrentTotalCost(int32 InCurrentTotalCost)
+{ 
+    CurrentTotalCost = InCurrentTotalCost;
+    UE_LOG(LogTemp, Error, TEXT("[GameMode] CurrentTotalCost : %d"), CurrentTotalCost);
+    if(MonitorWidget)
+        MonitorWidget->SetTextTotalCost();
+}
+
+void ASuperGameMode::SetCurrentInputCost(int32 InCurrentInputCost)
+{
+    CurrentInputCost = InCurrentInputCost;
+    MonitorWidget->SetTextInputCost();
+}
+
+
 FProductData* ASuperGameMode::GetProductData(EProductType ProductType) const
 {
     FProductData*  FoundData = Product[ProductType];
@@ -117,7 +167,7 @@ FProductData* ASuperGameMode::GetProductDataByIndex(int32 Index) const
 
 	if (Index < 0 || Index >= Product.Num())
 	{
-		UE_LOG(LogTemp, Warning, TEXT(">> Index %d is out of range. Product map size: %d"), Index, Product.Num());
+		// UE_LOG(LogTemp, Warning, TEXT(">> Index %d is out of range. Product map size: %d"), Index, Product.Num());
 		return nullptr;
 	}
 

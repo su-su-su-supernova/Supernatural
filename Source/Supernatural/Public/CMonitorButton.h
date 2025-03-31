@@ -30,4 +30,7 @@ public:
 	void SetMonitorReference(UCMonitorWidgetA* InMonitorWidget);
 
 	int32 ButtonIndex;
+
+private:
+	class CCounter* Counter;
 };
