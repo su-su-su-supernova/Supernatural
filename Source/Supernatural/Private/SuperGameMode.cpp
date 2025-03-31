@@ -2,6 +2,8 @@
 #include "EProductType.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "CCounter.h"
+#include "Components/WidgetComponent.h"
+#include "CMonitorWidgetA.h"
 
 ASuperGameMode::ASuperGameMode()
 {
@@ -16,7 +18,7 @@ void ASuperGameMode::BeginPlay()
 {
     Super::BeginPlay();
     
-    CastCounter();
+    CastCounterAndMonitorWidget();
 }
 
 void ASuperGameMode::LoadProductDT(UScriptStruct* InStruct)
@@ -102,7 +104,7 @@ int32 ASuperGameMode::GenerateGameModeTicketNumber()
     return GameModeTicketNumber;
 }
 
-void ASuperGameMode::CastCounter()
+void ASuperGameMode::CastCounterAndMonitorWidget()
 {
     // Counter
     UWorld* world = GetWorld();
@@ -110,16 +112,43 @@ void ASuperGameMode::CastCounter()
 
     AActor* foundActor = UGameplayStatics::GetActorOfClass(world, ACCounter::StaticClass());
 
-    if (foundActor)
+    if (foundActor == Cast<ACCounter>(foundActor))
     {
         Counter = Cast<ACCounter>(foundActor);
 
-        if (Counter) { UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Success <<")); }
+        if (Counter) 
+        { 
+            UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Success <<")); 
+
+            UCMonitorWidgetA* foundWidget = Cast<UCMonitorWidgetA>(Counter->WidgetComponent->GetWidget());
+
+            if (foundWidget)
+            {
+                UE_LOG(LogTemp, Warning, TEXT(">> @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ <<"));
+                MonitorWidget = Cast<UCMonitorWidgetA>(Counter->WidgetComponent->GetWidget());
+            }
+            else { UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Fail <<")); }
+        }
         else { UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Success <<")); }
     }
     else
         UE_LOG(LogTemp, Warning, TEXT(">> Couldn't find Actor in the World <<"));
 }
+
+void ASuperGameMode::SetCurrentTotalCost(int32 InCurrentTotalCost)
+{ 
+    CurrentTotalCost = InCurrentTotalCost;
+    UE_LOG(LogTemp, Error, TEXT("[GameMode] CurrentTotalCost : %d"), CurrentTotalCost);
+    if(MonitorWidget)
+        MonitorWidget->SetTextTotalCost();
+}
+
+void ASuperGameMode::SetCurrentInputCost(int32 InCurrentInputCost)
+{
+    CurrentInputCost = InCurrentInputCost;
+    MonitorWidget->SetTextInputCost();
+}
+
 
 FProductData* ASuperGameMode::GetProductData(EProductType ProductType) const
 {

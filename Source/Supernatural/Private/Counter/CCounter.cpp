@@ -5,6 +5,7 @@
 #include "ProductSalesStandDataAsset.h"
 #include "AiCharacter.h"
 #include "SuperGameMode.h"
+#include "CMonitorWidgetA.h"
 
 ACCounter::ACCounter()
 {
@@ -211,7 +212,7 @@ void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
 
 void ACCounter::UpdateCurrentCheckoutTotal()
 {
-	SuperGameMode->SetCurrentCheckoutTotal(TotalCost);
+	SuperGameMode->SetCurrentTotalCost(TotalCost);
 }
 
 

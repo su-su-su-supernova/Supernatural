@@ -19,6 +19,8 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
+	class UWidgetComponent* WidgetComponent;
 private:
 	UPROPERTY(EditAnywhere, Category = "Counter")
 	class UStaticMeshComponent* CounterBody;
@@ -38,8 +40,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UMaterial* MonitorMat;
 
-	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
-	class UWidgetComponent* WidgetComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Casher")
 	class UStaticMeshComponent* CasherBody;

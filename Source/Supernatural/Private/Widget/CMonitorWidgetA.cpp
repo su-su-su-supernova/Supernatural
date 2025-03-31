@@ -56,6 +56,10 @@ void UCMonitorWidgetA::NumberEntered(int32 InType)
 		return;
 	}
 	InputCost += value;
+
+	// UI 갱신
+	SetTextInputCost();
+
 	UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
 }
 
@@ -65,6 +69,10 @@ void UCMonitorWidgetA::DeleteLastInput()
 	else if(InputCost.Len() == 1) InputCost = "0";
 	// 문자열의 맨 마지막 문자를 지움
 	else InputCost = InputCost.LeftChop(1);
+
+	// UI 갱신
+	SetTextInputCost();
+
 	UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
 }
 
@@ -75,13 +83,16 @@ void UCMonitorWidgetA::ConvertInputToString()
 	PlayerCalculated = FCString::Atoi(*InputCost);
 
 	// 현재 사용자가 입력한 물품들의 총액이 얼마인지 Game Mode에 Update한다
-	SuperGameMode->SetCurrentInputTotal(PlayerCalculated);
+	SuperGameMode->SetCurrentInputCost(PlayerCalculated);
 	
 	// Player가 입력한 값이 총 계산해야 할 금액과 다르면 Input Cost를 0으로 초기화하여 
 	// 사용자로 하여금 다시 값을 입력하도록 한다
-	if(SuperGameMode->GetCurrentInputTotal() != SuperGameMode->GetCurrentCheckoutTotal())
+	if(SuperGameMode->GetCurrentInputCost() != SuperGameMode->GetCurrentTotalCost())
 	{
 		InputCost = "0";
+
+		// UI 갱신
+		SetTextInputCost();
 		return;
 	}
 
@@ -91,11 +102,11 @@ void UCMonitorWidgetA::ConvertInputToString()
 
 	// 사용자 입력값 초기화
 	InputCost = "0";
-	SuperGameMode->SetCurrentCheckoutTotal(0);
-	SuperGameMode->SetCurrentInputTotal(0);
+	SuperGameMode->SetCurrentTotalCost(0);
+	SuperGameMode->SetCurrentInputCost(0);
 
 	UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
-    UE_LOG(LogTemp, Log, TEXT("[Reset] CurCheckoutTotal : %d / CurInputTotal : %d"), SuperGameMode->GetCurrentCheckoutTotal(), SuperGameMode->GetCurrentInputTotal());
+    UE_LOG(LogTemp, Log, TEXT("[Reset] CurCheckoutTotal : %d / CurInputTotal : %d"), SuperGameMode->GetCurrentTotalCost(), SuperGameMode->GetCurrentInputCost());
 
 	SuperGameMode->GetCounter()->ReadyToNextCustomer();
 }
@@ -163,11 +174,27 @@ void UCMonitorWidgetA::SetWrapBox()
 
 void UCMonitorWidgetA::SetVerticalBox()
 {
-	TextTotalCost->SetText(FText::FromString(FString::Printf(TEXT("합계 : %d"), TotalCost)));
+	/*TextTotalCost->SetText(FText::FromString(FString::Printf(TEXT("합계 : %d"), TotalCost)));*/
+	SetTextTotalCost();
 	VerticalBox->AddChildToVerticalBox(TextTotalCost);
 
-	TextInputCost->SetText(FText::FromString(FString::Printf(TEXT("현재 금액 : %s"), *InputCost)));
+	/*TextInputCost->SetText(FText::FromString(FString::Printf(TEXT("현재 금액 : %s"), *InputCost)));*/
+	SetTextInputCost();
 	VerticalBox->AddChildToVerticalBox(TextInputCost);
+}
+
+void UCMonitorWidgetA::SetTextTotalCost()
+{
+	UE_LOG(LogTemp, Error, TEXT("[MonitorWidget] TextTotalSetting"));
+
+	UE_LOG(LogTemp, Error, TEXT("[MonitorWidget] TextTotalSetting : %d"),TotalCost);
+
+	TextTotalCost->SetText(FText::Format(FText::FromString(TEXT("합계 : {0}")), TotalCost));
+}
+
+void UCMonitorWidgetA::SetTextInputCost()
+{
+	TextInputCost->SetText(FText::FromString(FString::Printf(TEXT("현재 금액 : %s"), *InputCost)));
 }
 
 

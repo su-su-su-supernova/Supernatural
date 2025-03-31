@@ -549,6 +549,13 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 
 	// AI가 구매한 물품들의 총 액수를 갱신한다
 	Counter->SetTotalCost(Counter->GetTotalCost() + productPrice);
+
+	int32 TotalCost=Counter->GetTotalCost();
+	UE_LOG(LogTemp, Warning, TEXT(">>>> %d"), TotalCost);
+
+
+	SuperGameMode->SetCurrentTotalCost(TotalCost);
+
     UE_LOG(LogTemp, Warning, TEXT(">>>>>>>> Current Product Price : %d / Total Price : %d"), productPrice, Counter->GetTotalCost());
 
 	// 바코드 스캔이 끝났음을 명시한다

@@ -23,7 +23,7 @@ private:
 	void DeleteLastInput();
 	void ConvertInputToString();
 
-	int32 TotalCost = 30000;
+	int32 TotalCost = 0;
 	int32 PlayerCalculated = 0;
 	FString InputCost = "0";
 
@@ -53,4 +53,7 @@ public:
 	class ASuperGameMode* SuperGameMode;
 
 	void SetVerticalBox();
+
+	void SetTextTotalCost();
+	void SetTextInputCost();
 };
