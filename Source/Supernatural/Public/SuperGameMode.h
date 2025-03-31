@@ -4,6 +4,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "CProductDataTable.h"
 #include "SuperAIController.h"
+#include "Containers/Queue.h"
 #include "SuperGameMode.generated.h"
 
 class CProductDataTable;
@@ -44,8 +45,7 @@ public:
 	void SpawnAIHander();
 
 	bool getIsSpawnAi();
-    UPROPERTY(VisibleAnywhere)
-    TArray<ASuperAIController*> WaitingAIs; // 대기 중인 AI 목록
+    TQueue<int32> WaitingAIs;
 private:
 
 	UPROPERTY(VisibleAnywhere)

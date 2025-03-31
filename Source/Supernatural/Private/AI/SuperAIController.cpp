@@ -53,19 +53,18 @@ bool ASuperAIController::SelectNextProduct()
         TicketNumber = -1;
         return false;
     }
-    if (index >= ProductName.Num()) {
+    //if (FindActor())return false;
+
+    if (index >= ProductName.Num()&& ProductName.Num() != 0) {
         if (isSucceeded) return false;
-        //TicketNumber = GameMode->GenerateTicketNumber();
-        //GameMode->IncrementTicketCount();
-        GameMode->WaitingAIs.Add(this);
-        UE_LOG(LogTemp, Warning, TEXT("TicketNumber: %d"), TicketNumber);
+        GameMode->WaitingAIs.Enqueue(GameMode->GenerateTicketNumber());
+        TicketNumber = GameMode->GenerateTicketNumber();
         GameMode->IncrementTicketCount();
         isSucceeded = true;
         return false;
     }
     FName TargetTag = FName(*ProductName[index]);
     CurrentName = ProductName[index];
-
     // 컴포넌트 검색
     TArray<USceneComponent*> FoundComponents;
     for (TActorIterator<AsalesStandActor> It(GetWorld()); It; ++It)
@@ -83,10 +82,10 @@ bool ASuperAIController::SelectNextProduct()
         // 컴포넌트의 월드 위치를 가져와서 블랙보드에 저장
         FVector ComponentLocation = FoundComponents[0]->GetComponentLocation();
         GetBlackboardComponent()->SetValueAsVector(TEXT("ProductClass"), ComponentLocation);
-        //UE_LOG(LogTemp, Log, TEXT("Set ProductClass location: %s"), *ComponentLocation.ToString());
         return true;
     }
-    return false;
+    return true;
+
 }
 
 void ASuperAIController::AddIndex()

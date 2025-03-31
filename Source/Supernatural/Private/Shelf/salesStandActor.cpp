@@ -200,7 +200,6 @@ FProductData* AsalesStandActor::RemoveProduct()
 		CurrentProductNumber = 0;
 		CurrentProductType = EProductType::MAX; // 열거형의 기본값으로 가정
 	}
-
 	UE_LOG(LogTemp, Warning, TEXT("[HW] Product removed. CurrentProductCount: %d"), CurrentProductCount);
 	return SProductData;
 }

@@ -21,7 +21,7 @@ AAiCharacter::AAiCharacter()
 void AAiCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	GetCharacterMovement()->MaxWalkSpeed = 200;
+	GetCharacterMovement()->MaxWalkSpeed = 600;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
 
@@ -58,9 +58,9 @@ void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	ASuperAIController* pc = Cast<ASuperAIController>(GetController());
 	if (AsalesStandActor* salesStand = Cast<AsalesStandActor>(OtherActor)) {
 
-		//UE_LOG(LogTemp, Warning, TEXT("ComponentTags Count : %d"), salesStand->TargetComp->ComponentTags.Num());
+		UE_LOG(LogTemp, Warning, TEXT("ComponentTags Count : %d"), salesStand->TargetComp->ComponentTags.Num());
 		for (auto salesStandTag : salesStand->TargetComp->ComponentTags) {
-			//UE_LOG(LogTemp, Warning, TEXT("salesStandTag : %s"), *salesStandTag.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("salesStandTag : %s"), *salesStandTag.ToString());
 			if (salesStandTag == (*pc->CurrentName)) {
 				FProductData* Data= salesStand->RemoveProduct();
 				if (Data == nullptr)return;
@@ -75,7 +75,9 @@ void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	if (OtherActor->Tags.Contains(TEXT("Counter"))) {
 		isBegin = true;
 		ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
-		//g->WaitingAIs.Pop();
+		int32 result;
+		g->WaitingAIs.Dequeue(result);
+		UE_LOG(LogTemp, Warning, TEXT("Dequeue : %d"), result);
 	}
 	if (OtherActor->Tags.Contains(TEXT("End"))) {
 		isBegin = true;

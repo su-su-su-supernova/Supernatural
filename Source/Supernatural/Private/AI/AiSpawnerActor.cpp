@@ -40,7 +40,9 @@ void AAiSpawnerActor::Tick(float DeltaTime)
 
 	ASuperGameMode* GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
 	if (!GameMode)return;
+	if (!GameMode->getIsSpawnAi())return;
 		if (CurrentTime >= 5) {
+			for(int i=0;i<2;i++){
 			AAiCharacter* AiCharacter = GetWorld()->SpawnActorDeferred<AAiCharacter>(AiCharacterSample, ArrowComp->GetComponentTransform());
 			if (AiCharacter) {
 				FTransform SpawnTransform;
@@ -57,6 +59,7 @@ void AAiSpawnerActor::Tick(float DeltaTime)
 				}
 			}
 			CurrentTime = 0.0f;
+		}
 		}
 		CurrentTime += DeltaTime;
 }
