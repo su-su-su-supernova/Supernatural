@@ -1,7 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "SuperAIController.h"
+Ôªø#include "SuperAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "AiCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -11,18 +8,18 @@
 #include "CPlayer.h"
 #include "EAIState.h"
 #include "EngineUtils.h"
+#include "salesStandActor.h" // AsalesStandActor Ìè¨Ìï®
+#include "Components/BoxComponent.h"
 
 ASuperAIController::ASuperAIController()
 {
-
-	ConstructorHelpers::FObjectFinder<UBehaviorTree> AIBehavior(TEXT("/Game/HWL/AI/BT_AI.BT_AI"));
-	if (AIBehavior.Succeeded())AIBehaviorTree = AIBehavior.Object;
+    ConstructorHelpers::FObjectFinder<UBehaviorTree> AIBehavior(TEXT("/Game/HWL/AI/BT_AI.BT_AI"));
+    if (AIBehavior.Succeeded()) AIBehaviorTree = AIBehavior.Object;
 }
 
 void ASuperAIController::BeginPlay()
 {
     Super::BeginPlay();
-
     RunBehaviorTree(AIBehaviorTree);
 
     GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
@@ -34,73 +31,112 @@ void ASuperAIController::BeginPlay()
         AvailableIndices.Add(i);
     }
 
-    // πËø≠ ≈©±‚∞° 4∑Œ ∞Ì¡§µ«æÓ ¿÷¿∏π«∑Œ, √÷¥Î 4∞≥∏∏ º±≈√
-    TArray<FString> ProductNames; // FString¿∏∑Œ ¡§¿«
+    TArray<EProductType> ProductNames;
     for (int i = 0; i < 4 && AvailableIndices.Num() > 0; i++) {
-        int32 RandomIndex = FMath::RandRange(0, AvailableIndices.Num() - 1); // ≥≤¿∫ ¿Œµ¶Ω∫ ¡ﬂ «œ≥™ º±≈√
-        int32 SelectedIndex = AvailableIndices[RandomIndex]; // º±≈√µ» ¿Œµ¶Ω∫
-        ProductNames.Add(GameMode->GetProductDataByIndex(SelectedIndex)->ProductName); // ¡¶«∞ ¿Ã∏ß «“¥Á (FString ∞°¡§)
+        int32 RandomIndex = FMath::RandRange(0, AvailableIndices.Num() - 1);
+        int32 SelectedIndex = AvailableIndices[RandomIndex];
+        EProductType ProductType = static_cast<EProductType>(i);
+        ProductNames.Add(GameMode->GetProductData(ProductType)->ProductEnum);
         AvailableIndices.RemoveAt(RandomIndex);
     }
     BFS(ProductNames);
-
 }
 
 void ASuperAIController::Tick(float DeltaSeconds)
 {
-	Super::Tick(DeltaSeconds);
+    Super::Tick(DeltaSeconds);
 }
 
 bool ASuperAIController::SelectNextProduct()
 {
-    if (index >= ProductName.Num()) {
+    if (ProductName.Num() == 0) {
+        TicketNumber = -1;
+        return false;
+    }
+    //if (FindActor())return false;
+
+    if (index >= ProductName.Num()&& ProductName.Num() != 0) {
         if (isSucceeded) return false;
+        GameMode->WaitingAIs.Enqueue(GameMode->GenerateTicketNumber());
         TicketNumber = GameMode->GenerateTicketNumber();
         GameMode->IncrementTicketCount();
-		UE_LOG(LogTemp, Log, TEXT("%d"), TicketNumber);
         isSucceeded = true;
         return false;
     }
-	FName TargetTag = FName(*ProductName[index]);
-	CurrentName = ProductName[index];
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetTag, FoundActors);
-	if (FoundActors.Num() > 0) {
-		GetBlackboardComponent()->SetValueAsObject(TEXT("ProductClass"), FoundActors[0]);
-		GetBlackboardComponent()->SetValueAsBool(TEXT("IsSelling"), isBuyProduct[index]);
-	}
-	return true;
+    FName TargetTag = FName(*ProductName[index]);
+    CurrentName = ProductName[index];
+    // Ïª¥Ìè¨ÎÑåÌä∏ Í≤ÄÏÉâ
+    TArray<USceneComponent*> FoundComponents;
+    for (TActorIterator<AsalesStandActor> It(GetWorld()); It; ++It)
+    {
+        AsalesStandActor* SalesStandActor = *It;
+        if (!SalesStandActor || !SalesStandActor->TargetComp) continue;
+        if (SalesStandActor->TargetComp->ComponentHasTag(TargetTag))
+        {
+            FoundComponents.Add(SalesStandActor->TargetComp);
+            break;
+        }
+    }
+
+    if (FoundComponents.Num() > 0) {
+        // Ïª¥Ìè¨ÎÑåÌä∏Ïùò ÏõîÎìú ÏúÑÏπòÎ•º Í∞ÄÏ†∏ÏôÄÏÑú Î∏îÎûôÎ≥¥ÎìúÏóê Ï†ÄÏû•
+        FVector ComponentLocation = FoundComponents[0]->GetComponentLocation();
+        GetBlackboardComponent()->SetValueAsVector(TEXT("ProductClass"), ComponentLocation);
+        return true;
+    }
+    return true;
+
 }
 
 void ASuperAIController::AddIndex()
 {
-	index++;
+    index++;
 }
 
-void ASuperAIController::BFS(TArray<FString>ProductNames)
+void ASuperAIController::BFS(TArray<EProductType> ProductNames)
 {
-    // ≈¬±◊ ∞Àªˆ: ProductName 4∞≥ø° ¥Î«ÿ ∞¢∞¢ «— π¯æø∏∏ »Æ¿Œ
-    TArray<FString> MatchedTags; // ¿œƒ°«œ¥¬ ≈¬±◊∏¶ ¿˙¿Â«“ πËø≠
-    for (const FString& Name : ProductNames) {
-        // ø˘µÂø°º≠ «ÿ¥Á ¿Ã∏ß∞˙ ¿œƒ°«œ¥¬ ≈¬±◊∏¶ ∞°¡¯ æ◊≈Õ∏¶ √£¿Ω
-        for (TActorIterator<AActor> It(GetWorld()); It; ++It) {
-            AActor* Actor = *It;
-            for (const FName& Tag : Actor->Tags) {
-                if (Tag.ToString() == Name) { // FName¿ª FString¿∏∑Œ ∫Ø»Ø«ÿ ∫Ò±≥
-                    MatchedTags.Add(Name); // ¿œƒ°«œ∏È √ﬂ∞°
-                    break; // «ÿ¥Á ¿Ã∏ßø° ¥Î«ÿ ¥ı ¿ÃªÛ ∞Àªˆ«“ « ø‰ æ¯¿Ω
-                }
-            }
-            // ¿ÃπÃ √£æ“¿∏∏È ¥Ÿ¿Ω ¿Ã∏ß¿∏∑Œ ≥—æÓ∞®
-            if (MatchedTags.Contains(Name)) {
-                break;
-            }
+    TArray<USceneComponent*> MatchedComponents;
+
+    for (TActorIterator<AsalesStandActor> It(GetWorld()); It; ++It)
+    {
+        AsalesStandActor* SalesStandActor = *It;
+        if (!SalesStandActor) continue;
+
+        UBoxComponent* TargetComp = SalesStandActor->TargetComp;
+        if (!TargetComp) continue;
+
+        for (const EProductType& ProductType : ProductNames)
+        {
+            FName ProductNameAsFName = FName(*UEnum::GetValueAsString(ProductType));
+			if (TargetComp->ComponentHasTag(ProductNameAsFName))
+			{
+                if (MatchedComponents.Contains(TargetComp)) return;
+                if (ProductName.Contains(*ProductNameAsFName.ToString())) return;
+				MatchedComponents.Add(TargetComp);
+				ProductName.Add(*ProductNameAsFName.ToString());
+				break;
+			}
         }
     }
 
-    // ∞·∞˙ »Æ¿Œ (µπˆ±ÎøÎ)
-    for (const FString& MatchedTag : MatchedTags) {
-        ProductName.Add(MatchedTag);
+    if (MatchedComponents.Num() == 0)
+    {
+        //UE_LOG(LogTemp, Warning, TEXT("No components with matching tags found"));
     }
-
 }
 
+bool ASuperAIController::FindActor()
+{
+    for (TActorIterator<AsalesStandActor> It(GetWorld()); It; ++It)
+    {
+        AsalesStandActor* SalesStandActor = *It;
+        if (!SalesStandActor || !SalesStandActor->TargetComp) continue;
+        if (SalesStandActor->TargetComp->ComponentHasTag(*CurrentName))
+        {
+            return true;
+        }
+    }
+    return false;
+
+
+}

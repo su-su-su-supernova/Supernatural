@@ -82,26 +82,15 @@ void ASuperGameMode::LoadProductData()
     // UE_LOG(LogTemp, Error, TEXT(">> Product Data Success. Total items : %d"), Product.Num());
 }
 
-int32 ASuperGameMode::GenerateTicketNumber()
+void ASuperGameMode::SpawnAIHander()
 {
-    return TicketNumber;
+    isSpawnAi = !isSpawnAi;
 }
 
-void ASuperGameMode::IncrementTicketCount()
-{
-    TicketNumber++;
-}
 
-void ASuperGameMode::IncrementGameModeTicketCount()
+bool ASuperGameMode::getIsSpawnAi()
 {
-    GameModeTicketNumber++;
-}
-
-int32 ASuperGameMode::GenerateGameModeTicketNumber()
-{
-    UE_LOG(LogTemp, Log, TEXT("TICK%d"), GameModeTicketNumber);
-
-    return GameModeTicketNumber;
+    return isSpawnAi;
 }
 
 void ASuperGameMode::CastCounterAndMonitorWidget()

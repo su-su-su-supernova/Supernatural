@@ -30,5 +30,7 @@ public:
     FVector TargetLocation;
     float CurrentTime = 0.0f;
     TArray<AActor*> FoundActors;
+private:
+    bool isCheck = true;
 
 };

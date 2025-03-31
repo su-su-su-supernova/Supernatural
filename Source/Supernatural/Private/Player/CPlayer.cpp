@@ -326,7 +326,7 @@ void ACPlayer::PerformLineTrace(float InInteractionDistance)
 		}
 
 		/* Calculate */
-		
+
 	}
 }
 
@@ -478,11 +478,12 @@ void ACPlayer::DisplayProduct()
 	// UE_LOG(LogTemp, Error, TEXT(">>>>> Display Product Start <<<<<"));
 
 	if (!Stand) return;
+
+	if (BoxData == nullptr)return;
+
 	// UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *(BoxData->ProductName));
 	if (!Stand->SetMeshesForProductNumber(BoxData))
-	{
-		 //현재 Box에 들어 있는 물품 수를 1 감소시킨다
-		Box->SetCurrentStock(ProductCurrentStock--);
+	{Box->SetCurrentStock(ProductCurrentStock--);
 	}
 }
 
@@ -524,6 +525,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 
 	// 리더기로 바코드를 찍은 물품의 Visibility를 끈다
 	InProduct->SetVisibility(false);
+
 	InProduct->SetCollisionProfileName(FName("NoCollision"));
 	
 	// 리더기로 바코드를 찍은 물품의 개수를 1 증가시킨다
@@ -544,6 +546,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 		UE_LOG(LogTemp, Error, TEXT(">>>>> Product Data is EMPTY <<<<<"));
 		return;
 	}
+
 	FProductData* purchasedProduct = SuperGameMode->GetProductData(Counter->GetShoppingList()[index]);
 	int32 productPrice = purchasedProduct->CostPrice;
 

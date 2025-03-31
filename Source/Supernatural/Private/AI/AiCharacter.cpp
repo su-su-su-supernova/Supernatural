@@ -7,11 +7,12 @@
 #include <SuperAIController.h>
 #include "AiTartgetActor.h"
 #include "salesStandActor.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 AAiCharacter::AAiCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 }
@@ -21,7 +22,7 @@ void AAiCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	GetCharacterMovement()->MaxWalkSpeed = 600;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 
 
 	if (auto ai = Cast<AAIController>(GetController()))
@@ -30,9 +31,9 @@ void AAiCharacter::BeginPlay()
 		{
 			for (int i = 0; i < 4; ++i)
 			{
-				UE_LOG(LogTemp, Warning,
+				/*UE_LOG(LogTemp, Warning,
 					TEXT("Controller Name: %s\nPawn Name : %s\nProductName : %s"),
-						*myAi->GetName(), *this->GetName(), *myAi->ProductName[i]);
+					*myAi->GetName(), *this->GetName(), *myAi->ProductName[i]);*/
 			}
 		}
 	}
@@ -55,14 +56,28 @@ void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	ASuperAIController* pc = Cast<ASuperAIController>(GetController());
-	if (OtherActor->Tags.Contains(*pc->CurrentName)) {
-		isBegin = true;
-		UE_LOG(LogTemp, Warning, TEXT("name: %s"), *pc->CurrentName);
+	if (AsalesStandActor* salesStand = Cast<AsalesStandActor>(OtherActor)) {
+
+		UE_LOG(LogTemp, Warning, TEXT("ComponentTags Count : %d"), salesStand->TargetComp->ComponentTags.Num());
+		for (auto salesStandTag : salesStand->TargetComp->ComponentTags) {
+			UE_LOG(LogTemp, Warning, TEXT("salesStandTag : %s"), *salesStandTag.ToString());
+			if (salesStandTag == (*pc->CurrentName)) {
+				FProductData* Data= salesStand->RemoveProduct();
+				if (Data == nullptr)return;
+				isBegin = true;
+				break;
+
+			}
+		}
+
+		//UE_LOG(LogTemp, Warning, TEXT("name: %s"), *pc->CurrentName);
 	}
 	if (OtherActor->Tags.Contains(TEXT("Counter"))) {
 		isBegin = true;
 		ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
-		g->IncrementGameModeTicketCount();
+		int32 result;
+		g->WaitingAIs.Dequeue(result);
+		UE_LOG(LogTemp, Warning, TEXT("Dequeue : %d"), result);
 	}
 	if (OtherActor->Tags.Contains(TEXT("End"))) {
 		isBegin = true;

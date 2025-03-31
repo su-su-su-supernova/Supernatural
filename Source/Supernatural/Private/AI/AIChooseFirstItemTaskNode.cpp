@@ -21,6 +21,9 @@ EBTNodeResult::Type UAIChooseFirstItemTaskNode::ExecuteTask(UBehaviorTreeCompone
 	else {
 		return EBTNodeResult::Failed;
 	}
+	if(AIPlayerContaroller->FindActor())
+		return EBTNodeResult::Failed;
+
 }
 
 void UAIChooseFirstItemTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)

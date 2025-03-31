@@ -21,6 +21,7 @@ EBTNodeResult::Type UProductFindFailedTaskNode::ExecuteTask(UBehaviorTreeCompone
 {
     Super::ExecuteTask(OwnerComp, NodeMemory);
 
+
     ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
         AiController->TargetLocation = getRandomLocation();
         return EBTNodeResult::InProgress;
@@ -32,18 +33,6 @@ void UProductFindFailedTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uin
 
     ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
     ASuperGameMode* Gamemode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
-    if (!AiController) {
-        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-        return;
-    }
-    if (Gamemode->GenerateGameModeTicketNumber() == AiController->TicketNumber) {
-        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-        return;
-
-    }
-
-
-
 
     float AcceptableRadius = 100.0f;
 
@@ -56,6 +45,21 @@ void UProductFindFailedTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uin
         AiController->TargetLocation = getRandomLocation();
 
         AiController->MoveToLocation(AiController->TargetLocation, 0);
+    }
+    int32  CurrentAI;
+
+    if (AiController->TicketNumber == -1) {
+        CurrentTime += DeltaSeconds;
+        if (CurrentTime >= 10) {
+            FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+            CurrentTime = 0;
+        }
+    }
+    else if (Gamemode->WaitingAIs.Peek(CurrentAI)) {
+        if (CurrentAI == AiController->TicketNumber) {
+            FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+            //Gamemode->WaitingAIs.Dequeue(CurrentAI);
+        }
     }
 }
 

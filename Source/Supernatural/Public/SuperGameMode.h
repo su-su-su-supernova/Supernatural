@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "CProductDataTable.h"
+#include "SuperAIController.h"
+#include "Containers/Queue.h"
 #include "SuperGameMode.generated.h"
 
 class CProductDataTable;
@@ -35,14 +37,23 @@ public:
 
 	void LoadProductData();
 
-	int32 GenerateTicketNumber();
+	UFUNCTION(BlueprintCallable)
+    int32 GenerateTicketNumber() { return CurrentTicketNumber; }
 
-	void IncrementTicketCount();
-	void IncrementGameModeTicketCount();
-	int32 GenerateGameModeTicketNumber();
-	void CastCounterAndMonitorWidget();
 
+    void IncrementTicketCount() { CurrentTicketNumber++; }
+
+	void SpawnAIHander();
+
+	bool getIsSpawnAi();
+    TQueue<int32> WaitingAIs;
 private:
+
+	UPROPERTY(VisibleAnywhere)
+    int32 CurrentTicketNumber = 1; // ���� �߱��� Ƽ�� ��ȣ
+
+	bool isSpawnAi = false;
+
 	int32 TicketNumber = 1;
 	int32 GameModeTicketNumber = 1;
 

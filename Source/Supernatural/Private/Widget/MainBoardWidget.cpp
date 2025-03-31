@@ -26,6 +26,7 @@ void UMainBoardWidget::NativeConstruct()
     if (!GameMode)return;
     SetInfoWidget(GameMode->Product);
     purchaseButton->OnClicked.AddDynamic(this, &UMainBoardWidget::OnButtonClicked);
+    SpawnerBtn->OnClicked.AddDynamic(this, &UMainBoardWidget::OnSpwnerButtonClicked);
     FVector SpawnLocation(20.0f, 400.0f, 60.0f);
     FTransform SpawnTransform(SpawnLocation);
     productBox = GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform);
@@ -48,10 +49,19 @@ void UMainBoardWidget::OnButtonClicked()
         FProductData* Data = GameMode->GetProductData(product);
 
         GameMode->SetTotalSales(GameMode->GetTotalSales() - Data->CostPrice*Data->BoxStock);
+        UE_LOG(LogTemp, Error, TEXT("asdasdasdsa"));
+
         SpawnProductBox(product);
     }
     selectArrayProduct.Empty();
     ProductVerticalBox->ClearChildren();
+}
+
+void UMainBoardWidget::OnSpwnerButtonClicked()
+{
+    if (!GameMode) return;
+    UE_LOG(LogTemp, Error, TEXT("Start"));
+    GameMode->SpawnAIHander();
 }
 
 void UMainBoardWidget::SetInfoWidget(TMap<EProductType, FProductData*> Product)
@@ -79,7 +89,6 @@ void UMainBoardWidget::SpawnProductBox(EProductType product)
 {
     if (!GameMode)return;
 
-    //FName name = FName(GameMode->Product[product.ToString()]->ProductName);
 
     FProductData* Data = GameMode->GetProductData(product);
     if(Data&& GameMode){
