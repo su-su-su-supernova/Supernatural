@@ -21,6 +21,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UWidgetComponent* WidgetComponent;
+	UPROPERTY(EditAnywhere, Category = "Counter")
+	class UBoxComponent* AISpawnPoint;
 private:
 	UPROPERTY(EditAnywhere, Category = "Counter")
 	class UStaticMeshComponent* CounterBody;
@@ -28,8 +30,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Counter")
 	class UStaticMesh* BodyMesh;
 
-	UPROPERTY(EditAnywhere, Category = "Counter")
-	class UBoxComponent* AISpawnPoint;
 
 	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UStaticMeshComponent* CounterMonitor;

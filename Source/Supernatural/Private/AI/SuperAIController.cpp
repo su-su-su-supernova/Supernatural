@@ -45,6 +45,7 @@ void ASuperAIController::BeginPlay()
 void ASuperAIController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+
 }
 
 bool ASuperAIController::SelectNextProduct()
@@ -53,8 +54,6 @@ bool ASuperAIController::SelectNextProduct()
         TicketNumber = -1;
         return false;
     }
-    //if (FindActor())return false;
-
     if (index >= ProductName.Num()&& ProductName.Num() != 0) {
         if (isSucceeded) return false;
         GameMode->WaitingAIs.Enqueue(GameMode->GenerateTicketNumber());
@@ -63,6 +62,7 @@ bool ASuperAIController::SelectNextProduct()
         isSucceeded = true;
         return false;
     }
+    FindActor();
     FName TargetTag = FName(*ProductName[index]);
     CurrentName = ProductName[index];
     // 컴포넌트 검색
@@ -119,10 +119,6 @@ void ASuperAIController::BFS(TArray<EProductType> ProductNames)
         }
     }
 
-    if (MatchedComponents.Num() == 0)
-    {
-        //UE_LOG(LogTemp, Warning, TEXT("No components with matching tags found"));
-    }
 }
 
 bool ASuperAIController::FindActor()
@@ -131,9 +127,14 @@ bool ASuperAIController::FindActor()
     {
         AsalesStandActor* SalesStandActor = *It;
         if (!SalesStandActor || !SalesStandActor->TargetComp) continue;
-        if (SalesStandActor->TargetComp->ComponentHasTag(*CurrentName))
+        if (SalesStandActor->TargetComp->ComponentTags.Contains(*ProductName[index]))
         {
-            return true;
+            if (SalesStandActor->CurrentProductCount == 0) {
+                UE_LOG(LogTemp, Error, TEXT("SADASASDSAD"));
+                index++;
+                return true;
+            }
+
         }
     }
     return false;

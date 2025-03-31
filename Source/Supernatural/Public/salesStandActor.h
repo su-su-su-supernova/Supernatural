@@ -64,13 +64,13 @@ private:
 	void AddProduct(TArray<UStaticMeshComponent*>* TargetArray);
 private:
 	int32 ProductCountMax = 0;
-	int32 CurrentProductCount = 0;
 	EProductType CurrentProductType;
 	int32 CurrentProductNumber = 0;
 	bool bIsFull = false;
 	FProductData* SProductData;
 
 public:
+	int32 CurrentProductCount = 0;
 	bool SetMeshesForProductNumber(FProductData* ProductData);
 	FProductData* RemoveProduct();
 

@@ -32,4 +32,7 @@ private:
 	UFUNCTION()
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
+public:
+	TQueue<FProductData*> QProductData;
+
 };

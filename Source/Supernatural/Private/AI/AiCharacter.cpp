@@ -8,6 +8,7 @@
 #include "AiTartgetActor.h"
 #include "salesStandActor.h"
 #include "Components/BoxComponent.h"
+#include "CCounter.h"
 
 // Sets default values
 AAiCharacter::AAiCharacter()
@@ -62,23 +63,20 @@ void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		for (auto salesStandTag : salesStand->TargetComp->ComponentTags) {
 			UE_LOG(LogTemp, Warning, TEXT("salesStandTag : %s"), *salesStandTag.ToString());
 			if (salesStandTag == (*pc->CurrentName)) {
-				FProductData* Data= salesStand->RemoveProduct();
-				if (Data == nullptr)return;
+				QProductData.Enqueue(salesStand->RemoveProduct());
 				isBegin = true;
 				break;
-
 			}
 		}
 
-		//UE_LOG(LogTemp, Warning, TEXT("name: %s"), *pc->CurrentName);
 	}
-	if (OtherActor->Tags.Contains(TEXT("Counter"))) {
+	;
+	if (ACCounter* Counter = Cast<ACCounter>(OtherActor)) {
 		isBegin = true;
 		ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
 		int32 result;
 		g->WaitingAIs.Dequeue(result);
-		UE_LOG(LogTemp, Warning, TEXT("Dequeue : %d"), result);
-	}
+		}
 	if (OtherActor->Tags.Contains(TEXT("End"))) {
 		isBegin = true;
 	}
