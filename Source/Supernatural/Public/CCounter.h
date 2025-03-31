@@ -19,6 +19,8 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
+	class UWidgetComponent* WidgetComponent;
 private:
 	UPROPERTY(EditAnywhere, Category = "Counter")
 	class UStaticMeshComponent* CounterBody;
@@ -38,8 +40,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UMaterial* MonitorMat;
 
-	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
-	class UWidgetComponent* WidgetComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Casher")
 	class UStaticMeshComponent* CasherBody;
@@ -48,10 +48,10 @@ private:
 	class UStaticMesh* CasherMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Calculate")
-	class UStaticMeshComponent* CreditCard;
+	class UStaticMeshComponent* MagneticCard;
 
 	UPROPERTY(EditAnywhere, Category = "Calculate")
-	class UStaticMesh* CardMesh;
+	class UStaticMesh* MagneticCardMesh;
 
 	class UProductSalesStandDataAsset* ProductSalesStandDataAsset;
 
@@ -61,27 +61,40 @@ private:
 	bool bIsCustomerArrived = false;
 	bool bCanVisibilityOn = false;
 	bool bAreProductsOnCounter = false;
+	bool bIsScanningBarcodeComplete = false;
 	bool bDidCustomerGiveCard = false;
 	bool bCanCalculate = false;
-	bool bIsCalculatingCompleted = false;
 
 	int32 NPurchasedItems;
 	int32 NCountedItems;
 	int32 TotalCost;
 	int32 InputCost;
 
+	int32 CurVisibilityOn = 0;
+	int32 MaxVisibilityOn;
+
+	float CurVisibilityTime = 0;
+	float MaxVisibilityTime = 0.5;
+	float CurPayTime = 0;
+	float MaxPayTime = 0.5;
+
 	TArray<EProductType> ShoppingList;
+
+	class ASuperGameMode* SuperGameMode;
 
 
 public:
+	bool GetIsScanningBarcodeComplete() const { return bIsScanningBarcodeComplete; }
+	void SetIsScanningBarcodeComplete(bool bIsCompleted) { bIsScanningBarcodeComplete = bIsCompleted; }
+
 	bool GetDidCustomerGiveCard() const { return bDidCustomerGiveCard; }
 	void SetDidCustomerGiveCard(bool bIsGiven) { bDidCustomerGiveCard = bIsGiven; }
 
 	bool GetIsCustomerArrived() const { return bIsCustomerArrived; }
 	void SetIsCustomerArrived(bool bArrived) { bIsCustomerArrived = bArrived; }
 
-	bool GetIsProductsOnCounter() const { return bAreProductsOnCounter; }
-	void SetIsProductsOnCounter(bool bOnCounter) { bAreProductsOnCounter = bOnCounter; }
+	bool GetAreProductsOnCounter() const { return bAreProductsOnCounter; }
+	void SetAreProductsOnCounter(bool bOnCounter) { bAreProductsOnCounter = bOnCounter; }
 
 	bool GetCanCalculate() const { return bCanCalculate; }
 	void SetCanCalculate(bool canCalculate) { bCanCalculate = canCalculate; }
@@ -113,16 +126,9 @@ private:
 	void CustomerArrived();
 	void PlaceProductsOnCounter(float InDeltaTime);
 	void PayWithCreditCard(float InDeltaTime);
-	void CalculateStart();
 
 public:
 	void GrabCard();
-
-private:
-	int32 CurVisibilityOn = 0;
-	int32 MaxVisibilityOn;
-	float CurVisibilityTime = 0;
-	float MaxVisibilityTime = 0.5;
-	float CurPayTime = 0;
-	float MaxPayTime = 0.7;
+	void UpdateCurrentCheckoutTotal();
+	void ReadyToNextCustomer();
 };

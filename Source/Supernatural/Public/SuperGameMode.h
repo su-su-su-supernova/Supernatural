@@ -40,6 +40,7 @@ public:
 	UFUNCTION(BlueprintCallable)
     int32 GenerateTicketNumber() { return CurrentTicketNumber; }
 
+
     void IncrementTicketCount() { CurrentTicketNumber++; }
 
 	void SpawnAIHander();
@@ -49,15 +50,41 @@ public:
 private:
 
 	UPROPERTY(VisibleAnywhere)
-    int32 CurrentTicketNumber = 1; // ÇöÀç ¹ß±ÞÇÒ Æ¼ÄÏ ¹øÈ£
+    int32 CurrentTicketNumber = 1; // ï¿½ï¿½ï¿½ï¿½ ï¿½ß±ï¿½ï¿½ï¿½ Æ¼ï¿½ï¿½ ï¿½ï¿½È£
 
 	bool isSpawnAi = false;
+
 	int32 TicketNumber = 1;
 	int32 GameModeTicketNumber = 1;
 
 	int32 TotalSales = 100000000;
+	int32 CurrentTotalCost = 0;
+	int32 CurrentInputCost = 0;
+
+	bool bIsCalculating = false;
+
+	class ACCounter* Counter;
+	class UCMonitorWidgetA* MonitorWidget;
 
 public:
 	int32 GetTotalSales() const { return TotalSales; }
 	void SetTotalSales(int32 InTotalSales) { TotalSales = InTotalSales; }
+
+	int32 GetCurrentTotalCost() const { return CurrentTotalCost; }
+	void SetCurrentTotalCost(int32 InCurrentTotalCost);
+
+	int32 GetCurrentInputCost() const { return CurrentInputCost; }
+	void SetCurrentInputCost(int32 InCurrentInputCost);
+
+	void SetIsCalculating(bool InIsCalculating) 
+	{ 
+		bIsCalculating = InIsCalculating; 
+
+		if (bIsCalculating)
+			UE_LOG(LogTemp, Error, TEXT(">>>>>>>> CALCULATE PRODUCT BEGIN <<<<<<<<"))
+		else
+			UE_LOG(LogTemp, Error, TEXT(">>>>>>>> CALCULATE PRODUCT END <<<<<<<<"))
+	}
+
+	class ACCounter* GetCounter() const {return Counter;}
 };

@@ -201,11 +201,11 @@ private:
 
 
 #pragma region Calculate
-	UPROPERTY(EditDefaultsOnly, Category = "Calculate")
-    class UInputAction* IA_GrabCard;
-
     UPROPERTY(EditDefaultsOnly, Category = "Calculate")
     class UInputAction* IA_ScanBarcode;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Calculate")
+    class UInputAction* IA_GrabCard;
 
 	// 카운터 구별용 tag
 	const FName COUNTERTAG = FName("Counter");
@@ -219,7 +219,7 @@ private:
 	bool bIsHitByCounter = false;
 	bool bIsScanBarcodeInputEntered = false;
 	bool bIsGrabCardInputEntered = false;
-	//bool bIsCalculating = false;
+	bool bCanCalculate = false;
 
 	void ScanBarcodeInputStarted();
 	void GrabCardInputEntered();

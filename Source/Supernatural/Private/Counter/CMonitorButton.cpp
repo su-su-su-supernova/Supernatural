@@ -2,6 +2,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "CMonitorWidgetA.h"
+#include "CCounter.h"
 
 void UCMonitorButton::NativeConstruct()
 {
@@ -11,6 +12,7 @@ void UCMonitorButton::NativeConstruct()
 
 void UCMonitorButton::OnButtonClicked()
 {
+    // UE_LOG(LogTemp, Warning, TEXT(">>>>> %s : %d <<<<<"), *(Button->GetName()), ButtonIndex);
     MonitorWidget->OnMonitorButtonClicked(ButtonIndex);
 }
 
