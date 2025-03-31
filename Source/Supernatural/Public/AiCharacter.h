@@ -27,7 +27,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	bool isBegin = false;
+	bool isBeginProduct = false;
+	bool isBeginCounter = false;
+	bool isBeginEnd = false;
 private:
 	UFUNCTION()
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;

@@ -28,8 +28,8 @@ void UEndPosMoveTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 	ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
 	AAiCharacter* AI = Cast<AAiCharacter>(AiController->GetCharacter());
 
-	if (AI->isBegin) {
-		AI->isBegin = false;
+	if (AI->isBeginEnd) {
+		AI->isBeginEnd = false;
 
 		UE_LOG(LogTemp, Warning, TEXT("arrive"));
 		AI->Destroy();

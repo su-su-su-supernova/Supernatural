@@ -42,17 +42,17 @@ EBTNodeResult::Type UMoveTOTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 
 void UMoveTOTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	//Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
 	ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
-	//AAiCharacter* AI = Cast<AAiCharacter>(AiController->GetCharacter());
-	//if (AiController->TicketNumber == -1) {
-	//	FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-	//}
-	//if (AI->isBegin) {
-	//	AI->isBegin = false;
-	//	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-	//	return;
-	//}
+	AAiCharacter* AI = Cast<AAiCharacter>(AiController->GetCharacter());
+	if (AiController->TicketNumber == -1) {
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+	}
+	if (AI->isBeginCounter) {
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		AI->isBeginCounter = false;
+		return;
+	}
 	AiController->MoveToLocation(ComponentVector);
 }

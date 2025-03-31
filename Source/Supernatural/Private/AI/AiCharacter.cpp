@@ -44,6 +44,10 @@ void AAiCharacter::BeginPlay()
 void AAiCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+	UE_LOG(LogTemp, Log, TEXT("%d"), g->GetIsCalculating());
+	isBeginCounter = g->GetIsCalculating();
+
 }
 
 // Called to bind functionality to input
@@ -56,29 +60,25 @@ void AAiCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
+	ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
 	ASuperAIController* pc = Cast<ASuperAIController>(GetController());
 	if (AsalesStandActor* salesStand = Cast<AsalesStandActor>(OtherActor)) {
-
-		UE_LOG(LogTemp, Warning, TEXT("ComponentTags Count : %d"), salesStand->TargetComp->ComponentTags.Num());
 		for (auto salesStandTag : salesStand->TargetComp->ComponentTags) {
-			UE_LOG(LogTemp, Warning, TEXT("salesStandTag : %s"), *salesStandTag.ToString());
 			if (salesStandTag == (*pc->CurrentName)) {
 				QProductData.Enqueue(salesStand->RemoveProduct());
-				isBegin = true;
+				isBeginProduct = true;
 				break;
 			}
 		}
-
 	}
-	;
 	if (ACCounter* Counter = Cast<ACCounter>(OtherActor)) {
-		isBegin = true;
-		ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+		Counter->CustomerArrived(QProductData);
 		int32 result;
 		g->WaitingAIs.Dequeue(result);
-		}
+		UE_LOG(LogTemp, Log, TEXT("asdasdsa"));
+	}
 	if (OtherActor->Tags.Contains(TEXT("End"))) {
-		isBegin = true;
+		isBeginEnd = true;
 	}
 }
 

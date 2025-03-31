@@ -48,11 +48,11 @@ void UAIMoveToTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	AAiCharacter* ai = Cast<AAiCharacter>(PC->GetCharacter());
 	//UE_LOG(LogTemp, Log, TEXT("%s"), ai->isBegin ? *FString("true") : *FString("false"));
 	// 이동 상태 체크
-	if (ai->isBegin)
+	if (ai->isBeginProduct)
 	{
 		BlackboardComp = OwnerComp.GetBlackboardComponent();
 		PC->AddIndex();
-		ai->isBegin = false;
+		ai->isBeginProduct = false;
 		//FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
