@@ -77,15 +77,16 @@ public:
 	int32 GetCurrentInputCost() const { return CurrentInputCost; }
 	void SetCurrentInputCost(int32 InCurrentInputCost);
 
-	void SetIsCalculating(bool InIsCalculating) 
-	{ 
-		bIsCalculating = InIsCalculating; 
+	void SetIsCalculating(bool InIsCalculating)
+	{
+		bIsCalculating = InIsCalculating;
 
 		if (bIsCalculating)
 			UE_LOG(LogTemp, Error, TEXT(">>>>>>>> CALCULATE PRODUCT BEGIN <<<<<<<<"))
 		else
 			UE_LOG(LogTemp, Error, TEXT(">>>>>>>> CALCULATE PRODUCT END <<<<<<<<"))
 	}
+	bool GetIsCalculating() { return bIsCalculating; }
 
 	class ACCounter* GetCounter() const {return Counter;}
 };

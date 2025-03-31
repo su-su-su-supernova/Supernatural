@@ -22,5 +22,7 @@ public:
 
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
-	class AActor* Actor;
+	FVector ComponentVector;
+
+	AActor* Actor;
 };

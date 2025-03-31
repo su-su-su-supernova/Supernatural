@@ -38,18 +38,21 @@ void UAIMoveToTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
 	ASuperAIController* PC = Cast<ASuperAIController>(OwnerComp.GetOwner());
-	if (PC->FindActor()) FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-	if (!PC->FindActor()) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+	//if (PC->FindActor()) FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	//if (!PC->FindActor()) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
 	FindActor();
+	if (PC->FindActor()) {
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	}
 	AAiCharacter* ai = Cast<AAiCharacter>(PC->GetCharacter());
 	//UE_LOG(LogTemp, Log, TEXT("%s"), ai->isBegin ? *FString("true") : *FString("false"));
 	// 이동 상태 체크
-	if (ai->isBegin)
+	if (ai->isBeginProduct)
 	{
 		BlackboardComp = OwnerComp.GetBlackboardComponent();
 		PC->AddIndex();
-		ai->isBegin = false;
+		ai->isBeginProduct = false;
 		//FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

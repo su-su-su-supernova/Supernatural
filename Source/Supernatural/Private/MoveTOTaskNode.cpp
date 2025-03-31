@@ -7,6 +7,9 @@
 #include "SuperGameMode.h"
 #include "AiCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "CCounter.h"
+#include "EngineUtils.h"
+#include "Components/BoxComponent.h"
 
 UMoveTOTaskNode::UMoveTOTaskNode()
 {
@@ -17,9 +20,22 @@ EBTNodeResult::Type UMoveTOTaskNode::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 	ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("Counter"), FoundActors);
-	Actor = FoundActors[0];
+	TArray<USceneComponent*> FoundComponents;
+	for (TActorIterator<ACCounter> It(GetWorld()); It; ++It)
+	{
+		ACCounter* Counter = *It;
+		if (!Counter || !Counter->AISpawnPoint) continue;
+		if (Counter->AISpawnPoint->ComponentHasTag("Counter"))
+		{
+			FoundComponents.Add(Counter->AISpawnPoint);
+			break;
+		}
+	}
+	UE_LOG(LogTemp, Log, TEXT("%f"), FoundComponents[0]->GetComponentLocation().Size());
+
+	if (FoundComponents.Num() > 0) {
+		ComponentVector = FoundComponents[0]->GetComponentLocation();
+	}
 	return EBTNodeResult::InProgress;
 
 }
@@ -33,10 +49,10 @@ void UMoveTOTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 	if (AiController->TicketNumber == -1) {
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 	}
-	if (AI->isBegin) {
-		AI->isBegin = false;
+	if (AI->isBeginCounter) {
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		AI->isBeginCounter = false;
 		return;
 	}
-	AiController->MoveToActor(Actor, 0);
+	AiController->MoveToLocation(ComponentVector);
 }

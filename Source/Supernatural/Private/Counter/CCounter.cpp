@@ -108,11 +108,11 @@ ACCounter::ACCounter()
 void ACCounter::BeginPlay()
 {
 	Super::BeginPlay();
-  
+
 	SuperGameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
 
 	// 이 부분 AI와 연동 후 빼줘야 함
-	CustomerArrived();
+	//CustomerArrived();
 }
 
 
@@ -133,16 +133,16 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 {
 	class AAiCharacter* customer = Cast<AAiCharacter>(OtherActor);
 
-	if (customer)
-	{
-		CustomerArrived();
-	}
+	//if (customer)
+	//{
+	//	CustomerArrived();
+	//}
 }
 
-void ACCounter::CustomerArrived()
+void ACCounter::CustomerArrived(TQueue<FProductData*>&ProductData)
 {
 	// 계산대에 이미 손님이 있으면 종료한다
-	if(bIsCustomerArrived) return;
+	//if(bIsCustomerArrived) return;
 
 	// 계산이 시작되었다고 Game Mode에 알려준다
 	bIsCustomerArrived = true;
@@ -155,7 +155,18 @@ void ACCounter::CustomerArrived()
 
 	// customer의 구매 목록을 가져온다
 	// 여기 수정해줘야 함
-	ShoppingList = { EProductType::CAKE, EProductType::COKE, EProductType::TEA };
+	while (!ProductData.IsEmpty())
+	{
+		FProductData* DT = nullptr;
+		if (ProductData.Dequeue(DT) && DT) // Dequeue 성공 여부 및 포인터 유효성 체크
+		{
+			ShoppingList.Add(DT->ProductEnum); // FProductData의 ProductEnum을 ShoppingList에 추가
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid ProductData pointer in queue"));
+		}
+	}
 
 	// customer가 구매한 총 물품 개수를 파악한다
 	NPurchasedItems = ShoppingList.Num();
@@ -166,14 +177,14 @@ void ACCounter::CustomerArrived()
 		if (Products[i] == nullptr)
 		{
 			UE_LOG(LogTemp, Error, TEXT("<<<<< Products[i] is EMPTY >>>>>"));
-			return;
+			return ;
 		}
 		if (CachedProducts.Num() == 0)
 		{
 			UE_LOG(LogTemp, Error, TEXT("<<<<< CachedProducts is EMPTY >>>>>"));
-			return;
+			return ;
 		}
-			
+
 		Products[i]->SetStaticMesh(CachedProducts[ShoppingList[i]].MeshData);
 		Products[i]->SetVisibility(false);
 		Products[i]->ComponentTags.Add(FName("Product"));
@@ -182,6 +193,7 @@ void ACCounter::CustomerArrived()
 	// Static Mesh Component의 visibility를 켜준다
 	MaxVisibilityOn = NPurchasedItems;
 	bCanVisibilityOn = true;
+
 }
 
 void ACCounter::PlaceProductsOnCounter(float InDeltaTime)
@@ -270,7 +282,7 @@ void ACCounter::ReadyToNextCustomer()
 
 	CurVisibilityOn = 0;
 	MaxVisibilityOn = 0;
-	
+
 	bIsCustomerArrived = false;
 	SuperGameMode->SetIsCalculating(bIsCustomerArrived);
 }

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include <ProductSalesStandDataTable.h>
+#include "CProductDataTable.h"
 #include "CCounter.generated.h"
 
 UCLASS()
@@ -21,6 +22,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UWidgetComponent* WidgetComponent;
+	UPROPERTY(EditAnywhere, Category = "Counter")
+	class UBoxComponent* AISpawnPoint;
 private:
 	UPROPERTY(EditAnywhere, Category = "Counter")
 	class UStaticMeshComponent* CounterBody;
@@ -28,8 +31,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Counter")
 	class UStaticMesh* BodyMesh;
 
-	UPROPERTY(EditAnywhere, Category = "Counter")
-	class UBoxComponent* AISpawnPoint;
 
 	UPROPERTY(EditAnywhere, Category = "Counter Monitor")
 	class UStaticMeshComponent* CounterMonitor;
@@ -122,8 +123,8 @@ public:
 	UFUNCTION()
 	void OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	void CustomerArrived(TQueue<FProductData*>&ProductData);
 private:
-	void CustomerArrived();
 	void PlaceProductsOnCounter(float InDeltaTime);
 	void PayWithCreditCard(float InDeltaTime);
 
