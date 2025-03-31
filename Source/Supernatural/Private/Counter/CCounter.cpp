@@ -72,6 +72,7 @@ ACCounter::ACCounter()
 
 	AISpawnPoint->SetCollisionProfileName(FName("Counter"));
 	AISpawnPoint->OnComponentBeginOverlap.AddDynamic(this, &ACCounter::OnAIBeginOverlap);
+	AISpawnPoint->OnComponentEndOverlap.AddDynamic(this, &ACCounter::OnAIEndOverlap);
 
 
 	// Product Sales Stand Data Asset
@@ -137,6 +138,12 @@ void ACCounter::OnAIBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	//{
 	//	CustomerArrived();
 	//}
+}
+
+void ACCounter::OnAIEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	bIsCustomerArrived = false;
+	SuperGameMode->SetIsCalculating(bIsCustomerArrived);
 }
 
 void ACCounter::CustomerArrived(TQueue<FProductData*>&ProductData)
