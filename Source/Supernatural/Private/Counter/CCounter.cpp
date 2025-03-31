@@ -148,7 +148,7 @@ void ACCounter::OnAIEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	SuperGameMode->SetIsCalculating(bIsCustomerArrived);
 }
 
-void ACCounter::CustomerArrived(TQueue<FProductData*>&ProductData)
+void ACCounter::CustomerArrived(TArray<EProductType>ProductData)
 
 // void ACCounter::CustomerArrived(TArray<EProductType>ProductData)
 
