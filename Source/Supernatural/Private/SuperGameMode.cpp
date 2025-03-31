@@ -3,7 +3,6 @@
 #include "../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "CCounter.h"
 #include "Components/WidgetComponent.h"
-#include "CMonitorWidgetA.h"
 
 ASuperGameMode::ASuperGameMode()
 {
@@ -12,6 +11,13 @@ ASuperGameMode::ASuperGameMode()
 
     // CSV 파일 로드 및 DataTable 초기화
     LoadProductDT(FProductData::StaticStruct());
+
+    ConstructorHelpers::FObjectFinder<UCMonitorWidgetA> tmpMonitorWidget(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/DYL/Widgets/WBP_MonitorUI.WBP_MonitorUI'"));
+    if(tmpMonitorWidget.Succeeded()) {
+                UE_LOG(LogTemp, Warning, TEXT(">> Monitor Casting Success <<"));
+
+    MonitorWidget = tmpMonitorWidget.Object;
+    }
 }
 
 void ASuperGameMode::BeginPlay()
@@ -108,14 +114,13 @@ void ASuperGameMode::CastCounterAndMonitorWidget()
         if (Counter) 
         { 
             UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Success <<")); 
-
-            UCMonitorWidgetA* foundWidget = Cast<UCMonitorWidgetA>(Counter->WidgetComponent->GetWidget());
-
-            if (foundWidget)
+            MonitorWidget = Cast<UCMonitorWidgetA>(MonitorWidgetFactory);
+            if (MonitorWidget)
             {
-                MonitorWidget = Cast<UCMonitorWidgetA>(Counter->WidgetComponent->GetWidget());
+                
+                UE_LOG(LogTemp, Warning, TEXT(">> Monitor Casting Success <<"));
             }
-            else { UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Fail <<")); }
+            else { UE_LOG(LogTemp, Warning, TEXT(">> Monitor Casting Fail <<")); }
         }
         else { UE_LOG(LogTemp, Warning, TEXT(">> Counter Casting Success <<")); }
     }
@@ -127,8 +132,15 @@ void ASuperGameMode::SetCurrentTotalCost(int32 InCurrentTotalCost)
 { 
     CurrentTotalCost = InCurrentTotalCost;
     UE_LOG(LogTemp, Error, TEXT("[GameMode] CurrentTotalCost : %d"), CurrentTotalCost);
-    if(MonitorWidget)
+
+    if (MonitorWidget)
+    {
+        // 모니터에 띄울 TotalCost 값을 갱신해준다
+        MonitorWidget->SetTotalCost(CurrentTotalCost);
+
+        // 모니터 UI를 갱신한다
         MonitorWidget->SetTextTotalCost();
+    }
 }
 
 void ASuperGameMode::SetCurrentInputCost(int32 InCurrentInputCost)
