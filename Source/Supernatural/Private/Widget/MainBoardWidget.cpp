@@ -19,11 +19,8 @@
 UMainBoardWidget::UMainBoardWidget(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer) // 부모 클래스 초기화
 {
-    ConstructorHelpers::FObjectFinder<USoundCue>SoundCueTool(TEXT("/Script/Engine.SoundCue'/Game/HWL/Sound/Sound_Homeplus_Cue.Sound_Homeplus_Cue'"));
-    if (SoundCueTool.Succeeded()) MainBoardSound = SoundCueTool.Object;
-
     ConstructorHelpers::FObjectFinder<USoundCue>SoundCueTool2(TEXT("/Script/Engine.SoundWave'/Game/DYL/Sounds/Sound_Pay.Sound_Pay'"));
-    if (SoundCueTool.Succeeded()) MainBoardSound2 = SoundCueTool2.Object;
+    if (SoundCueTool2.Succeeded()) MainBoardSound2 = SoundCueTool2.Object;
 }
 
 void UMainBoardWidget::NativeConstruct()
@@ -38,6 +35,7 @@ void UMainBoardWidget::NativeConstruct()
     FVector SpawnLocation(774.547301f, -1708.812250f, 79.15f);
     FTransform SpawnTransform(SpawnLocation);
     productBox = GetWorld()->SpawnActor<AProductBoxSpawner>(ProductBoxSpawner, SpawnTransform);
+    ACPlayer* player = Cast<ACPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn());
 }
 
 void UMainBoardWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
@@ -70,15 +68,12 @@ void UMainBoardWidget::OnSpwnerButtonClicked()
 {
     if (!GameMode) return;
     ACPlayer* player = Cast<ACPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn());
-    GameMode->SpawnAIHander();
+	if (GameMode->SpawnAIHander()) {
+        //player->PlaySound();
+	}
+	else {
 
-    //if (GameMode->SpawnAIHander()) {
-    //    if (AudioComponent->IsPlaying()) return;
-    //    AudioComponent->Play();
-    //}
-    //else {
-    //    AudioComponent->Stop();
-    //}
+	}
 }
 
 void UMainBoardWidget::SetInfoWidget(TMap<EProductType, FProductData*> Product)

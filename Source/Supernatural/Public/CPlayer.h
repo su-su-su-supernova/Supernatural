@@ -140,7 +140,7 @@ private:
 	FName SocketAttachBox = TEXT("AttachBox");
 
 	// 박스 안 물품의 정보
-	FString ProductName;		
+	FString ProductName;
 	int32 ProductCurrentStock; // 현재 박스 안에 있는 재고수
 
 	FProductData* BoxData;
@@ -226,6 +226,7 @@ private:
 	void ScanProductBarcode(UStaticMeshComponent* InProduct);
 	void CalculateTotalPrice();
 
+
 	class ACCounter* Counter;
 
 	class ASuperGameMode* SuperGameMode;
@@ -242,4 +243,7 @@ public:
 public:
 	class USoundCue* ClickSound;
 	class USoundCue* BarCodeSound;
+	class USoundCue* MainSound;
+	class UAudioComponent* AudioComponent;
+	void PlaySound();
 };
