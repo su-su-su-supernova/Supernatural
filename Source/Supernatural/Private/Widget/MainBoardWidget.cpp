@@ -69,7 +69,7 @@ void UMainBoardWidget::OnButtonClicked()
 void UMainBoardWidget::OnSpwnerButtonClicked()
 {
     if (!GameMode) return;
-    ACPlayer* player = Cast<ACPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn()); 
+    ACPlayer* player = Cast<ACPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn());
     GameMode->SpawnAIHander();
 
     //if (GameMode->SpawnAIHander()) {
