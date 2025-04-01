@@ -21,6 +21,8 @@
 #include "SuperGameMode.h"
 #include "Components/WidgetComponent.h"
 #include "CMonitorWidget.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 ACPlayer::ACPlayer()
 {
@@ -36,6 +38,13 @@ ACPlayer::ACPlayer()
 	GetCapsuleComponent()->SetCollisionProfileName(FName("Player"));
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACPlayer::OnOtherBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ACPlayer::OnOtherEndOverlap);
+
+	//Sounds
+	ConstructorHelpers::FObjectFinder<USoundCue>SoundCueTool1(TEXT("/Script/Engine.SoundCue'/Game/DYL/Sounds/Cue/Sound_Monitor_Cue.Sound_Monitor_Cue'"));
+	if (SoundCueTool1.Succeeded()) ClickSound = SoundCueTool1.Object;
+
+	ConstructorHelpers::FObjectFinder<USoundCue>SoundCueTool2(TEXT("/Script/Engine.SoundCue'/Game/DYL/Sounds/Cue/Sound_BarcodeScan_Cue.Sound_BarcodeScan_Cue'"));
+	if (SoundCueTool2.Succeeded()) BarCodeSound = SoundCueTool2.Object;
 
 
 	/* IMC */
@@ -185,6 +194,7 @@ void ACPlayer::OnOtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 			if (!bIsHitByStand)
 			{
 				bIsHitByStand = true;
+
 			}
 		}
 		else if (OtherActor->ActorHasTag(COUNTERTAG))
@@ -355,6 +365,7 @@ void ACPlayer::ClickUIStart()
 		{
 			WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
 			bIsClickingUI = true;
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ClickSound, GetActorLocation());
 		}
 	}
 }
@@ -362,7 +373,6 @@ void ACPlayer::ClickUIStart()
 void ACPlayer::ClickUICompleted()
 {
 	bIsClickUIInputEntered = false;
-
 	WidgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
 	bIsClickingUI = false;
 }
@@ -483,7 +493,9 @@ void ACPlayer::DisplayProduct()
 	// UE_LOG(LogTemp, Error, TEXT("Product Name : %s"), *(BoxData->ProductName));
 
 	if ( !(Stand->SetMeshesForProductNumber(BoxData)) )
-	{Box->SetCurrentStock(ProductCurrentStock--);
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ClickSound,GetActorLocation());
+		Box->SetCurrentStock(ProductCurrentStock--);
 	}
 }
 
@@ -537,7 +549,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 	FString name = InProduct->GetName();
 	FString tmp, tmpIdx;
 	name.Split(TEXT("CounterProduct"), &tmp, &tmpIdx);
-	
+
 	// 여기가 이상한거다!!!!!!!!!!
 	int32 index = FCString::Atoi(*tmpIdx) - 1;
 	//UE_LOG(LogTemp, Warning, TEXT(">>>>> Shopping List Index : %d"), index);
@@ -569,7 +581,7 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 
 	// 현재 계산해야 할 물품들의 총액이 얼마인지 Game Mode에 Update한다
 	Counter->UpdateCurrentCheckoutTotal();
-
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), BarCodeSound, GetActorLocation());
 	// Counter에 있는 모든 물품을 리더기로 인식시켰다면 카드를 받는다
 	if (Counter->GetNCountedItems() == Counter->GetNPurchasedItems())
 	{
