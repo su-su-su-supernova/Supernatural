@@ -21,6 +21,7 @@
 #include "SuperGameMode.h"
 #include "Components/WidgetComponent.h"
 #include "CMonitorWidget.h"
+#include "../../../../../../../Plugins/Runtime/XRBase/Source/XRBase/Public/HeadMountedDisplayFunctionLibrary.h"
 
 ACPlayer::ACPlayer()
 {
@@ -66,10 +67,14 @@ ACPlayer::ACPlayer()
 	if (tmpIAGrabBox.Succeeded()) IA_ScanBarcode = tmpIAScanBarcode.Object;
 
 
+	/* Scene Component */
+	SceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp"));
+	SceneComp->SetupAttachment(RootComponent);
+
 	/* Motion Controller - Left Hand */
 	LeftHand = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("LeftHand"));
 	LeftHand->SetTrackingMotionSource(TEXT("Left"));
-	LeftHand->SetupAttachment(RootComponent);
+	LeftHand->SetupAttachment(SceneComp);
 
 	SkeletalMeshLeftHand = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshLeftHand"));
 
@@ -85,7 +90,7 @@ ACPlayer::ACPlayer()
 	/* Motion Controller - Right Hand */
 	RightHand = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("RightHand"));
 	RightHand->SetTrackingMotionSource(TEXT("Right"));
-	RightHand->SetupAttachment(RootComponent);
+	RightHand->SetupAttachment(SceneComp);
 
 	SkeletalMeshRightHand = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshRightHand"));
 
@@ -118,6 +123,13 @@ void ACPlayer::BeginPlay()
 	{
         //UE_LOG(LogTemp, Error, TEXT(">>>>>> Input Mode : GameAndUI"));
 		pc->SetInputMode(FInputModeGameAndUI());
+	}
+
+	// HDM가 연결되어 있으면 HMD의 Tracking 위치를 조정해보자
+	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
+	{
+		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Stage);
+		UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition(SceneComp->GetComponentTransform().GetRotation().Y);
 	}
 }
 

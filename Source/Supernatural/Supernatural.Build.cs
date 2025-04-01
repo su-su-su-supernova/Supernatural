@@ -9,7 +9,7 @@ public class Supernatural : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "HeadMountedDisplay","GameplayTasks", "NavigationSystem","Slate", "SlateCore", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "HeadMountedDisplay","GameplayTasks", "NavigationSystem","Slate", "SlateCore", "UMG", "XRBase" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

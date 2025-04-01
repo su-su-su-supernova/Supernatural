@@ -50,6 +50,9 @@ private:
 
 #pragma region Motion Controller
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class USceneComponent* SceneComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UMotionControllerComponent* LeftHand;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class USkeletalMeshComponent* SkeletalMeshLeftHand;
