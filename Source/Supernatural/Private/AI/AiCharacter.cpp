@@ -44,9 +44,9 @@ void AAiCharacter::BeginPlay()
 void AAiCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
-	UE_LOG(LogTemp, Log, TEXT("%d"), g->GetIsCalculating());
-	isBeginCounter = g->GetIsCalculating();
+	//ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+	//UE_LOG(LogTemp, Log, TEXT("%d"), g->GetIsCalculating());
+	//isBeginCounter = g->GetIsCalculating();
 
 }
 
@@ -73,8 +73,7 @@ void AAiCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	}
 	if (ACCounter* Counter = Cast<ACCounter>(OtherActor)) {
 		Counter->CustomerArrived(QProductData);
-		int32 result;
-		g->WaitingAIs.Dequeue(result);
+		QProductData.Empty();
 		UE_LOG(LogTemp, Log, TEXT("asdasdsa"));
 	}
 	if (OtherActor->Tags.Contains(TEXT("End"))) {

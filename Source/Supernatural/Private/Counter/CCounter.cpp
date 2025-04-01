@@ -113,8 +113,8 @@ void ACCounter::BeginPlay()
 	SuperGameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
 
 	// 이 부분 AI와 연동 후 빼줘야 함
-	TArray<EProductType>ProductData = { EProductType::CAKE };
-	CustomerArrived(ProductData);
+	//TArray<EProductType>ProductData = { EProductType::CAKE };
+	//CustomerArrived(ProductData);
 }
 
 
@@ -151,7 +151,7 @@ void ACCounter::OnAIEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 void ACCounter::CustomerArrived(TArray<EProductType>ProductData)
 {
 	// 계산대에 이미 손님이 있으면 종료한다
-	//if(bIsCustomerArrived) return;
+	if(bIsCustomerArrived) return;
 
 	// 계산이 시작되었다고 Game Mode에 알려준다
 	bIsCustomerArrived = true;
@@ -268,6 +268,9 @@ void ACCounter::GrabCard()
 // 다음 손님을 받을 준비를 하기 위해 전부 초기화
 void ACCounter::ReadyToNextCustomer()
 {
+	ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+	int32 result;
+	g->WaitingAIs.Dequeue(result);
 	bCanVisibilityOn = false;
 	bAreProductsOnCounter = false;
 	bIsScanningBarcodeComplete = false;

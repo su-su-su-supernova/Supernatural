@@ -69,15 +69,16 @@ void UMainBoardWidget::OnButtonClicked()
 void UMainBoardWidget::OnSpwnerButtonClicked()
 {
     if (!GameMode) return;
-    ACPlayer* player = Cast<ACPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn());
-    UAudioComponent* AudioComponent = UGameplayStatics::SpawnSoundAtLocation(this, MainBoardSound, player->GetActorLocation());
-    if (GameMode->SpawnAIHander()) {
-        if (AudioComponent->IsPlaying()) return;
-        AudioComponent->Play();
-    }
-    else {
-        AudioComponent->Stop();
-    }
+    ACPlayer* player = Cast<ACPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn()); 
+    GameMode->SpawnAIHander();
+
+    //if (GameMode->SpawnAIHander()) {
+    //    if (AudioComponent->IsPlaying()) return;
+    //    AudioComponent->Play();
+    //}
+    //else {
+    //    AudioComponent->Stop();
+    //}
 }
 
 void UMainBoardWidget::SetInfoWidget(TMap<EProductType, FProductData*> Product)

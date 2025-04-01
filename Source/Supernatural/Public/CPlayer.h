@@ -239,5 +239,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Haptic")
 	class UHapticFeedbackEffect_Curve* HapticAICollide;
 #pragma endregion
-
+public:
+	class USoundCue* ClickSound;
+	class USoundCue* BarCodeSound;
 };

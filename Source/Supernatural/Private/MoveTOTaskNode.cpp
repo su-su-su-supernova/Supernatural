@@ -44,11 +44,13 @@ void UMoveTOTaskNode::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
 	ASuperAIController* AiController = Cast<ASuperAIController>(OwnerComp.GetOwner());
+	ASuperGameMode* g = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
+
 	AAiCharacter* AI = Cast<AAiCharacter>(AiController->GetCharacter());
 	if (AiController->TicketNumber == -1) {
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 	}
-	if (AI->isBeginCounter) {
+	if (AI->QProductData.IsEmpty() &&!(g->GetIsCalculating())) {
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		AI->isBeginCounter = false;
 		return;
