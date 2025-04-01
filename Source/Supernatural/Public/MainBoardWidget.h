@@ -74,5 +74,5 @@ private:
 
 	class USoundCue* MainBoardSound;
 	class USoundCue* MainBoardSound2;
-	class UAudioComponent* AudioComponent;
+
 };

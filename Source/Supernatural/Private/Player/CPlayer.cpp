@@ -23,6 +23,7 @@
 #include "CMonitorWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
 ACPlayer::ACPlayer()
 {
@@ -112,10 +113,14 @@ ACPlayer::ACPlayer()
 	WidgetInteraction->InteractionDistance = InteractionDistanceWidget;
 	WidgetInteraction->InteractionSource = EWidgetInteractionSource::World;
 	WidgetInteraction->TraceChannel = ECollisionChannel::ECC_Visibility;
-
+	ConstructorHelpers::FObjectFinder<USoundCue>SoundCueTool(TEXT("/Script/Engine.SoundCue'/Game/HWL/Sound/Sound_Homeplus_Cue.Sound_Homeplus_Cue'"));
+	if (SoundCueTool.Succeeded()) MainSound = SoundCueTool.Object;
 
 	/* GameMode */
 	SuperGameMode = CreateDefaultSubobject<ASuperGameMode>(TEXT("SuperGameMode"));
+
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	//AudioComponent->SetSound(MainSound);
 }
 
 void ACPlayer::BeginPlay()
@@ -596,6 +601,13 @@ void ACPlayer::ScanProductBarcode(UStaticMeshComponent* InProduct)
 void ACPlayer::CalculateTotalPrice()
 {
 
+}
+
+void ACPlayer::PlaySound()
+{
+	AudioComponent->SetWorldLocation(GetActorLocation());
+	AudioComponent->SetSound(MainSound);
+	AudioComponent->Play();
 }
 
 #pragma endregion
