@@ -149,9 +149,6 @@ void ACCounter::OnAIEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 }
 
 void ACCounter::CustomerArrived(TArray<EProductType>ProductData)
-
-// void ACCounter::CustomerArrived(TArray<EProductType>ProductData)
-
 {
 	// 계산대에 이미 손님이 있으면 종료한다
 	//if(bIsCustomerArrived) return;
@@ -166,7 +163,6 @@ void ACCounter::CustomerArrived(TArray<EProductType>ProductData)
 	InputCost = 0;
 
 	// customer의 구매 목록을 가져온다
-	// 여기 수정해줘야 함
 	for (auto& Data : ProductData) {
 		ShoppingList.Add(Data);
 	}
