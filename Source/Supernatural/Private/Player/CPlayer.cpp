@@ -34,7 +34,6 @@ ACPlayer::ACPlayer()
 	PlayerCamera->SetupAttachment(RootComponent);
 	PlayerCamera->SetRelativeLocation(FVector(0,0,95));
 
-
 	/* Collision */
 	GetCapsuleComponent()->SetCollisionProfileName(FName("Player"));
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACPlayer::OnOtherBeginOverlap);

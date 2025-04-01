@@ -85,38 +85,38 @@ void UCMonitorWidgetA::DeleteLastInput()
 void UCMonitorWidgetA::ConvertInputToString()
 {
 	ASuperGameMode* GameMode = Cast<ASuperGameMode>(GetWorld()->GetAuthGameMode());
-	UE_LOG(LogTemp, Warning, TEXT(">>>> Before Update TotalSales : %d"), GameMode->GetTotalSales());
-	// 입력받은 값을 정수로 변환
-	PlayerCalculated = FCString::Atoi(*InputCost);
+	//UE_LOG(LogTemp, Warning, TEXT(">>>> Before Update TotalSales : %d"), GameMode->GetTotalSales());
+	//// 입력받은 값을 정수로 변환
+	//PlayerCalculated = FCString::Atoi(*InputCost);
 
-	// 현재 사용자가 입력한 물품들의 총액이 얼마인지 Game Mode에 Update한다
-	GameMode->SetCurrentInputCost(PlayerCalculated);
+	//// 현재 사용자가 입력한 물품들의 총액이 얼마인지 Game Mode에 Update한다
+	//GameMode->SetCurrentInputCost(PlayerCalculated);
 
-	// Player가 입력한 값이 총 계산해야 할 금액과 다르면 Input Cost를 0으로 초기화하여
-	// 사용자로 하여금 다시 값을 입력하도록 한다
-	if (!GameMode)return;
-	int32 a = GameMode->GetCurrentInputCost();
-	int32 b = GameMode->GetCurrentTotalCost();
-	if(a!=b)
-	{
-		InputCost = "0";
+	//// Player가 입력한 값이 총 계산해야 할 금액과 다르면 Input Cost를 0으로 초기화하여
+	//// 사용자로 하여금 다시 값을 입력하도록 한다
+	//if (!GameMode)return;
+	//int32 a = GameMode->GetCurrentInputCost();
+	//int32 b = GameMode->GetCurrentTotalCost();
+	//if(a!=b)
+	//{
+	//	InputCost = "0";
 
-		// UI 갱신
-		SetTextInputCost();
-		return;
-	}
+	//	// UI 갱신
+	//	SetTextInputCost();
+	//	return;
+	//}
 
-	// 매출을 갱신한다
-	GameMode->SetTotalSales(GameMode->GetTotalSales() + PlayerCalculated );
-	UE_LOG(LogTemp, Warning, TEXT(">>> After Update TotalSales : %d"), GameMode->GetTotalSales());
+	//// 매출을 갱신한다
+	//GameMode->SetTotalSales(GameMode->GetTotalSales() + PlayerCalculated );
+	//UE_LOG(LogTemp, Warning, TEXT(">>> After Update TotalSales : %d"), GameMode->GetTotalSales());
 
-	// 사용자 입력값 초기화
-	InputCost = "0";
-	GameMode->SetCurrentTotalCost(0);
-	GameMode->SetCurrentInputCost(0);
+	//// 사용자 입력값 초기화
+	//InputCost = "0";
+	//GameMode->SetCurrentTotalCost(0);
+	//GameMode->SetCurrentInputCost(0);
 
-	UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
-    UE_LOG(LogTemp, Log, TEXT("[Reset] CurCheckoutTotal : %d / CurInputTotal : %d"), GameMode->GetCurrentTotalCost(), GameMode->GetCurrentInputCost());
+	//UE_LOG(LogTemp, Warning, TEXT(">>> Input Cost : %s"), *InputCost);
+ //   UE_LOG(LogTemp, Log, TEXT("[Reset] CurCheckoutTotal : %d / CurInputTotal : %d"), GameMode->GetCurrentTotalCost(), GameMode->GetCurrentInputCost());
 
 	GameMode->GetCounter()->ReadyToNextCustomer();
 }

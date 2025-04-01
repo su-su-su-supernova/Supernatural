@@ -246,4 +246,6 @@ public:
 	class USoundCue* MainSound;
 	class UAudioComponent* AudioComponent;
 	void PlaySound();
+
+
 };
